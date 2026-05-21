@@ -37,19 +37,17 @@ export default function ShareCard({
     setDownloading(true);
     try {
       // Dynamic import — avoids SSR crash
-      const html2canvas = (await import('html2canvas')).default;
-      const canvas = await html2canvas(cardRef.current, {
-        backgroundColor: '#0a0a0a',
-        scale: 2,
-        useCORS: true,
-        allowTaint: false,
+      // html-to-image uses SVG foreignObject which faithfully respects all CSS
+      const { toPng } = await import('html-to-image');
+      const dataUrl = await toPng(cardRef.current, {
+        pixelRatio: 2,
       });
       const link = document.createElement('a');
       link.download = `logrithm-${login}.png`;
-      link.href = canvas.toDataURL('image/png');
+      link.href = dataUrl;
       link.click();
     } catch (err) {
-      console.error('[ShareCard] html2canvas error:', err);
+      console.error('[ShareCard] html-to-image error:', err);
     } finally {
       setDownloading(false);
     }
@@ -77,6 +75,7 @@ export default function ShareCard({
           padding: '2rem',
           maxWidth: 560,
           fontFamily: 'sans-serif',
+          overflow: 'hidden',
         }}
       >
         {/* Header */}
@@ -131,6 +130,7 @@ export default function ShareCard({
               background: 'rgba(29,158,117,0.12)',
               border: '1px solid rgba(29,158,117,0.25)',
               borderRadius: 9999,
+              display: 'inline-block',
               padding: '0.25rem 0.75rem',
             }}
           >
@@ -165,19 +165,19 @@ export default function ShareCard({
               <span
                 key={tag}
                 style={{
+                  display: 'inline-block',
                   fontFamily: 'monospace',
                   fontSize: '0.65rem',
                   fontWeight: 500,
                   letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
                   color: 'rgba(255,255,255,0.5)',
                   background: 'rgba(255,255,255,0.06)',
                   border: '1px solid rgba(255,255,255,0.08)',
                   borderRadius: 9999,
-                  padding: '0.2rem 0.6rem',
+                  padding: '0.25rem 0.6rem',
                 }}
               >
-                {tag}
+                {tag.toUpperCase()}
               </span>
             ))}
           </div>
@@ -192,19 +192,19 @@ export default function ShareCard({
               <span
                 key={lang}
                 style={{
+                  display: 'inline-block',
                   fontFamily: 'monospace',
                   fontSize: '0.65rem',
                   fontWeight: 500,
                   letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
                   color: '#1D9E75',
                   background: 'rgba(29,158,117,0.12)',
                   border: '1px solid rgba(29,158,117,0.25)',
                   borderRadius: 9999,
-                  padding: '0.2rem 0.6rem',
+                  padding: '0.25rem 0.6rem',
                 }}
               >
-                {lang}
+                {lang.toUpperCase()}
               </span>
             ))}
           </div>

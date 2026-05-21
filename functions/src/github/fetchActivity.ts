@@ -25,7 +25,28 @@ const GITHUB_GRAPHQL_QUERY = `
           }
         }
       }
-      repositories(first: 15, orderBy: { field: UPDATED_AT, direction: DESC }, ownerAffiliations: [OWNER, COLLABORATOR]) {
+      repositories(first: 15, orderBy: { field: UPDATED_AT, direction: DESC }, ownerAffiliations: [OWNER, COLLABORATOR, ORGANIZATION_MEMBER]) {
+        nodes {
+          name
+          url
+          stargazerCount
+          forkCount
+          primaryLanguage {
+            name
+            color
+          }
+          defaultBranchRef {
+            target {
+              ... on Commit {
+                history(first: 1) {
+                  totalCount
+                }
+              }
+            }
+          }
+        }
+      }
+      repositoriesContributedTo(first: 15, orderBy: { field: UPDATED_AT, direction: DESC }, contributionTypes: [COMMIT, PULL_REQUEST, ISSUE, REPOSITORY]) {
         nodes {
           name
           url
@@ -110,6 +131,18 @@ export const fetchGitHubActivity = onCall(
               } | null;
             }>;
           };
+          repositoriesContributedTo: {
+            nodes: Array<{
+              name: string;
+              url: string;
+              stargazerCount: number;
+              forkCount: number;
+              primaryLanguage: { name: string; color: string | null } | null;
+              defaultBranchRef: {
+                target: { history: { totalCount: number } } | null;
+              } | null;
+            }>;
+          };
         };
       };
       errors?: Array<{ message: string }>;
@@ -127,9 +160,20 @@ export const fetchGitHubActivity = onCall(
 
     const { contributionsCollection } = viewer;
 
-    // filter(Boolean) on primaryLanguage — some repos return null
-    const repositories: GitHubActivity['repositories'] = viewer.repositories.nodes
-      .filter(Boolean)
+    // Merge repositories and repositoriesContributedTo, then deduplicate by URL
+    const allRepos = [
+      ...(viewer.repositories?.nodes || []),
+      ...(viewer.repositoriesContributedTo?.nodes || []),
+    ].filter(Boolean);
+
+    const uniqueReposMap = new Map<string, typeof allRepos[0]>();
+    for (const repo of allRepos) {
+      if (!uniqueReposMap.has(repo.url)) {
+        uniqueReposMap.set(repo.url, repo);
+      }
+    }
+
+    const repositories: GitHubActivity['repositories'] = Array.from(uniqueReposMap.values())
       .map((repo) => ({
         name: repo.name,
         url: repo.url,
@@ -137,7 +181,8 @@ export const fetchGitHubActivity = onCall(
         forkCount: repo.forkCount,
         primaryLanguage: repo.primaryLanguage ?? null,
         commitCount: repo.defaultBranchRef?.target?.history?.totalCount ?? 0,
-      }));
+      }))
+      .slice(0, 15);
 
     return {
       login: viewer.login,

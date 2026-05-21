@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { GithubAuthProvider, signInWithPopup } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { GithubAuthProvider, signInWithPopup, getAdditionalUserInfo } from 'firebase/auth';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { GitBranch, Zap } from 'lucide-react';
 
@@ -23,6 +23,7 @@ export default function LoginClient() {
 
       const result = await signInWithPopup(auth, provider);
       const credential = GithubAuthProvider.credentialFromResult(result);
+      const additionalInfo = getAdditionalUserInfo(result);
       const token = credential?.accessToken;
       const user = result.user;
 
@@ -30,20 +31,33 @@ export default function LoginClient() {
         throw new Error('No GitHub access token returned.');
       }
 
+      const githubUsername = additionalInfo?.username ?? (user.providerData[0]?.uid ?? user.displayName ?? '').replace(/^github:/, '');
+
       // Write user profile to Firestore
       const profileRef = doc(db, 'users', user.uid, 'profile', 'data');
-      await setDoc(
-        profileRef,
-        {
-          githubLogin: (user.providerData[0]?.uid ?? user.displayName ?? '').replace(/^github:/, ''),
+      const profileSnap = await getDoc(profileRef);
+
+      if (!profileSnap.exists()) {
+        await setDoc(profileRef, {
+          githubLogin: githubUsername,
           displayName: user.displayName ?? '',
           avatarUrl: user.photoURL ?? '',
           createdAt: new Date().toISOString(),
           plan: 'free',      // hardcoded — pro comes in Phase 2
           isPublic: false,   // user must opt in
-        },
-        { merge: true }
-      );
+        });
+      } else {
+        // Only update safely overwritable fields for returning users
+        await setDoc(
+          profileRef,
+          {
+            githubLogin: githubUsername,
+            displayName: user.displayName ?? '',
+            avatarUrl: user.photoURL ?? '',
+          },
+          { merge: true }
+        );
+      }
 
       // Store GitHub token in Firestore (uid-gated by security rules)
       const tokenRef = doc(db, 'users', user.uid, 'tokens', 'github');

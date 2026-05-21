@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { getAdminDb } from '@/lib/firebase-admin';
 import type { InsightObject, UserProfile } from '@/types/github';
 import ShareCard from '@/components/share/ShareCard';
@@ -26,6 +27,11 @@ export default async function SharePage({ params }: SharePageProps) {
     return <NoPublicInsights username={username} reason="demo" />;
   }
 
+  let profile: UserProfile | null = null;
+  let insights: InsightObject | null = null;
+  let generatedAt: string | null = null;
+  let errorReason: 'not-found' | 'no-insights' | 'error' | null = null;
+
   try {
     // Look up user by githubLogin — query across users collection
     const usersSnap = await adminDb
@@ -35,76 +41,87 @@ export default async function SharePage({ params }: SharePageProps) {
       .get();
 
     if (usersSnap.empty) {
-      return <NoPublicInsights username={username} />;
+      errorReason = 'not-found';
+    } else {
+      const profileDoc = usersSnap.docs[0];
+      const p = profileDoc.data() as UserProfile;
+
+      // isPublic must be true — users default to false
+      if (!p.isPublic) {
+        errorReason = 'not-found';
+      } else {
+        // Get the latest insights
+        const uid = profileDoc.ref.parent.parent!.id;
+        const insightSnap = await adminDb.doc(`users/${uid}/insights/latest`).get();
+
+        if (!insightSnap.exists) {
+          errorReason = 'no-insights';
+        } else {
+          const data = insightSnap.data() as {
+            data: InsightObject;
+            generatedAt: string;
+          };
+          profile = p;
+          insights = data.data;
+          generatedAt = data.generatedAt;
+        }
+      }
     }
-
-    const profileDoc = usersSnap.docs[0];
-    const profile = profileDoc.data() as UserProfile;
-
-    // isPublic must be true — users default to false
-    if (!profile.isPublic) {
-      return <NoPublicInsights username={username} />;
-    }
-
-    // Get the latest insights
-    const uid = profileDoc.ref.parent.parent!.id;
-    const insightSnap = await adminDb.doc(`users/${uid}/insights/latest`).get();
-
-    if (!insightSnap.exists) {
-      return <NoPublicInsights username={username} reason="no-insights" />;
-    }
-
-    const { data: insights, generatedAt } = insightSnap.data() as {
-      data: InsightObject;
-      generatedAt: string;
-    };
-
-    return (
-      <main
-        style={{
-          minHeight: '100vh',
-          background: 'var(--bg-page)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '2rem 1rem',
-        }}
-      >
-        <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
-          <p
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '0.75rem',
-              color: 'var(--text-muted)',
-              marginBottom: '0.5rem',
-            }}
-          >
-            logrithm analysis
-          </p>
-          <h1
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '1.5rem',
-              color: 'var(--text-primary)',
-            }}
-          >
-            @{username}
-          </h1>
-        </div>
-
-        <ShareCard
-          login={username}
-          avatarUrl={profile.avatarUrl}
-          insights={insights}
-          generatedAt={generatedAt}
-        />
-      </main>
-    );
   } catch (err) {
     console.error('[SharePage] Error reading Firestore:', err);
+    errorReason = 'error';
+  }
+
+  if (errorReason === 'not-found' || errorReason === 'error' || !profile || !insights || !generatedAt) {
     return <NoPublicInsights username={username} />;
   }
+  
+  if (errorReason === 'no-insights') {
+    return <NoPublicInsights username={username} reason="no-insights" />;
+  }
+
+  return (
+    <main
+      style={{
+        minHeight: '100vh',
+        background: 'var(--bg-page)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '2rem 1rem',
+      }}
+    >
+      <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
+        <p
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.75rem',
+            color: 'var(--text-muted)',
+            marginBottom: '0.5rem',
+          }}
+        >
+          logrithm analysis
+        </p>
+        <h1
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '1.5rem',
+            color: 'var(--text-primary)',
+          }}
+        >
+          @{username}
+        </h1>
+      </div>
+
+      <ShareCard
+        login={username}
+        avatarUrl={profile.avatarUrl}
+        insights={insights}
+        generatedAt={generatedAt}
+      />
+    </main>
+  );
 }
 
 function NoPublicInsights({
@@ -153,7 +170,7 @@ function NoPublicInsights({
       >
         {message}
       </h1>
-      <a
+      <Link
         href="/"
         style={{
           fontFamily: 'var(--font-mono)',
@@ -164,7 +181,7 @@ function NoPublicInsights({
         }}
       >
         ← logrithm.dev
-      </a>
+      </Link>
     </main>
   );
 }
