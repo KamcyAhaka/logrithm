@@ -109,9 +109,9 @@ export default function DashboardClient() {
           maxWidth: '80rem',
           margin: '0 auto',
           width: '100%',
-          padding: '2rem 1.5rem',
           boxSizing: 'border-box',
         }}
+        className="px-0 sm:px-6 sm:py-8"
       >
         {/* Activity fetch error */}
         {activityError && (
@@ -120,11 +120,11 @@ export default function DashboardClient() {
               padding: '0.875rem 1.25rem',
               background: 'rgba(255,100,100,0.06)',
               border: '1px solid rgba(255,100,100,0.15)',
-              borderRadius: '0.75rem',
               fontFamily: 'var(--font-mono)',
               fontSize: '0.8rem',
               color: 'rgba(255,100,100,0.85)',
             }}
+            className="rounded-none sm:rounded-xl"
           >
             {activityError}
           </div>
@@ -134,7 +134,7 @@ export default function DashboardClient() {
         {/*  InsightPanel + RepoList      */}
         {/* ─────────────────────────────────── */}
         {activity && (
-          <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-4" style={{ minHeight: 500 }}>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[3fr_2fr]" style={{ minHeight: 500 }}>
             <InsightPanel
               insights={insights}
               loading={insightsLoading}

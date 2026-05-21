@@ -32,13 +32,6 @@
 /* ============================================================
    Base Reset
    ============================================================ */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
 
 html {
   color-scheme: dark;
@@ -60,10 +53,15 @@ body {
 .glass-card {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-card);
   transition:
     border-color 0.2s ease,
     background 0.2s ease;
+}
+
+@media screen and (min-width: 640px) {
+  .glass-card {
+    border-radius: var(--radius-card);
+  }
 }
 
 .glass-card:hover {
