@@ -91,7 +91,7 @@ export default function DashboardClient() {
     );
   }
 
-  const login = isDemoMode ? 'demo-dev' : (user?.displayName ?? user?.email ?? 'developer');
+  const login = isDemoMode ? 'demo-dev' : (activity?.login ?? user?.displayName ?? user?.email ?? 'developer');
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-page)' }}>

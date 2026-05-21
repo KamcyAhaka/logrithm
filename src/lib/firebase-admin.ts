@@ -21,14 +21,12 @@ export async function getAdminDb(): Promise<Firestore | null> {
     const { getFirestore } = await import('firebase-admin/firestore');
 
     if (getApps().length === 0) {
-      // In Cloud Run, Application Default Credentials are used automatically.
-      // Locally, set GOOGLE_APPLICATION_CREDENTIALS to a service account key path.
+      const { applicationDefault } = await import('firebase-admin/app');
+      // In Cloud Run, applicationDefault() uses attached service account automatically.
+      // Locally, you MUST set GOOGLE_APPLICATION_CREDENTIALS to a service account key path.
       initializeApp({
-        credential: cert({
-          projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'logrithm-ai',
-          // ADC — no explicit key file needed in Cloud Run
-          // For local dev: export GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json
-        } as Parameters<typeof cert>[0]),
+        credential: applicationDefault(),
+        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'logrithm-ai',
       });
     }
 
