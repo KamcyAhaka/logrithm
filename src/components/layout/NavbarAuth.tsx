@@ -25,7 +25,7 @@ export default function NavbarAuth() {
   };
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
       {user.photoURL && (
         <Image
           src={user.photoURL}
@@ -35,6 +35,15 @@ export default function NavbarAuth() {
           style={{ borderRadius: '50%', border: '1px solid var(--border-std)' }}
         />
       )}
+      {/* Vertical divider */}
+      <div
+        style={{
+          width: 1,
+          height: 16,
+          background: 'var(--border-subtle)',
+          margin: '0 0.25rem',
+        }}
+      />
       <button
         onClick={handleSignOut}
         title="Sign out"
