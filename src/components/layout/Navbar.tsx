@@ -17,7 +17,7 @@ export default function Navbar() {
         maxWidth: '100%',
         overflowX: 'hidden',
       }}
-      className='mx-auto flex items-center justify-center'
+      className="mx-auto flex items-center justify-center"
     >
       <div
         className="w-full px-6 sm:px-8 md:px-12"

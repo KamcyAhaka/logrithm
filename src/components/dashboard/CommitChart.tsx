@@ -31,10 +31,7 @@ export default function CommitChart({ contributionCalendar }: CommitChartProps) 
     }));
 
   return (
-    <div
-      className="glass-card"
-      style={{ padding: '1.5rem', height: '100%', minHeight: '280px' }}
-    >
+    <div className="glass-card" style={{ padding: '1.5rem', height: '100%', minHeight: '280px' }}>
       <div style={{ marginBottom: '1rem' }}>
         <h3
           style={{
@@ -53,15 +50,11 @@ export default function CommitChart({ contributionCalendar }: CommitChartProps) 
         <AreaChart data={allDays} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
           <defs>
             <linearGradient id="commitGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%"  stopColor="#1D9E75" stopOpacity={0.35} />
+              <stop offset="5%" stopColor="#1D9E75" stopOpacity={0.35} />
               <stop offset="95%" stopColor="#1D9E75" stopOpacity={0.02} />
             </linearGradient>
           </defs>
-          <CartesianGrid
-            strokeDasharray="3 3"
-            stroke="rgba(255,255,255,0.05)"
-            vertical={false}
-          />
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
           <XAxis
             dataKey="date"
             tick={{ fontFamily: 'JetBrains Mono', fontSize: 10, fill: 'rgba(255,255,255,0.3)' }}

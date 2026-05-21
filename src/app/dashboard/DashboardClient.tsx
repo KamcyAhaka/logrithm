@@ -91,7 +91,9 @@ export default function DashboardClient() {
     );
   }
 
-  const login = isDemoMode ? 'demo-dev' : (activity?.login ?? user?.displayName ?? user?.email ?? 'developer');
+  const login = isDemoMode
+    ? 'demo-dev'
+    : (activity?.login ?? user?.displayName ?? user?.email ?? 'developer');
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-page)' }}>
@@ -128,20 +130,17 @@ export default function DashboardClient() {
           </div>
         )}
 
-                {/* ─────────────────────────────────── */}
+        {/* ─────────────────────────────────── */}
         {/*  InsightPanel + RepoList      */}
         {/* ─────────────────────────────────── */}
         {activity && (
-          <div
-            className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-4"
-            style={{ minHeight: 500 }}
-          >
+          <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-4" style={{ minHeight: 500 }}>
             <InsightPanel
               insights={insights}
               loading={insightsLoading}
               error={insightsError}
               onRun={() => {
-                const uid = isDemoMode ? 'demo' : user?.uid ?? 'anon';
+                const uid = isDemoMode ? 'demo' : (user?.uid ?? 'anon');
                 runInsights(activity, uid);
               }}
               login={login}
@@ -186,10 +185,7 @@ export default function DashboardClient() {
         {/* Commit chart + Language pie  */}
         {/* ─────────────────────────────────── */}
         {activity && (
-          <div
-         
-            className="flex flex-col gap-4 sm:grid-cols-1 md:grid-cols-[2fr_1fr]"
-          >
+          <div className="flex flex-col gap-4 sm:grid-cols-1 md:grid-cols-[2fr_1fr]">
             <CommitChart contributionCalendar={activity.contributionCalendar} />
             <LanguageBreakdown repositories={activity.repositories} />
           </div>
@@ -198,11 +194,7 @@ export default function DashboardClient() {
         {/* ─────────────────────────────────── */}
         {/*  Activity heatmap (full width) */}
         {/* ─────────────────────────────────── */}
-        {activity && (
-          <ActivityHeatmap contributionCalendar={activity.contributionCalendar} />
-        )}
-
-
+        {activity && <ActivityHeatmap contributionCalendar={activity.contributionCalendar} />}
 
         {/* Loading skeleton for activity */}
         {activityLoading && (

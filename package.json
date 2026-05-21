@@ -10,7 +10,8 @@
     "start": "next start",
     "deploy": "bun run build && firebase deploy",
     "lint": "eslint",
-    "lint:fix": "eslint --fix",
+    "lint:fix": "eslint --fix .",
+    "format": "prettier --write .",
     "prepare": "husky"
   },
   "dependencies": {

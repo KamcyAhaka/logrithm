@@ -72,10 +72,16 @@ export default async function SharePage({ params }: SharePageProps) {
     errorReason = 'error';
   }
 
-  if (errorReason === 'not-found' || errorReason === 'error' || !profile || !insights || !generatedAt) {
+  if (
+    errorReason === 'not-found' ||
+    errorReason === 'error' ||
+    !profile ||
+    !insights ||
+    !generatedAt
+  ) {
     return <NoPublicInsights username={username} />;
   }
-  
+
   if (errorReason === 'no-insights') {
     return <NoPublicInsights username={username} reason="no-insights" />;
   }
@@ -135,8 +141,8 @@ function NoPublicInsights({
     reason === 'demo'
       ? 'Public sharing is only available with a live account.'
       : reason === 'no-insights'
-      ? `@${username} hasn't generated any insights yet.`
-      : `No public insights for @${username}.`;
+        ? `@${username} hasn't generated any insights yet.`
+        : `No public insights for @${username}.`;
 
   return (
     <main

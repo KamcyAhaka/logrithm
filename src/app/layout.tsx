@@ -5,10 +5,17 @@ export const metadata: Metadata = {
   title: 'Logrithm — Your commit history. Analyzed.',
   description:
     'Connect your GitHub and let Gemini AI surface your development patterns, strengths, and blind spots. Open source, free to try.',
-  keywords: ['github analytics', 'developer insights', 'commit history', 'gemini ai', 'open source'],
+  keywords: [
+    'github analytics',
+    'developer insights',
+    'commit history',
+    'gemini ai',
+    'open source',
+  ],
   openGraph: {
     title: 'Logrithm — Your commit history. Analyzed.',
-    description: 'AI-powered GitHub activity analysis. See your patterns, strengths, and growth areas.',
+    description:
+      'AI-powered GitHub activity analysis. See your patterns, strengths, and growth areas.',
     type: 'website',
     url: 'https://logrithm.dev',
   },
@@ -21,9 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body style={{ minHeight: '100vh', background: 'var(--bg-page)' }}>
-        {children}
-      </body>
+      <body style={{ minHeight: '100vh', background: 'var(--bg-page)' }}>{children}</body>
     </html>
   );
 }

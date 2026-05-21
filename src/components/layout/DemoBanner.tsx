@@ -14,7 +14,7 @@ export default function DemoBanner() {
       }}
       className="w-full py-3 flex items-center justify-center"
     >
-      <div 
+      <div
         className="w-full flex items-center justify-between gap-4 flex-wrap px-6 sm:px-8 md:px-12"
         style={{ maxWidth: '80rem', margin: '0 auto' }}
       >
@@ -26,8 +26,7 @@ export default function DemoBanner() {
           }}
         >
           👋 You&apos;re viewing a demo with sample data.{' '}
-          <span style={{ color: 'var(--green)' }}>@demo-dev</span> is not a real
-          user.
+          <span style={{ color: 'var(--green)' }}>@demo-dev</span> is not a real user.
         </p>
         <Link
           href="/"

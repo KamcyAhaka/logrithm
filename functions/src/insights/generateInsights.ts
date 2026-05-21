@@ -25,7 +25,15 @@ const DUMMY_INSIGHTS: InsightObject = {
     'Peak activity falls on Tuesday–Wednesday between 10am and 2pm. Quarterly streaks of 14+ days followed by short recovery periods reveal a sprint-and-rest pattern.',
   topLanguages: ['TypeScript', 'JavaScript', 'Dart'],
   activityScore: 82,
-  tags: ['typescript', 'high output', 'multi-repo', 'pr focused', 'full-stack', 'sprint cycles', 'cross-platform'],
+  tags: [
+    'typescript',
+    'high output',
+    'multi-repo',
+    'pr focused',
+    'full-stack',
+    'sprint cycles',
+    'cross-platform',
+  ],
 };
 
 // Init admin SDK if not already initialised
@@ -122,13 +130,14 @@ function parseInsights(text: string): InsightObject {
 
   // Sanitise tags — fix known bug where tags may be missing or malformed
   if (!Array.isArray(insights.tags) || insights.tags.length === 0) {
-    insights.tags = (insights.topLanguages ?? [])
-      .map((l: string) => l.toLowerCase())
-      .slice(0, 3);
+    insights.tags = (insights.topLanguages ?? []).map((l: string) => l.toLowerCase()).slice(0, 3);
   }
   insights.tags = insights.tags
     .map((t: string) =>
-      t.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim()
+      t
+        .replace(/[^a-z0-9\s]/gi, '')
+        .toLowerCase()
+        .trim()
     )
     .filter(Boolean)
     .slice(0, 7);
@@ -160,7 +169,7 @@ export const generateInsights = onCall(
 
     // Step 2: Check Firestore cache — one Gemini call per user per day max (unless forceRefresh is true)
     const insightRef = db.doc(`users/${uid}/insights/latest`);
-    
+
     if (!forceRefresh) {
       try {
         const cached = await insightRef.get();
@@ -201,11 +210,11 @@ export const generateInsights = onCall(
     let insights: InsightObject;
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ 
+      const model = genAI.getGenerativeModel({
         model: 'gemini-2.5-flash',
         generationConfig: {
           temperature: 0.85, // Add randomness so manual updates feel fresh
-        }
+        },
       });
       const prompt = buildPrompt(activity);
       const result = await model.generateContent(prompt);

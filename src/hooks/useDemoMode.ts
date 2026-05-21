@@ -8,8 +8,5 @@ import { useSearchParams } from 'next/navigation';
 
 export function useDemoMode(): boolean {
   const searchParams = useSearchParams();
-  return (
-    process.env.NEXT_PUBLIC_DEMO_MODE === 'true' ||
-    searchParams.has('demo')
-  );
+  return process.env.NEXT_PUBLIC_DEMO_MODE === 'true' || searchParams.has('demo');
 }
