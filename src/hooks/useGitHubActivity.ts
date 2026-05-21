@@ -13,9 +13,7 @@ interface UseGitHubActivityReturn {
 }
 
 export function useGitHubActivity(isDemoMode: boolean): UseGitHubActivityReturn {
-  const [data, setData] = useState<GitHubActivity | null>(
-    isDemoMode ? DUMMY_GITHUB_DATA : null
-  );
+  const [data, setData] = useState<GitHubActivity | null>(isDemoMode ? DUMMY_GITHUB_DATA : null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

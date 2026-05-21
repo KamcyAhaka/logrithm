@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import Image from 'next/image';
+
 import { Download, Link2, Check } from 'lucide-react';
 import type { InsightObject } from '@/types/github';
 
@@ -12,12 +12,7 @@ interface ShareCardProps {
   generatedAt: string; // ISO string
 }
 
-export default function ShareCard({
-  login,
-  avatarUrl,
-  insights,
-  generatedAt,
-}: ShareCardProps) {
+export default function ShareCard({ login, avatarUrl, insights, generatedAt }: ShareCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -28,9 +23,7 @@ export default function ShareCard({
   });
 
   const shareUrl =
-    typeof window !== 'undefined'
-      ? window.location.href
-      : `https://logrithm.dev/share/${login}`;
+    typeof window !== 'undefined' ? window.location.href : `https://logrithm.dev/share/${login}`;
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
@@ -260,11 +253,7 @@ export default function ShareCard({
           <Download size={14} />
           {downloading ? 'Generating...' : 'Download PNG'}
         </button>
-        <button
-          className="btn btn-secondary"
-          onClick={handleCopyLink}
-          id="copy-link-btn"
-        >
+        <button className="btn btn-secondary" onClick={handleCopyLink} id="copy-link-btn">
           {copied ? <Check size={14} /> : <Link2 size={14} />}
           {copied ? 'Copied!' : 'Copy link'}
         </button>

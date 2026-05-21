@@ -17,11 +17,11 @@ function getIntensityLevel(count: number): number {
 }
 
 const LEVEL_COLORS = [
-  'rgba(255,255,255,0.05)',  // 0 — empty
-  'rgba(29,158,117,0.25)',   // 1 — light
-  'rgba(29,158,117,0.45)',   // 2 — medium
-  'rgba(29,158,117,0.70)',   // 3 — dark
-  'rgba(29,158,117,0.95)',   // 4 — full
+  'rgba(255,255,255,0.05)', // 0 — empty
+  'rgba(29,158,117,0.25)', // 1 — light
+  'rgba(29,158,117,0.45)', // 2 — medium
+  'rgba(29,158,117,0.70)', // 3 — dark
+  'rgba(29,158,117,0.95)', // 4 — full
 ];
 
 const DAY_LABELS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
@@ -87,9 +87,8 @@ export default function ActivityHeatmap({ contributionCalendar }: ActivityHeatma
       {/* Scroll wrapper for small screens */}
       <div style={{ overflowX: 'auto', paddingBottom: '0.5rem' }}>
         <div style={{ position: 'relative', minWidth: totalWidth + 32, width: '100%' }}>
-
           {/* Grid */}
-          <div style={{ display: 'flex', gap: cellGap, width: "100%", marginTop: '20px' }}>
+          <div style={{ display: 'flex', gap: cellGap, width: '100%', marginTop: '20px' }}>
             {/* Day-of-week labels */}
             <div
               style={{
@@ -118,25 +117,33 @@ export default function ActivityHeatmap({ contributionCalendar }: ActivityHeatma
                 </div>
               ))}
             </div>
-            
+
             {/* Weeks */}
             {weeks.map((week, wi) => {
-              const mLabel = monthLabels.find(m => m.colIndex === wi);
+              const mLabel = monthLabels.find((m) => m.colIndex === wi);
               return (
                 <div
                   key={wi}
-                  style={{ display: 'flex', flexDirection: 'column', gap: cellGap, flex: 1, position: 'relative' }}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: cellGap,
+                    flex: 1,
+                    position: 'relative',
+                  }}
                 >
                   {mLabel && (
-                    <span style={{
-                      position: 'absolute',
-                      top: -20,
-                      left: 0,
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: '9px',
-                      color: 'rgba(255,255,255,0.3)',
-                      whiteSpace: 'nowrap',
-                    }}>
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: -20,
+                        left: 0,
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: '9px',
+                        color: 'rgba(255,255,255,0.3)',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
                       {mLabel.label}
                     </span>
                   )}

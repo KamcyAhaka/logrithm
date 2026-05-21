@@ -46,11 +46,11 @@ Open [http://localhost:3000](http://localhost:3000) and click **"Try the Demo �
 
 ## Dev Modes
 
-| Command | Description |
-|---|---|
-| `bun run dev` | **Demo mode** — sample data, no Firebase needed |
-| `bun run dev:live` | Live Firebase — needs `.env.local` |
-| `bun run dev:emulator` | Local emulator — run functions locally |
+| Command                | Description                                     |
+| ---------------------- | ----------------------------------------------- |
+| `bun run dev`          | **Demo mode** — sample data, no Firebase needed |
+| `bun run dev:live`     | Live Firebase — needs `.env.local`              |
+| `bun run dev:emulator` | Local emulator — run functions locally          |
 
 ### Emulator mode (3 terminals)
 
@@ -172,6 +172,7 @@ logrithm/
 5. Open a PR
 
 **PR checklist:**
+
 - [ ] No `npm`/`yarn`/`npx` — use `bun` everywhere
 - [ ] `'use client'` present where needed (hooks, browser APIs, Recharts)
 - [ ] Loading and error states for all async operations

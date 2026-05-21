@@ -20,9 +20,7 @@ export async function getSecret(secretName: string): Promise<string | null> {
       return null;
     }
 
-    return typeof payload === 'string'
-      ? payload
-      : Buffer.from(payload).toString('utf8');
+    return typeof payload === 'string' ? payload : Buffer.from(payload).toString('utf8');
   } catch (err) {
     console.warn(`[getSecret] Could not access secret "${secretName}":`, err);
     return null;

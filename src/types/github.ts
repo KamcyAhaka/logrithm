@@ -42,22 +42,22 @@ export interface GitHubActivity {
 }
 
 export interface InsightObject {
-  summary: string;         // 2-3 sentence developer persona
-  strengths: string[];     // exactly 3 items, full sentences
-  improvements: string[];  // exactly 3 items, full sentences
-  patterns: string;        // paragraph on timing and consistency
-  topLanguages: string[];  // top 3 language names
-  activityScore: number;   // 1-100
-  tags: string[];          // 5-7 tags, max 2 words, lowercase, no punctuation
+  summary: string; // 2-3 sentence developer persona
+  strengths: string[]; // exactly 3 items, full sentences
+  improvements: string[]; // exactly 3 items, full sentences
+  patterns: string; // paragraph on timing and consistency
+  topLanguages: string[]; // top 3 language names
+  activityScore: number; // 1-100
+  tags: string[]; // 5-7 tags, max 2 words, lowercase, no punctuation
 }
 
 export interface UserProfile {
   githubLogin: string;
   displayName: string;
   avatarUrl: string;
-  createdAt: string;    // ISO string
-  plan: 'free';         // hardcoded — pro comes in Phase 2
-  isPublic: boolean;    // controls /share/[username] visibility
+  createdAt: string; // ISO string
+  plan: 'free'; // hardcoded — pro comes in Phase 2
+  isPublic: boolean; // controls /share/[username] visibility
 }
 
 // Phase 2 data model shapes — scaffolded now, written by scheduler later

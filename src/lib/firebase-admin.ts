@@ -17,7 +17,7 @@ export async function getAdminDb(): Promise<Firestore | null> {
   if (adminDb) return adminDb;
 
   try {
-    const { initializeApp, getApps, cert } = await import('firebase-admin/app');
+    const { initializeApp, getApps } = await import('firebase-admin/app');
     const { getFirestore } = await import('firebase-admin/firestore');
 
     if (getApps().length === 0) {

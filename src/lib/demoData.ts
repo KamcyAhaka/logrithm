@@ -15,8 +15,8 @@ function buildDemoCalendar(): GitHubActivity['contributionCalendar'] {
 
   // Streak periods (week indices): 8-21 (14-week sprint), 33-44 (12-week sprint)
   const highStreakWeeks = new Set([
-    8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
-    33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44,
+    8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42,
+    43, 44,
   ]);
   // Vacation quiet periods (week indices): 25-27, 49-50
   const quietWeeks = new Set([25, 26, 27, 49, 50]);
@@ -42,12 +42,16 @@ function buildDemoCalendar(): GitHubActivity['contributionCalendar'] {
       let count = 0;
       if (!isQuiet) {
         if (isStreak) {
-          if (isWeekday) count = Math.floor(Math.random() * 8) + 4;       // 4-11
-          else if (isFriday) count = Math.floor(Math.random() * 5) + 2;   // 2-6
+          if (isWeekday)
+            count = Math.floor(Math.random() * 8) + 4; // 4-11
+          else if (isFriday)
+            count = Math.floor(Math.random() * 5) + 2; // 2-6
           else count = Math.random() > 0.55 ? Math.floor(Math.random() * 3) + 1 : 0; // occasional weekend
         } else {
-          if (isWeekday) count = Math.floor(Math.random() * 6) + 2;       // 2-7
-          else if (isFriday) count = Math.floor(Math.random() * 4) + 1;   // 1-4
+          if (isWeekday)
+            count = Math.floor(Math.random() * 6) + 2; // 2-7
+          else if (isFriday)
+            count = Math.floor(Math.random() * 4) + 1; // 1-4
           else count = Math.random() > 0.7 ? Math.floor(Math.random() * 2) + 1 : 0; // rare weekend
         }
       } else {
