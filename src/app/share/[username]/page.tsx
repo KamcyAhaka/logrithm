@@ -126,6 +126,19 @@ export default async function SharePage({ params }: SharePageProps) {
         insights={insights}
         generatedAt={generatedAt}
       />
+
+      <Link
+        href="/dashboard"
+        style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: '0.8rem',
+          color: 'var(--text-muted)',
+          textDecoration: 'none',
+          marginTop: '2rem',
+        }}
+      >
+        ← return to dashboard
+      </Link>
     </main>
   );
 }

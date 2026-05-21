@@ -6,6 +6,7 @@ import { db } from '@/lib/firebase';
 import { DUMMY_INSIGHTS } from '@/lib/demoData';
 import { generateInsights as callGenerateInsights } from '@/lib/functions';
 import type { GitHubActivity, InsightObject } from '@/types/github';
+import { useDashboardStore } from '@/store/useDashboardStore';
 
 interface UseInsightsReturn {
   insights: InsightObject | null;
@@ -15,7 +16,7 @@ interface UseInsightsReturn {
 }
 
 export function useInsights(isDemoMode: boolean, uid?: string): UseInsightsReturn {
-  const [insights, setInsights] = useState<InsightObject | null>(null);
+  const { insights, setInsights } = useDashboardStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasInitialFetched, setHasInitialFetched] = useState(false);
@@ -26,7 +27,8 @@ export function useInsights(isDemoMode: boolean, uid?: string): UseInsightsRetur
       // In demo mode, we wait for the user to click "Run" to show the dummy insights
       return;
     }
-    if (!uid || hasInitialFetched) return;
+    // If we already have insights in the store, skip initial fetch
+    if (!uid || hasInitialFetched || insights) return;
 
     const fetchInitial = async () => {
       setLoading(true);
@@ -46,7 +48,7 @@ export function useInsights(isDemoMode: boolean, uid?: string): UseInsightsRetur
     };
 
     fetchInitial();
-  }, [isDemoMode, uid, hasInitialFetched]);
+  }, [isDemoMode, uid, hasInitialFetched, insights, setInsights]);
 
   const run = useCallback(
     async (activity: GitHubActivity, runUid: string) => {
@@ -73,7 +75,7 @@ export function useInsights(isDemoMode: boolean, uid?: string): UseInsightsRetur
         setLoading(false);
       }
     },
-    [isDemoMode]
+    [isDemoMode, setInsights]
   );
 
   return { insights, loading, error, run };

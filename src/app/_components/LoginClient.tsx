@@ -1,8 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { GithubAuthProvider, signInWithPopup, getAdditionalUserInfo } from 'firebase/auth';
+import {
+  GithubAuthProvider,
+  signInWithPopup,
+  getAdditionalUserInfo,
+  onAuthStateChanged,
+  User,
+} from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { GitBranch, Zap } from 'lucide-react';
@@ -11,6 +17,16 @@ export default function LoginClient() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [authChecking, setAuthChecking] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      setAuthChecking(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleGitHubLogin = async () => {
     setLoading(true);
@@ -102,6 +118,54 @@ export default function LoginClient() {
         overflow: 'hidden',
       }}
     >
+      {/* Navbar for logged in user */}
+      {!authChecking && currentUser && (
+        <nav
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            padding: '1.5rem 2rem',
+            display: 'flex',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            zIndex: 10,
+          }}
+        >
+          <div
+            onClick={() => router.push('/dashboard')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              cursor: 'pointer',
+              background: 'rgba(255,255,255,0.05)',
+              padding: '0.5rem 1rem',
+              borderRadius: '2rem',
+              border: '1px solid var(--border)',
+            }}
+          >
+            <span
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.8rem',
+                color: 'var(--text-primary)',
+              }}
+            >
+              Dashboard
+            </span>
+            {currentUser.photoURL && (
+              <img
+                src={currentUser.photoURL}
+                alt="Profile"
+                style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }}
+              />
+            )}
+          </div>
+        </nav>
+      )}
+
       {/* Ambient glow */}
       <div
         aria-hidden
@@ -239,16 +303,28 @@ export default function LoginClient() {
           alignItems: 'center',
         }}
       >
-        <button
-          id="connect-github-btn"
-          className="btn btn-primary"
-          onClick={handleGitHubLogin}
-          disabled={loading}
-          style={{ width: '100%', padding: '0.875rem 1.5rem', fontSize: '0.9rem' }}
-        >
-          <GitBranch size={16} />
-          {loading ? 'Running the algorithm...' : 'Connect with GitHub'}
-        </button>
+        {!authChecking && currentUser ? (
+          <button
+            id="go-dashboard-btn"
+            className="btn btn-primary"
+            onClick={() => router.push('/dashboard')}
+            style={{ width: '100%', padding: '0.875rem 1.5rem', fontSize: '0.9rem' }}
+          >
+            <GitBranch size={16} />
+            Go to Dashboard →
+          </button>
+        ) : (
+          <button
+            id="connect-github-btn"
+            className="btn btn-primary"
+            onClick={handleGitHubLogin}
+            disabled={loading || authChecking}
+            style={{ width: '100%', padding: '0.875rem 1.5rem', fontSize: '0.9rem' }}
+          >
+            <GitBranch size={16} />
+            {loading ? 'Running the algorithm...' : 'Connect with GitHub'}
+          </button>
+        )}
 
         <button
           id="try-demo-btn"

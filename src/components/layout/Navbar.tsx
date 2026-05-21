@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { GitBranch, BookOpen } from 'lucide-react';
+import { GitBranch } from 'lucide-react';
 import NavbarAuth from './NavbarAuth';
 
 // Wordmark: "log" normal · "r" green · "ithm" normal — consistent with login page
@@ -17,10 +17,9 @@ export default function Navbar() {
         maxWidth: '100%',
         overflowX: 'hidden',
       }}
-      className="mx-auto flex items-center justify-center"
+      className="mx-auto flex w-full items-center justify-center"
     >
       <div
-        className="w-full px-6 sm:px-8 md:px-12"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -28,6 +27,8 @@ export default function Navbar() {
           height: '60px',
           maxWidth: '80rem',
           margin: '0 auto',
+          width: '100%',
+          padding: '0 2rem',
         }}
       >
         {/* Wordmark */}
@@ -47,24 +48,6 @@ export default function Navbar() {
 
         {/* Nav links + auth */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-          <Link
-            href="/docs"
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '0.8rem',
-              color: 'var(--text-muted)',
-              textDecoration: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.375rem',
-              transition: 'color 0.15s',
-            }}
-            className="hover:text-white"
-          >
-            <BookOpen size={13} />
-            docs
-          </Link>
-
           <a
             href="https://github.com/divine/logrithm"
             target="_blank"

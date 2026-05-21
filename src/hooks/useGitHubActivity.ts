@@ -2,8 +2,9 @@
 
 import { useState, useCallback } from 'react';
 import { DUMMY_GITHUB_DATA } from '@/lib/demoData';
-import { fetchGitHubActivity } from '@/lib/functions';
+import { fetchGitHubActivity as callFetchGitHubActivity } from '@/lib/functions';
 import type { GitHubActivity } from '@/types/github';
+import { useDashboardStore } from '@/store/useDashboardStore';
 
 interface UseGitHubActivityReturn {
   data: GitHubActivity | null;
@@ -13,12 +14,17 @@ interface UseGitHubActivityReturn {
 }
 
 export function useGitHubActivity(isDemoMode: boolean): UseGitHubActivityReturn {
-  const [data, setData] = useState<GitHubActivity | null>(isDemoMode ? DUMMY_GITHUB_DATA : null);
+  const { activity: data, setActivity: setData } = useDashboardStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetch = useCallback(
     async (token: string) => {
+      // If we already have data in the store, don't refetch
+      if (data && !isDemoMode) {
+        return;
+      }
+
       if (isDemoMode) {
         setData(DUMMY_GITHUB_DATA);
         return;
@@ -28,7 +34,7 @@ export function useGitHubActivity(isDemoMode: boolean): UseGitHubActivityReturn 
       setError(null);
 
       try {
-        const activity = await fetchGitHubActivity(token);
+        const activity = await callFetchGitHubActivity(token);
         setData(activity);
       } catch (err) {
         console.error('[useGitHubActivity] Error:', err);
@@ -37,7 +43,7 @@ export function useGitHubActivity(isDemoMode: boolean): UseGitHubActivityReturn 
         setLoading(false);
       }
     },
-    [isDemoMode]
+    [isDemoMode, data, setData]
   );
 
   return { data, loading, error, fetch };
