@@ -17,21 +17,13 @@ export interface GenerateInsightsParams {
 }
 
 export async function fetchGitHubActivity(token: string): Promise<GitHubActivity> {
-  const fn = httpsCallable<FetchActivityParams, GitHubActivity>(
-    functions,
-    'fetchGitHubActivity'
-  );
+  const fn = httpsCallable<FetchActivityParams, GitHubActivity>(functions, 'fetchGitHubActivity');
   const result = await fn({ token });
   return result.data;
 }
 
-export async function generateInsights(
-  params: GenerateInsightsParams
-): Promise<InsightObject> {
-  const fn = httpsCallable<GenerateInsightsParams, InsightObject>(
-    functions,
-    'generateInsights'
-  );
+export async function generateInsights(params: GenerateInsightsParams): Promise<InsightObject> {
+  const fn = httpsCallable<GenerateInsightsParams, InsightObject>(functions, 'generateInsights');
   const result = await fn(params);
   return result.data;
 }

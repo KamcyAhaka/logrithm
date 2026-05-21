@@ -31,7 +31,9 @@ export default function LoginClient() {
         throw new Error('No GitHub access token returned.');
       }
 
-      const githubUsername = additionalInfo?.username ?? (user.providerData[0]?.uid ?? user.displayName ?? '').replace(/^github:/, '');
+      const githubUsername =
+        additionalInfo?.username ??
+        (user.providerData[0]?.uid ?? user.displayName ?? '').replace(/^github:/, '');
 
       // Write user profile to Firestore
       const profileRef = doc(db, 'users', user.uid, 'profile', 'data');
@@ -43,8 +45,8 @@ export default function LoginClient() {
           displayName: user.displayName ?? '',
           avatarUrl: user.photoURL ?? '',
           createdAt: new Date().toISOString(),
-          plan: 'free',      // hardcoded — pro comes in Phase 2
-          isPublic: false,   // user must opt in
+          plan: 'free', // hardcoded — pro comes in Phase 2
+          isPublic: false, // user must opt in
         });
       } else {
         // Only update safely overwritable fields for returning users
@@ -157,8 +159,7 @@ export default function LoginClient() {
           letterSpacing: '0.01em',
         }}
       >
-        Your commit history.{' '}
-        <span style={{ color: 'var(--green)' }}>Analyzed.</span>
+        Your commit history. <span style={{ color: 'var(--green)' }}>Analyzed.</span>
       </p>
 
       {/* Terminal preview card */}
@@ -188,7 +189,11 @@ export default function LoginClient() {
         </div>
         {[
           { prefix: '$ ', cmd: 'logrithm analyze @demo-dev', color: '#1D9E75' },
-          { prefix: '  ', cmd: 'fetching 12 months of activity...', color: 'rgba(255,255,255,0.4)' },
+          {
+            prefix: '  ',
+            cmd: 'fetching 12 months of activity...',
+            color: 'rgba(255,255,255,0.4)',
+          },
           { prefix: '✓ ', cmd: '847 commits across 12 repos', color: 'rgba(255,255,255,0.4)' },
           { prefix: '✓ ', cmd: 'running algorithm...', color: 'rgba(255,255,255,0.4)' },
           null,
@@ -196,7 +201,12 @@ export default function LoginClient() {
           { prefix: '  insight: ', cmd: 'TypeScript dominance — 68% of output', color: '#1D9E75' },
           { prefix: '  insight: ', cmd: 'sprint-and-rest pattern detected', color: '#1D9E75' },
           null,
-          { prefix: '  ', cmd: 'activity score: 82/100', color: 'rgba(29,158,117,0.8)', bold: true },
+          {
+            prefix: '  ',
+            cmd: 'activity score: 82/100',
+            color: 'rgba(29,158,117,0.8)',
+            bold: true,
+          },
         ].map((line, i) =>
           line === null ? (
             <div key={i} style={{ height: '0.5rem' }} />

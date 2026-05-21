@@ -1,6 +1,6 @@
 'use client';
 
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import type { Repository } from '@/types/github';
 
 interface LanguageBreakdownProps {
@@ -8,8 +8,14 @@ interface LanguageBreakdownProps {
 }
 
 const FALLBACK_COLORS = [
-  '#1D9E75', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-  '#DDA0DD', '#98D8C8', '#F7DC6F',
+  '#1D9E75',
+  '#4ECDC4',
+  '#45B7D1',
+  '#96CEB4',
+  '#FFEAA7',
+  '#DDA0DD',
+  '#98D8C8',
+  '#F7DC6F',
 ];
 
 export default function LanguageBreakdown({ repositories }: LanguageBreakdownProps) {
@@ -83,7 +89,7 @@ export default function LanguageBreakdown({ repositories }: LanguageBreakdownPro
                 fontSize: '0.75rem',
               }}
               formatter={(value, name) => [
-                `${value ?? 0} commits (${Math.round(((value as number ?? 0) / total) * 100)}%)`,
+                `${value ?? 0} commits (${Math.round((((value as number) ?? 0) / total) * 100)}%)`,
                 name as string,
               ]}
             />

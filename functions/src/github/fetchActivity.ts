@@ -93,7 +93,10 @@ export const fetchGitHubActivity = onCall(
       });
     } catch (err) {
       console.error('[fetchGitHubActivity] Network error:', err);
-      throw new HttpsError('unavailable', 'Could not reach GitHub API. The log is empty. Try again.');
+      throw new HttpsError(
+        'unavailable',
+        'Could not reach GitHub API. The log is empty. Try again.'
+      );
     }
 
     if (!response.ok) {
@@ -166,7 +169,7 @@ export const fetchGitHubActivity = onCall(
       ...(viewer.repositoriesContributedTo?.nodes || []),
     ].filter(Boolean);
 
-    const uniqueReposMap = new Map<string, typeof allRepos[0]>();
+    const uniqueReposMap = new Map<string, (typeof allRepos)[0]>();
     for (const repo of allRepos) {
       if (!uniqueReposMap.has(repo.url)) {
         uniqueReposMap.set(repo.url, repo);
