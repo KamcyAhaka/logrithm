@@ -1,0 +1,39 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "repos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "visibility", "order": "ASCENDING" },
+        { "fieldPath": "commitCount", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "repos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "excludedByUser", "order": "ASCENDING" },
+        { "fieldPath": "syncedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "insights",
+      "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "generatedAt", "order": "DESCENDING" }]
+    },
+    {
+      "collectionGroup": "snapshots",
+      "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "capturedAt", "order": "DESCENDING" }]
+    },
+    {
+      "collectionGroup": "shareEvents",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "sharedAt", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

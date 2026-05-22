@@ -1,5 +1,6 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import type { GitHubActivity } from '../types/github';
+import { upsertRepo } from '../lib/firestoreService';
 
 // ---------------------------------------------------------------------------
 // GitHub GraphQL query — fetches 12 months of activity for the authed user
@@ -27,8 +28,14 @@ const GITHUB_GRAPHQL_QUERY = `
       }
       repositories(first: 15, orderBy: { field: UPDATED_AT, direction: DESC }, ownerAffiliations: [OWNER, COLLABORATOR, ORGANIZATION_MEMBER]) {
         nodes {
+          databaseId
           name
           url
+          isPrivate
+          owner {
+            login
+            __typename
+          }
           stargazerCount
           forkCount
           primaryLanguage {
@@ -48,8 +55,14 @@ const GITHUB_GRAPHQL_QUERY = `
       }
       repositoriesContributedTo(first: 15, orderBy: { field: UPDATED_AT, direction: DESC }, contributionTypes: [COMMIT, PULL_REQUEST, ISSUE, REPOSITORY]) {
         nodes {
+          databaseId
           name
           url
+          isPrivate
+          owner {
+            login
+            __typename
+          }
           stargazerCount
           forkCount
           primaryLanguage {
@@ -74,10 +87,14 @@ const GITHUB_GRAPHQL_QUERY = `
 export const fetchGitHubActivity = onCall(
   { region: 'us-central1' },
   async (request): Promise<GitHubActivity> => {
-    const { token } = request.data as { token: string };
+    const { token, uid } = request.data as { token: string; uid: string };
 
     if (!token || typeof token !== 'string') {
       throw new HttpsError('invalid-argument', 'GitHub token is required.');
+    }
+
+    if (!uid || typeof uid !== 'string') {
+      throw new HttpsError('invalid-argument', 'uid is required.');
     }
 
     let response: Response;
@@ -124,8 +141,14 @@ export const fetchGitHubActivity = onCall(
           };
           repositories: {
             nodes: Array<{
+              databaseId: number;
               name: string;
               url: string;
+              isPrivate: boolean;
+              owner: {
+                login: string;
+                __typename: string;
+              };
               stargazerCount: number;
               forkCount: number;
               primaryLanguage: { name: string; color: string | null } | null;
@@ -136,8 +159,14 @@ export const fetchGitHubActivity = onCall(
           };
           repositoriesContributedTo: {
             nodes: Array<{
+              databaseId: number;
               name: string;
               url: string;
+              isPrivate: boolean;
+              owner: {
+                login: string;
+                __typename: string;
+              };
               stargazerCount: number;
               forkCount: number;
               primaryLanguage: { name: string; color: string | null } | null;
@@ -178,14 +207,32 @@ export const fetchGitHubActivity = onCall(
 
     const repositories: GitHubActivity['repositories'] = Array.from(uniqueReposMap.values())
       .map((repo) => ({
+        repoId: String(repo.databaseId),
         name: repo.name,
         url: repo.url,
+        isPrivate: repo.isPrivate,
+        ownerLogin: repo.owner.login,
+        ownerType: (repo.owner.__typename === 'Organization' ? 'organization' : 'user') as
+          | 'user'
+          | 'organization',
         stargazerCount: repo.stargazerCount,
         forkCount: repo.forkCount,
         primaryLanguage: repo.primaryLanguage ?? null,
         commitCount: repo.defaultBranchRef?.target?.history?.totalCount ?? 0,
       }))
       .slice(0, 15);
+
+    // Persist repos to Firestore for privacy filtering in generateInsights
+    // Fire-and-forget with Promise.allSettled — never block or throw on upsert failures
+    try {
+      await Promise.allSettled(
+        repositories.map((repo) => upsertRepo(uid, repo, repo.ownerType as 'user' | 'organization'))
+      );
+      console.log(`[fetchGitHubActivity] Upserted ${repositories.length} repos for ${uid}`);
+    } catch (err) {
+      // Non-fatal — generateInsights falls back to activity.repositories if Firestore is empty
+      console.warn('[fetchGitHubActivity] Could not upsert repos:', err);
+    }
 
     return {
       login: viewer.login,
