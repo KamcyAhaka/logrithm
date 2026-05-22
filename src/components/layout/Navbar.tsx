@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { GitBranch } from 'lucide-react';
+import { GitBranch, Settings } from 'lucide-react';
 import NavbarAuth from './NavbarAuth';
 
 // Wordmark: "log" normal · "r" green · "ithm" normal — consistent with login page
@@ -67,6 +67,20 @@ export default function Navbar() {
             <GitBranch size={13} />
             github
           </a>
+
+          <Link
+            href="/settings"
+            style={{
+              color: 'var(--text-muted)',
+              display: 'flex',
+              alignItems: 'center',
+              transition: 'color 0.15s',
+            }}
+            className="hover:text-white"
+            aria-label="Settings"
+          >
+            <Settings size={16} />
+          </Link>
 
           {/* Client component handles auth state */}
           <NavbarAuth />

@@ -1,5 +1,6 @@
 // TypeScript interfaces for Logrithm.
 // Update all consumers if shapes change — see contributor-safety skill.
+import type { Timestamp, FieldValue } from 'firebase/firestore';
 
 export interface ContributionDay {
   date: string;
@@ -69,4 +70,22 @@ export interface InsightHistoryEntry {
 export interface ActivitySnapshot {
   activity: GitHubActivity;
   capturedAt: string; // ISO string
+}
+
+export interface PrivacySettingsDocument {
+  analysis: {
+    includePrivatePersonal: boolean;
+    includeOrgRepos: boolean;
+  };
+  display: {
+    showPrivateRepoNames: boolean;
+    showOrgRepoNames: boolean;
+    shareCardDataScope: 'public_only' | 'aggregated';
+  };
+  profile: {
+    showScore: boolean;
+    showLanguages: boolean;
+    showRepoList: boolean;
+  };
+  updatedAt: Timestamp | FieldValue;
 }
