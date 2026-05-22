@@ -190,6 +190,16 @@ the useDemoMode check.
 
 ---
 
+## UI & Theming Rules
+
+Logrithm is strictly a dark-themed application ("Your commit history. Analyzed." terminal style).
+
+- Never introduce light-themed default colors.
+- Always ensure new UI components (like ShadCN components) default to dark mode by applying the `.dark` class to the root `<html>` element, or by merging dark variables directly into `:root`.
+- Do not add theme toggles or light mode variants; they break the core brand aesthetic.
+
+---
+
 ## Before Committing Any Change
 
 Check:

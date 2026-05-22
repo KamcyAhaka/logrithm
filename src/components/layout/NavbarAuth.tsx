@@ -4,19 +4,31 @@ import { useAuth } from '@/hooks/useAuth';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import Image from 'next/image';
-import { LogOut } from 'lucide-react';
+import Link from 'next/link';
+import { LogOut, User as UserIcon, Settings } from 'lucide-react';
+import { useDashboardStore } from '@/store/useDashboardStore';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export default function NavbarAuth() {
   const { user, loading } = useAuth();
+  const { activity, clearStore } = useDashboardStore();
 
   if (loading) {
-    return <div className="skeleton" style={{ width: 32, height: 32, borderRadius: '50%' }} />;
+    return <div className="skeleton" style={{ width: 30, height: 30, borderRadius: '50%' }} />;
   }
 
   if (!user) return null;
 
   const handleSignOut = async () => {
     try {
+      clearStore();
       await signOut(auth);
       window.location.href = '/';
     } catch (err) {
@@ -24,43 +36,92 @@ export default function NavbarAuth() {
     }
   };
 
+  const username = activity?.login;
+
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-      {user.photoURL && (
-        <Image
-          src={user.photoURL}
-          alt={user.displayName ?? 'User avatar'}
-          width={30}
-          height={30}
-          style={{ borderRadius: '50%', border: '1px solid var(--border-std)' }}
-        />
-      )}
-      {/* Vertical divider */}
-      <div
-        style={{
-          width: 1,
-          height: 16,
-          background: 'var(--border-subtle)',
-          margin: '0 0.25rem',
-        }}
-      />
-      <button
-        onClick={handleSignOut}
-        title="Sign out"
-        style={{
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          color: 'var(--text-muted)',
-          display: 'flex',
-          alignItems: 'center',
-          transition: 'color 0.15s',
-          padding: '4px',
-        }}
-        className="hover:text-white"
-      >
-        <LogOut size={14} />
-      </button>
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0,
+              display: 'flex',
+              alignItems: 'center',
+              borderRadius: '50%',
+              outline: 'none',
+            }}
+          >
+            {user.photoURL ? (
+              <Image
+                src={user.photoURL}
+                alt={user.displayName ?? 'User avatar'}
+                width={30}
+                height={30}
+                style={{ borderRadius: '50%', border: '1px solid var(--border-std)' }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: '50%',
+                  background: 'var(--border-subtle)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '1px solid var(--border-std)',
+                }}
+              >
+                <UserIcon size={16} color="var(--text-muted)" />
+              </div>
+            )}
+          </button>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent
+          align="end"
+          className="border-border-subtle bg-card text-card-foreground w-56 font-mono text-sm"
+        >
+          <DropdownMenuLabel className="text-muted-foreground text-xs font-normal tracking-wider uppercase">
+            My Account
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator className="bg-border-subtle" />
+
+          {username ? (
+            <Link href={`/share/${username}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+              <DropdownMenuItem className="cursor-pointer transition-colors focus:bg-white/10 focus:text-white">
+                <UserIcon className="mr-2 h-4 w-4" />
+                <span>Profile</span>
+              </DropdownMenuItem>
+            </Link>
+          ) : (
+            <DropdownMenuItem disabled className="opacity-50">
+              <UserIcon className="mr-2 h-4 w-4" />
+              <span>Profile</span>
+            </DropdownMenuItem>
+          )}
+
+          <Link href="/settings" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <DropdownMenuItem className="cursor-pointer transition-colors focus:bg-white/10 focus:text-white">
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Settings</span>
+            </DropdownMenuItem>
+          </Link>
+
+          <DropdownMenuSeparator className="bg-border-subtle" />
+
+          <DropdownMenuItem
+            onClick={handleSignOut}
+            className="cursor-pointer text-red-400 transition-colors focus:bg-red-400/10 focus:text-red-400"
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Log out</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
