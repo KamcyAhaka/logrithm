@@ -21,6 +21,12 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
       <div className="mx-auto mt-4 flex w-full max-w-5xl flex-1 flex-col gap-8 p-4 md:mt-8 md:flex-row md:p-8">
         <aside className="shrink-0 md:w-56">
           <div className="sticky top-24">
+            <Link
+              href="/dashboard"
+              className="mb-6 flex items-center gap-2 px-3 font-mono text-xs text-white/40 transition-colors hover:text-[#1D9E75] md:mb-8"
+            >
+              ← return to dashboard
+            </Link>
             <h2 className="mb-4 hidden px-3 font-mono text-xs font-medium tracking-widest text-white/40 uppercase md:block">
               Settings
             </h2>

@@ -156,6 +156,7 @@ export interface PrivacySettingsDocument {
     showScore: boolean;
     showLanguages: boolean;
     showRepoList: boolean;
+    displayStyle: 'full' | 'card';
   };
   updatedAt: Timestamp;
 }

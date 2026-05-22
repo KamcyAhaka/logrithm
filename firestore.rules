@@ -29,6 +29,12 @@ service cloud.firestore {
       allow read: if false;
     }
 
+    // Public slug lookup — readable by anyone, writable only by server
+    match /slugs/{slug} {
+      allow read: if true;
+      allow write: if false; // server-side only via Admin SDK
+    }
+
     // ── Default deny ────────────────────────────────────────────────────────
     // Deny everything else. Never add a rule that allows public writes.
     match /{document=**} {
