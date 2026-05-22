@@ -1,5 +1,11 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { Inter, JetBrains_Mono } from 'next/font/google';
+import { cn } from '@/lib/utils';
+
+const jetbrainsMonoHeading = JetBrains_Mono({ subsets: ['latin'], variable: '--font-heading' });
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
   title: 'Logrithm — Your commit history. Analyzed.',
@@ -27,7 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={cn('font-sans', inter.variable, jetbrainsMonoHeading.variable)}>
       <body style={{ minHeight: '100vh', background: 'var(--bg-page)' }}>{children}</body>
     </html>
   );
