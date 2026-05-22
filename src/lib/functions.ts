@@ -7,6 +7,7 @@ import type { GitHubActivity, InsightObject } from '@/types/github';
 
 export interface FetchActivityParams {
   token: string;
+  uid: string;
 }
 
 export interface GenerateInsightsParams {
@@ -16,9 +17,9 @@ export interface GenerateInsightsParams {
   forceRefresh?: boolean;
 }
 
-export async function fetchGitHubActivity(token: string): Promise<GitHubActivity> {
+export async function fetchGitHubActivity(token: string, uid: string): Promise<GitHubActivity> {
   const fn = httpsCallable<FetchActivityParams, GitHubActivity>(functions, 'fetchGitHubActivity');
-  const result = await fn({ token });
+  const result = await fn({ token, uid });
   return result.data;
 }
 

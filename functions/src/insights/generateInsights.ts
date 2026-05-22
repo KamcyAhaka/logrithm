@@ -1,9 +1,16 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
-import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { initializeApp, getApps } from 'firebase-admin/app';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getSecret } from '../secrets/getSecret';
 import type { GitHubActivity, InsightObject } from '../types/github';
+import {
+  initUserPrivacySettings,
+  getIncludedRepos,
+  saveInsightHistory,
+  updateAnalysisStatus,
+} from '../lib/firestoreService';
+import type { RepoDocument } from '../types/github';
+import { db } from '../lib/firebase'; // Added to resolve db.doc TS error
 
 // ---------------------------------------------------------------------------
 // Demo fallback — returned when key is missing or demo mode is active
@@ -41,13 +48,12 @@ if (getApps().length === 0) {
   initializeApp();
 }
 
-const db = getFirestore();
-
 // ---------------------------------------------------------------------------
 // Gemini prompt builder
 // ---------------------------------------------------------------------------
-function buildPrompt(activity: GitHubActivity): string {
-  const topLangs = activity.repositories
+function buildPrompt(activity: GitHubActivity, filteredRepos?: RepoDocument[]): string {
+  const reposToUse = filteredRepos ?? activity.repositories;
+  const topLangs = reposToUse
     .filter((r) => r.primaryLanguage)
     .reduce<Record<string, number>>((acc, r) => {
       const lang = r.primaryLanguage!.name;
@@ -80,7 +86,7 @@ GitHub Activity Summary:
 - Top languages by commit: ${sortedLangs.join(', ')}
 - Total calendar contributions: ${activity.contributionCalendar.totalContributions}
 - Active repos (with details):
-${activity.repositories
+${reposToUse
   .slice(0, 10)
   .map(
     (r) =>
@@ -174,8 +180,22 @@ export const generateInsights = onCall(
       try {
         const cached = await insightRef.get();
         if (cached.exists) {
-          const data = cached.data() as { data: InsightObject; generatedAt: string };
-          const generatedAt = new Date(data.generatedAt);
+          const data = cached.data() as {
+            data: InsightObject;
+            generatedAt: FirebaseFirestore.Timestamp | string;
+          };
+
+          // Handle both Timestamp (new) and ISO string (legacy) formats
+          let generatedAt: Date;
+          if (
+            data.generatedAt &&
+            typeof (data.generatedAt as FirebaseFirestore.Timestamp).toDate === 'function'
+          ) {
+            generatedAt = (data.generatedAt as FirebaseFirestore.Timestamp).toDate();
+          } else {
+            generatedAt = new Date(data.generatedAt as string);
+          }
+
           const today = new Date();
           const sameDay =
             generatedAt.getFullYear() === today.getFullYear() &&
@@ -194,6 +214,21 @@ export const generateInsights = onCall(
       console.log(`[generateInsights] forceRefresh=true for ${uid}, bypassing cache check`);
     }
 
+    // Step 2b: Ensure privacy settings exist for this user (idempotent)
+    try {
+      await initUserPrivacySettings(uid);
+    } catch (err) {
+      console.warn('[generateInsights] Could not init privacy settings:', err);
+      // Non-fatal — continue without privacy settings initialised
+    }
+
+    // Step 2c: Mark analysis as running
+    try {
+      await updateAnalysisStatus(uid, 'running');
+    } catch (err) {
+      console.warn('[generateInsights] Could not update analysis status:', err);
+    }
+
     // Step 3: Get GEMINI_API_KEY — env first, then Secret Manager
     let apiKey = process.env.GEMINI_API_KEY ?? null;
 
@@ -206,6 +241,28 @@ export const generateInsights = onCall(
       return DUMMY_INSIGHTS;
     }
 
+    // Step 3b: Fetch privacy-filtered repos from Firestore
+    // Falls back to activity.repositories if Firestore repos are not yet populated
+    let filteredRepos: RepoDocument[] | undefined;
+    try {
+      const firestoreRepos = await getIncludedRepos(uid);
+      if (firestoreRepos.length > 0) {
+        filteredRepos = firestoreRepos;
+        console.log(
+          `[generateInsights] Using ${filteredRepos.length} privacy-filtered repos for ${uid}`
+        );
+      } else {
+        console.log(
+          `[generateInsights] No Firestore repos found for ${uid}, using activity.repositories`
+        );
+      }
+    } catch (err) {
+      console.warn(
+        '[generateInsights] Could not fetch filtered repos, using activity.repositories:',
+        err
+      );
+    }
+
     // Step 4: Call Gemini
     let insights: InsightObject;
     try {
@@ -216,26 +273,42 @@ export const generateInsights = onCall(
           temperature: 0.85, // Add randomness so manual updates feel fresh
         },
       });
-      const prompt = buildPrompt(activity);
+      const prompt = buildPrompt(activity, filteredRepos);
       const result = await model.generateContent(prompt);
       const text = result.response.text();
       insights = parseInsights(text);
     } catch (err) {
       console.error('[generateInsights] Gemini call failed:', err);
-      // Cost protection: if Gemini fails, return dummy — never crash
+      try {
+        await updateAnalysisStatus(uid, 'error', String(err));
+      } catch {
+        // Non-fatal
+      }
       return DUMMY_INSIGHTS;
     }
 
-    // Step 5: Cache in Firestore
+    // Step 5: Persist insights via firestoreService
+    // saveInsightHistory writes to both insights/latest (preserving UI)
+    // and a new timestamped history doc, and updates profile/data
     try {
-      await insightRef.set({
-        data: insights,
-        generatedAt: new Date().toISOString(),
-        updatedAt: FieldValue.serverTimestamp(),
+      const repoScope = {
+        totalReposAnalyzed: filteredRepos?.length ?? activity.repositories.length,
+        publicReposCount: filteredRepos?.filter((r) => r.visibility === 'public').length ?? 0,
+        privatePersonalCount:
+          filteredRepos?.filter((r) => r.visibility === 'private_personal').length ?? 0,
+        orgReposCount: filteredRepos?.filter((r) => r.visibility === 'private_org').length ?? 0,
+        excludedCount: 0, // populated when excludedByUser logic is fully wired
+      };
+
+      await saveInsightHistory(uid, insights, {
+        geminiModel: 'gemini-2.5-flash',
+        repoScope,
       });
+
+      console.log(`[generateInsights] Insights saved for ${uid}`);
     } catch (err) {
-      console.warn('[generateInsights] Could not cache insights:', err);
-      // Non-fatal — return insights even if cache write fails
+      console.warn('[generateInsights] Could not save insights:', err);
+      // Non-fatal — return insights even if persistence fails
     }
 
     return insights;

@@ -5,6 +5,7 @@ import { DUMMY_GITHUB_DATA } from '@/lib/demoData';
 import { fetchGitHubActivity as callFetchGitHubActivity } from '@/lib/functions';
 import type { GitHubActivity } from '@/types/github';
 import { useDashboardStore } from '@/store/useDashboardStore';
+import { getAuth } from 'firebase/auth';
 
 interface UseGitHubActivityReturn {
   data: GitHubActivity | null;
@@ -30,11 +31,17 @@ export function useGitHubActivity(isDemoMode: boolean): UseGitHubActivityReturn 
         return;
       }
 
+      const uid = getAuth().currentUser?.uid;
+      if (!uid) {
+        setError('Not authenticated. Please sign in again.');
+        return;
+      }
+
       setLoading(true);
       setError(null);
 
       try {
-        const activity = await callFetchGitHubActivity(token);
+        const activity = await callFetchGitHubActivity(token, uid);
         setData(activity);
       } catch (err) {
         console.error('[useGitHubActivity] Error:', err);
