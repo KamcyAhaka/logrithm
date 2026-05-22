@@ -33,7 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn('font-sans', inter.variable, jetbrainsMonoHeading.variable)}>
+    <html lang="en" className={cn('dark font-sans', inter.variable, jetbrainsMonoHeading.variable)}>
       <body style={{ minHeight: '100vh', background: 'var(--bg-page)' }}>{children}</body>
     </html>
   );
