@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
   GithubAuthProvider,
   signInWithPopup,
@@ -76,6 +77,10 @@ export default function LoginClient() {
           { merge: true }
         );
       }
+
+      // Write to slugs collection for public profile resolution
+      const slugRef = doc(db, 'slugs', githubUsername.toLowerCase());
+      await setDoc(slugRef, { uid: user.uid }, { merge: true });
 
       // Store GitHub token in Firestore (uid-gated by security rules)
       const tokenRef = doc(db, 'users', user.uid, 'tokens', 'github');
@@ -156,10 +161,12 @@ export default function LoginClient() {
               Dashboard
             </span>
             {currentUser.photoURL && (
-              <img
+              <Image
                 src={currentUser.photoURL}
                 alt="Profile"
-                style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }}
+                width={28}
+                height={28}
+                style={{ borderRadius: '50%', objectFit: 'cover' }}
               />
             )}
           </div>

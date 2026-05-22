@@ -21,7 +21,7 @@ const DEFAULT_PRIVACY: Omit<PrivacySettingsDocument, 'updatedAt'> = {
     showOrgRepoNames: false,
     shareCardDataScope: 'public_only',
   },
-  profile: { showScore: true, showLanguages: true, showRepoList: true },
+  profile: { showScore: true, showLanguages: true, showRepoList: true, displayStyle: 'card' },
 };
 
 interface PrivacyFormState {
@@ -37,6 +37,7 @@ interface PrivacyFormState {
     showScore: boolean;
     showLanguages: boolean;
     showRepoList: boolean;
+    displayStyle: 'full' | 'card';
   };
 }
 
@@ -93,6 +94,7 @@ export default function PrivacySettingsPage() {
             showLanguages:
               privacyData.profile.showLanguages ?? DEFAULT_PRIVACY.profile.showLanguages,
             showRepoList: privacyData.profile.showRepoList ?? DEFAULT_PRIVACY.profile.showRepoList,
+            displayStyle: privacyData.profile.displayStyle ?? DEFAULT_PRIVACY.profile.displayStyle,
           },
         };
 
@@ -128,6 +130,7 @@ export default function PrivacySettingsPage() {
             showScore: currentState.profile.showScore,
             showLanguages: currentState.profile.showLanguages,
             showRepoList: currentState.profile.showRepoList,
+            displayStyle: currentState.profile.displayStyle,
           },
           updatedAt: serverTimestamp(),
         },
@@ -313,6 +316,58 @@ export default function PrivacySettingsPage() {
               }
               disabled={!currentState.profile.isPublic}
             />
+          </div>
+
+          <div className="pt-4 opacity-90">
+            <label className="mb-4 block text-sm font-medium text-white">Profile Style</label>
+            <RadioGroup
+              value={currentState.profile.displayStyle}
+              onValueChange={(val: 'full' | 'card') =>
+                setCurrentState({
+                  ...currentState,
+                  profile: { ...currentState.profile, displayStyle: val },
+                })
+              }
+              disabled={!currentState.profile.isPublic}
+              className="space-y-4"
+            >
+              <div className="flex items-start space-x-3">
+                <RadioGroupItem
+                  value="full"
+                  id="style_full"
+                  className="mt-1 border-white/40 text-[#1D9E75]"
+                />
+                <div className="grid gap-1.5">
+                  <label
+                    htmlFor="style_full"
+                    className="cursor-pointer text-sm leading-none font-medium text-white"
+                  >
+                    Full Profile
+                  </label>
+                  <p className="text-sm text-white/40">
+                    A comprehensive view with detailed statistics, charts, and activity.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <RadioGroupItem
+                  value="card"
+                  id="style_card"
+                  className="mt-1 border-white/40 text-[#1D9E75]"
+                />
+                <div className="grid gap-1.5">
+                  <label
+                    htmlFor="style_card"
+                    className="cursor-pointer text-sm leading-none font-medium text-white"
+                  >
+                    Summary Card
+                  </label>
+                  <p className="text-sm text-white/40">
+                    A compact, shareable overview of your GitHub activity.
+                  </p>
+                </div>
+              </div>
+            </RadioGroup>
           </div>
         </div>
         <Separator className="mt-8 mb-8 bg-white/10" />

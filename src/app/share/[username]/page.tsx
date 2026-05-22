@@ -57,13 +57,20 @@ export default async function SharePage({ params }: SharePageProps) {
         if (!insightSnap.exists) {
           errorReason = 'no-insights';
         } else {
-          const data = insightSnap.data() as {
+          const rawData = insightSnap.data() as {
             data: InsightObject;
-            generatedAt: string;
+            generatedAt?: { toDate?: () => Date } | string;
           };
           profile = p;
-          insights = data.data;
-          generatedAt = data.generatedAt;
+          insights = rawData.data as InsightObject;
+          const genAt = rawData.generatedAt;
+          if (typeof genAt === 'string') {
+            generatedAt = genAt;
+          } else if (genAt && typeof genAt.toDate === 'function') {
+            generatedAt = genAt.toDate().toISOString();
+          } else {
+            generatedAt = new Date().toISOString();
+          }
         }
       }
     }

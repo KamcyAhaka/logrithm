@@ -14,5 +14,6 @@ export const defaultPrivacySettings: Omit<PrivacySettingsDocument, 'updatedAt'> 
     showScore: true,
     showLanguages: true,
     showRepoList: true,
+    displayStyle: 'card',
   },
 };
