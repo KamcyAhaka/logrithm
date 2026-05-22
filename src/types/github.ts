@@ -86,6 +86,52 @@ export interface PrivacySettingsDocument {
     showScore: boolean;
     showLanguages: boolean;
     showRepoList: boolean;
+    displayStyle: 'full' | 'card';
   };
   updatedAt: Timestamp | FieldValue;
+}
+
+export interface RepoDocument extends Repository {
+  repoId: string;
+  fullName: string;
+  description: string | null;
+  visibility: 'public' | 'private_personal' | 'private_org';
+  ownerType: 'user' | 'organization';
+  ownerLogin: string;
+  isArchived: boolean;
+  isFork: boolean;
+  isPrivate: boolean;
+  prCount: number;
+  issueCount: number;
+  languages: Record<string, number>;
+  includedInLastAnalysis: boolean;
+  excludedByUser: boolean;
+  lastCommitAt: Timestamp | null;
+  syncedAt: Timestamp;
+}
+
+export interface DailyCommit {
+  date: string;
+  count: number;
+}
+
+export interface HeatmapEntry {
+  date: string;
+  count: number;
+  level: 0 | 1 | 2 | 3 | 4;
+}
+
+export interface SnapshotDocument {
+  snapshotId: string;
+  capturedAt: Timestamp;
+  periodStart: Timestamp;
+  periodEnd: Timestamp;
+  totalCommits: number;
+  totalPRsMerged: number;
+  totalIssuesOpened: number;
+  activeRepoCount: number;
+  calendarContributions: number;
+  languageTotals: Record<string, number>;
+  dailyCommits: DailyCommit[];
+  contributionHeatmap: HeatmapEntry[];
 }
