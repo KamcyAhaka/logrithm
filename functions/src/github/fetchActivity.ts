@@ -1,7 +1,8 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 import type { GitHubActivity } from '../types/github';
-import { upsertRepo } from '../lib/firestoreService';
+import { upsertRepo, saveSnapshot } from '../lib/firestoreService';
+import { buildSnapshot } from '../lib/snapshotBuilder';
 
 const secretClient = new SecretManagerServiceClient();
 const PROJECT_ID = process.env.GCLOUD_PROJECT ?? 'logrithm-ai';
@@ -88,20 +89,28 @@ const GITHUB_GRAPHQL_QUERY = `
 `;
 
 export const fetchActivityInternal = async (uid: string): Promise<GitHubActivity> => {
-  // Retrieve GitHub token from Secret Manager
-  // SECURITY: token never passes through the client
+  // Retrieve GitHub token — local dev override first, then Secret Manager.
+  // In local dev, set GITHUB_TOKEN_OVERRIDE in functions/.env.local to skip Secret Manager.
+  // SECURITY: token never passes through the client in production.
   let token: string;
-  try {
-    const secretName = `projects/${PROJECT_ID}/secrets/github-token-${uid}/versions/latest`;
-    const [version] = await secretClient.accessSecretVersion({ name: secretName });
-    const payload = version.payload?.data;
-    if (!payload) {
-      throw new Error('Empty secret payload');
+
+  const localTokenOverride = process.env.GITHUB_TOKEN_OVERRIDE ?? null;
+  if (localTokenOverride) {
+    console.log('[fetchGitHubActivity] Using GITHUB_TOKEN_OVERRIDE for local dev.');
+    token = localTokenOverride;
+  } else {
+    try {
+      const secretName = `projects/${PROJECT_ID}/secrets/github-token-${uid}/versions/latest`;
+      const [version] = await secretClient.accessSecretVersion({ name: secretName });
+      const payload = version.payload?.data;
+      if (!payload) {
+        throw new Error('Empty secret payload');
+      }
+      token = typeof payload === 'string' ? payload : Buffer.from(payload).toString('utf8');
+    } catch (err) {
+      console.error('[fetchGitHubActivity] Could not retrieve token from Secret Manager:', err);
+      throw new HttpsError('unauthenticated', 'GitHub token not found. Please sign in again.');
     }
-    token = typeof payload === 'string' ? payload : Buffer.from(payload).toString('utf8');
-  } catch (err) {
-    console.error('[fetchGitHubActivity] Could not retrieve token from Secret Manager:', err);
-    throw new HttpsError('unauthenticated', 'GitHub token not found. Please sign in again.');
   }
 
   let response: Response;
@@ -238,7 +247,7 @@ export const fetchActivityInternal = async (uid: string): Promise<GitHubActivity
     console.warn('[fetchGitHubActivity] Could not upsert repos:', err);
   }
 
-  return {
+  const activity: GitHubActivity = {
     login: viewer.login,
     name: viewer.name,
     avatarUrl: viewer.avatarUrl,
@@ -250,6 +259,15 @@ export const fetchActivityInternal = async (uid: string): Promise<GitHubActivity
     contributionCalendar: contributionsCollection.contributionCalendar,
     repositories,
   };
+
+  // Fire-and-forget snapshot — never block the response or throw on failure.
+  // This ensures every user gets a snapshot on their first dashboard load,
+  // without having to wait for the background scheduler to run.
+  saveSnapshot(uid, buildSnapshot(activity)).catch((err) =>
+    console.warn('[fetchGitHubActivity] Could not save snapshot (non-fatal):', err)
+  );
+
+  return activity;
 };
 
 export const fetchGitHubActivity = onCall(
