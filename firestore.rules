@@ -19,6 +19,7 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == uid;
     }
 
+    // The tokens/github doc now stores only a Secret Manager reference, never a raw token.
     match /users/{uid}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
     }
@@ -32,7 +33,7 @@ service cloud.firestore {
     // Public slug lookup — readable by anyone, writable only by server
     match /slugs/{slug} {
       allow read: if true;
-      allow write: if false; // server-side only via Admin SDK
+      allow write: if request.auth != null; // client writes on login
     }
 
     // ── Default deny ────────────────────────────────────────────────────────

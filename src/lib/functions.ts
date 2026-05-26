@@ -5,9 +5,13 @@ import { httpsCallable } from 'firebase/functions';
 import { functions } from '@/lib/firebase';
 import type { GitHubActivity, InsightObject } from '@/types/github';
 
-export interface FetchActivityParams {
+export interface StoreTokenParams {
   token: string;
-  uid: string;
+}
+
+export async function storeGitHubToken(token: string): Promise<void> {
+  const fn = httpsCallable<StoreTokenParams, { success: boolean }>(functions, 'storeGitHubToken');
+  await fn({ token });
 }
 
 export interface GenerateInsightsParams {
@@ -17,9 +21,9 @@ export interface GenerateInsightsParams {
   forceRefresh?: boolean;
 }
 
-export async function fetchGitHubActivity(token: string, uid: string): Promise<GitHubActivity> {
-  const fn = httpsCallable<FetchActivityParams, GitHubActivity>(functions, 'fetchGitHubActivity');
-  const result = await fn({ token, uid });
+export async function fetchGitHubActivity(uid: string): Promise<GitHubActivity> {
+  const fn = httpsCallable<{ uid: string }, GitHubActivity>(functions, 'fetchGitHubActivity');
+  const result = await fn({ uid });
   return result.data;
 }
 
