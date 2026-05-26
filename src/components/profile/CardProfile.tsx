@@ -66,16 +66,15 @@ export function CardProfile({
           </div>
         )}
 
-        <div className="mt-12 grid grid-cols-3 gap-4 border-y border-white/10 py-8 text-center">
-          {totalCommits !== undefined ? (
+        <div
+          className={`mt-12 grid gap-4 border-y border-white/10 py-8 text-center ${
+            totalCommits !== undefined ? 'grid-cols-3' : 'grid-cols-2'
+          }`}
+        >
+          {totalCommits !== undefined && (
             <div>
               <p className="font-mono text-xl font-semibold text-white">{totalCommits}</p>
               <p className="mt-1 text-xs text-white/40">Commits</p>
-            </div>
-          ) : (
-            <div>
-              <p className="font-mono text-xl font-semibold text-white">{insights.activityScore}</p>
-              <p className="mt-1 text-xs text-white/40">Score</p>
             </div>
           )}
 
