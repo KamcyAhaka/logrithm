@@ -140,6 +140,8 @@ export interface SnapshotDocument {
   languageTotals: Record<string, number>;
   dailyCommits: DailyCommit[];
   contributionHeatmap: HeatmapEntry[];
+  currentStreak: number;
+  longestStreak: number;
 }
 
 export interface PrivacySettingsDocument {
