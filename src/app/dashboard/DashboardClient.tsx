@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useDemoMode } from '@/hooks/useDemoMode';
 import { useAuth } from '@/hooks/useAuth';
 import { useGitHubActivity } from '@/hooks/useGitHubActivity';
+import { useDashboardStore } from '@/store/useDashboardStore';
 import { useInsights } from '@/hooks/useInsights';
 
 import Navbar from '@/components/layout/Navbar';
@@ -56,6 +57,20 @@ export default function DashboardClient() {
     const loadActivity = async () => {
       try {
         await fetchActivity(user.uid);
+        // Read plan from profile/data and sync to store
+        try {
+          const { getDoc, doc } = await import('firebase/firestore');
+          const { db } = await import('@/lib/firebase');
+          const profileSnap = await getDoc(doc(db, 'users', user.uid, 'profile', 'data'));
+          if (profileSnap.exists()) {
+            const profileData = profileSnap.data() as { plan?: string };
+            const plan = profileData.plan === 'pro' ? 'pro' : 'free';
+            useDashboardStore.getState().setPlan(plan);
+          }
+        } catch (err) {
+          console.warn('[DashboardClient] Could not load plan:', err);
+          // Non-fatal — defaults to free
+        }
       } catch (err) {
         console.error('[DashboardClient] Failed to load activity:', err);
       }

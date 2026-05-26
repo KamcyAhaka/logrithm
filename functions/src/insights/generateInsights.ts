@@ -11,6 +11,7 @@ import {
 } from '../lib/firestoreService';
 import type { RepoDocument } from '../types/github';
 import { db } from '../lib/firebase'; // Added to resolve db.doc TS error
+import { getRepoLimit, assertCanRefresh } from '../lib/planService';
 
 // ---------------------------------------------------------------------------
 // Demo fallback — returned when key is missing or demo mode is active
@@ -173,6 +174,17 @@ export const generateInsights = onCall(
       throw new HttpsError('invalid-argument', 'activity and uid are required.');
     }
 
+    // Enforce plan limits server-side — never trust client
+    // assertCanRefresh throws HttpsError if free tier daily limit exceeded
+    try {
+      await assertCanRefresh(uid);
+    } catch (err) {
+      // Re-throw HttpsError directly so the client receives the right error code
+      throw err;
+    }
+
+    const repoLimit = await getRepoLimit(uid);
+
     // Step 2: Check Firestore cache — one Gemini call per user per day max (unless forceRefresh is true)
     const insightRef = db.doc(`users/${uid}/insights/latest`);
 
@@ -263,6 +275,11 @@ export const generateInsights = onCall(
       );
     }
 
+    // Apply plan-based repo limit
+    if (filteredRepos) {
+      filteredRepos = filteredRepos.slice(0, repoLimit);
+    }
+
     // Step 4: Call Gemini
     let insights: InsightObject;
     try {
@@ -292,7 +309,10 @@ export const generateInsights = onCall(
     // and a new timestamped history doc, and updates profile/data
     try {
       const repoScope = {
-        totalReposAnalyzed: filteredRepos?.length ?? activity.repositories.length,
+        totalReposAnalyzed: Math.min(
+          filteredRepos?.length ?? activity.repositories.length,
+          repoLimit
+        ),
         publicReposCount: filteredRepos?.filter((r) => r.visibility === 'public').length ?? 0,
         privatePersonalCount:
           filteredRepos?.filter((r) => r.visibility === 'private_personal').length ?? 0,
