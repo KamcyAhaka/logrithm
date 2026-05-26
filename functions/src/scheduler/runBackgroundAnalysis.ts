@@ -7,7 +7,7 @@ import { buildSnapshot } from '../lib/snapshotBuilder';
 
 export const scheduledAnalysis = onSchedule('every 1 hours', async (event) => {
   try {
-    // const currentHour = new Date().getHours();
+    const currentHour = new Date().getHours();
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
@@ -17,33 +17,33 @@ export const scheduledAnalysis = onSchedule('every 1 hours', async (event) => {
       const uid = doc.ref.parent.parent!.id;
 
       // Slot allocation logic
-      // const hexSlice = uid.slice(-2);
-      // const slot = parseInt(hexSlice, 16) % 24;
+      const hexSlice = uid.slice(-2);
+      const slot = parseInt(hexSlice, 16) % 24;
 
-      // if (slot !== currentHour && !Number.isNaN(slot)) {
-      //   continue;
-      // }
+      if (slot !== currentHour && !Number.isNaN(slot)) {
+        continue;
+      }
 
       try {
         // 1. Skip if today's snapshot already exists
         const latestSnapshot = await getLatestSnapshot(uid);
         if (latestSnapshot) {
-          // let capturedAt: Date;
+          let capturedAt: Date;
           const capturedAtRaw = latestSnapshot.capturedAt;
 
           if (
             capturedAtRaw &&
             typeof (capturedAtRaw as FirebaseFirestore.Timestamp).toDate === 'function'
           ) {
-            // capturedAt = (capturedAtRaw as FirebaseFirestore.Timestamp).toDate();
+            capturedAt = (capturedAtRaw as FirebaseFirestore.Timestamp).toDate();
           } else {
-            // capturedAt = new Date(capturedAtRaw as unknown as string);
+            capturedAt = new Date(capturedAtRaw as unknown as string);
           }
 
-          // if (capturedAt >= todayStart) {
-          //   console.log(`[scheduledAnalysis] Skipping ${uid}, snapshot already exists for today.`);
-          //   continue;
-          // }
+          if (capturedAt >= todayStart) {
+            console.log(`[scheduledAnalysis] Skipping ${uid}, snapshot already exists for today.`);
+            continue;
+          }
         }
 
         // 2. Fetch GitHub activity

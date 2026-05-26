@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { ContributionCalendar } from '@/types/github';
 
 interface ActivityHeatmapProps {
@@ -55,6 +56,21 @@ export default function ActivityHeatmap({ contributionCalendar }: ActivityHeatma
   const cellGap = 5;
   const totalWidth = weeks.length * (cellSize + cellGap);
 
+  // Single onMouseMove handler on the entire grid container.
+  // Uses elementFromPoint + data-tooltip attribute to determine which cell is hovered.
+  // This completely avoids the rapid onMouseLeave/onMouseEnter toggling that happens
+  // when the cursor crosses the CSS gap space between cells.
+  const handleGridMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
+    const text = el?.dataset?.tooltip;
+    if (text) {
+      const rect = el!.getBoundingClientRect();
+      setTooltip({ text, x: e.clientX, y: rect.top });
+    } else {
+      setTooltip(null);
+    }
+  };
+
   return (
     <div className="glass-card" style={{ padding: '1.5rem' }}>
       <div
@@ -87,8 +103,12 @@ export default function ActivityHeatmap({ contributionCalendar }: ActivityHeatma
       {/* Scroll wrapper for small screens */}
       <div style={{ overflowX: 'auto', paddingBottom: '0.5rem' }}>
         <div style={{ position: 'relative', minWidth: totalWidth + 32, width: '100%' }}>
-          {/* Grid */}
-          <div style={{ display: 'flex', gap: cellGap, width: '100%', marginTop: '20px' }}>
+          {/* Grid — all mouse tracking is here; individual cells have no event handlers */}
+          <div
+            style={{ display: 'flex', gap: cellGap, width: '100%', marginTop: '20px' }}
+            onMouseMove={handleGridMouseMove}
+            onMouseLeave={() => setTooltip(null)}
+          >
             {/* Day-of-week labels */}
             <div
               style={{
@@ -149,29 +169,17 @@ export default function ActivityHeatmap({ contributionCalendar }: ActivityHeatma
                   )}
                   {week.contributionDays.map((day, di) => {
                     const level = getIntensityLevel(day.contributionCount);
+                    const tooltipText = `${day.contributionCount} contribution${day.contributionCount !== 1 ? 's' : ''} on ${day.date}`;
                     return (
                       <div
                         key={di}
+                        data-tooltip={tooltipText}
                         style={{
                           width: '100%',
                           aspectRatio: '1 / 1',
                           borderRadius: 2,
                           background: LEVEL_COLORS[level],
                           cursor: 'default',
-                          transition: 'transform 0.1s',
-                        }}
-                        onMouseEnter={(e) => {
-                          const rect = (e.target as HTMLElement).getBoundingClientRect();
-                          setTooltip({
-                            text: `${day.contributionCount} contribution${day.contributionCount !== 1 ? 's' : ''} on ${day.date}`,
-                            x: rect.left,
-                            y: rect.top,
-                          });
-                          (e.target as HTMLElement).style.transform = 'scale(1.25)';
-                        }}
-                        onMouseLeave={(e) => {
-                          setTooltip(null);
-                          (e.target as HTMLElement).style.transform = 'scale(1)';
                         }}
                       />
                     );
@@ -201,15 +209,7 @@ export default function ActivityHeatmap({ contributionCalendar }: ActivityHeatma
               Less
             </span>
             {LEVEL_COLORS.map((color, i) => (
-              <div
-                key={i}
-                style={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: 2,
-                  background: color,
-                }}
-              />
+              <div key={i} style={{ width: 10, height: 10, borderRadius: 2, background: color }} />
             ))}
             <span
               style={{
@@ -224,28 +224,47 @@ export default function ActivityHeatmap({ contributionCalendar }: ActivityHeatma
         </div>
       </div>
 
-      {/* Tooltip — fixed position */}
-      {tooltip && (
-        <div
-          style={{
-            position: 'fixed',
-            left: tooltip.x,
-            top: tooltip.y - 36,
-            background: '#1a1a1a',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: '0.375rem',
-            padding: '4px 10px',
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.7rem',
-            color: '#fff',
-            pointerEvents: 'none',
-            zIndex: 100,
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {tooltip.text}
-        </div>
-      )}
+      {/* Tooltip — portal-mounted directly on document.body, outside the layout tree.
+          A fixed element inside the component tree can still affect scrollbar calculations
+          in certain browser/OS configurations; a portal prevents this entirely. */}
+      {tooltip &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          (() => {
+            const TOOLTIP_EST_WIDTH = 220;
+            const EDGE_MARGIN = 12;
+            const vw = document.documentElement.clientWidth;
+            const safeLeft = Math.max(
+              EDGE_MARGIN,
+              Math.min(tooltip.x, vw - TOOLTIP_EST_WIDTH - EDGE_MARGIN)
+            );
+            return (
+              <div
+                style={{
+                  position: 'fixed',
+                  left: safeLeft,
+                  top: tooltip.y - 36,
+                  background: '#1a1a1a',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '0.375rem',
+                  padding: '4px 10px',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.7rem',
+                  color: '#fff',
+                  pointerEvents: 'none',
+                  zIndex: 2147483647,
+                  whiteSpace: 'nowrap',
+                  maxWidth: vw - EDGE_MARGIN * 2,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {tooltip.text}
+              </div>
+            );
+          })(),
+          document.body
+        )}
     </div>
   );
 }
