@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getAdminDb } from '@/lib/firebase-admin';
 import type { InsightObject, UserProfile } from '@/types/github';
-import ShareCard from '@/components/share/ShareCard';
+import ShareCard, { type ShareCardSnapshot } from '@/components/share/ShareCard';
 
 interface SharePageProps {
   params: Promise<{ username: string }>;
@@ -29,6 +29,7 @@ export default async function SharePage({ params }: SharePageProps) {
 
   let profile: UserProfile | null = null;
   let insights: InsightObject | null = null;
+  let snapshot: ShareCardSnapshot | null = null;
   let generatedAt: string | null = null;
   let errorReason: 'not-found' | 'no-insights' | 'error' | null = null;
 
@@ -50,9 +51,14 @@ export default async function SharePage({ params }: SharePageProps) {
       if (!p.isPublic) {
         errorReason = 'not-found';
       } else {
-        // Get the latest insights
+        // Get the latest insights and snapshot
         const uid = profileDoc.ref.parent.parent!.id;
         const insightSnap = await adminDb.doc(`users/${uid}/insights/latest`).get();
+        const snapshotSnap = await adminDb
+          .collection(`users/${uid}/snapshots`)
+          .orderBy('capturedAt', 'desc')
+          .limit(1)
+          .get();
 
         if (!insightSnap.exists) {
           errorReason = 'no-insights';
@@ -63,6 +69,21 @@ export default async function SharePage({ params }: SharePageProps) {
           };
           profile = p;
           insights = rawData.data as InsightObject;
+
+          if (!snapshotSnap.empty) {
+            const data = snapshotSnap.docs[0].data();
+            snapshot = {
+              snapshotId: snapshotSnap.docs[0].id,
+              totalCommits: data.totalCommits || 0,
+              totalPRsMerged: data.totalPRsMerged || 0,
+              totalIssuesOpened: data.totalIssuesOpened || 0,
+              activeRepoCount: data.activeRepoCount || 0,
+              languageTotals: data.languageTotals || {},
+              currentStreak: data.currentStreak || 0,
+              longestStreak: data.longestStreak || 0,
+            };
+          }
+
           const genAt = rawData.generatedAt;
           if (typeof genAt === 'string') {
             generatedAt = genAt;
@@ -131,6 +152,7 @@ export default async function SharePage({ params }: SharePageProps) {
         login={username}
         avatarUrl={profile.avatarUrl}
         insights={insights}
+        snapshot={snapshot || undefined}
         generatedAt={generatedAt}
       />
 

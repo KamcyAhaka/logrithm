@@ -34,6 +34,22 @@ export function buildSnapshot(
     };
   });
 
+  let longestStreak = 0;
+  let currentStreak = 0;
+
+  for (let i = 0; i < dailyCommits.length; i++) {
+    if (dailyCommits[i].count > 0) {
+      currentStreak++;
+      longestStreak = Math.max(longestStreak, currentStreak);
+    } else {
+      // If today (the last day) has 0 commits, the streak isn't broken yet
+      // because the user still has time to commit today.
+      if (i !== dailyCommits.length - 1) {
+        currentStreak = 0;
+      }
+    }
+  }
+
   const now = new Date();
   const periodEnd = Timestamp.fromDate(now);
 
@@ -53,5 +69,7 @@ export function buildSnapshot(
     languageTotals,
     dailyCommits,
     contributionHeatmap,
+    currentStreak,
+    longestStreak,
   };
 }
