@@ -12,6 +12,7 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
+import { storeGitHubToken } from '@/lib/functions';
 import { GitBranch, Zap } from 'lucide-react';
 
 export default function LoginClient() {
@@ -82,12 +83,10 @@ export default function LoginClient() {
       const slugRef = doc(db, 'slugs', githubUsername.toLowerCase());
       await setDoc(slugRef, { uid: user.uid }, { merge: true });
 
-      // Store GitHub token in Firestore (uid-gated by security rules)
-      const tokenRef = doc(db, 'users', user.uid, 'tokens', 'github');
-      await setDoc(tokenRef, {
-        accessToken: token,
-        updatedAt: new Date().toISOString(),
-      });
+      // Store GitHub token securely via Cloud Function → Secret Manager
+      // SECURITY: raw token never stored in Firestore
+      await user.getIdToken(true);
+      await storeGitHubToken(token);
 
       router.push('/dashboard');
     } catch (err: unknown) {
