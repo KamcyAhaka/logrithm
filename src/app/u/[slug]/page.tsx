@@ -123,16 +123,14 @@ export default async function PublicProfilePage({ params }: ProfilePageProps) {
 
   // Step 6: Read latest snapshot
   let snapshot: SnapshotDocument | undefined;
-  if (displayStyle === 'full') {
-    const snapshotSnap = await adminDb
-      .collection(`users/${uid}/snapshots`)
-      .orderBy('capturedAt', 'desc')
-      .limit(1)
-      .get();
+  const snapshotSnap = await adminDb
+    .collection(`users/${uid}/snapshots`)
+    .orderBy('capturedAt', 'desc')
+    .limit(1)
+    .get();
 
-    if (!snapshotSnap.empty) {
-      snapshot = snapshotSnap.docs[0].data() as SnapshotDocument;
-    }
+  if (!snapshotSnap.empty) {
+    snapshot = snapshotSnap.docs[0].data() as SnapshotDocument;
   }
 
   // Remove Timestamps to prevent Next.js serialization errors
