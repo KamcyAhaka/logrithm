@@ -178,6 +178,17 @@ export const saveSnapshot = async (
   });
 };
 
+export const getLatestSnapshot = async (uid: string): Promise<SnapshotDocument | null> => {
+  const snapshotsRef = db.collection(`users/${uid}/snapshots`);
+  const snapshotSnap = await snapshotsRef.orderBy('capturedAt', 'desc').limit(1).get();
+
+  if (snapshotSnap.empty) {
+    return null;
+  }
+
+  return snapshotSnap.docs[0].data() as SnapshotDocument;
+};
+
 export const updateAnalysisStatus = async (
   uid: string,
   status: 'idle' | 'pending' | 'running' | 'complete' | 'error',
