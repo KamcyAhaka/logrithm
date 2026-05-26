@@ -2,6 +2,10 @@
 // Update all consumers if shapes change — see contributor-safety skill.
 import type { Timestamp, FieldValue } from 'firebase/firestore';
 
+export type Plan = 'free' | 'pro';
+
+export type ShareCardType = 'about' | 'score' | 'streak' | 'top_repo' | 'pr_stats' | 'wrapped';
+
 export interface ContributionDay {
   date: string;
   contributionCount: number;
@@ -57,7 +61,7 @@ export interface UserProfile {
   displayName: string;
   avatarUrl: string;
   createdAt: string; // ISO string
-  plan: 'free'; // hardcoded — pro comes in Phase 2
+  plan: Plan;
   isPublic: boolean; // controls /share/[username] visibility
 }
 
