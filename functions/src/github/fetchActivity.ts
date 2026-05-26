@@ -1,7 +1,10 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 import type { GitHubActivity } from '../types/github';
 import { upsertRepo } from '../lib/firestoreService';
 
+const secretClient = new SecretManagerServiceClient();
+const PROJECT_ID = process.env.GCLOUD_PROJECT ?? 'logrithm-ai';
 // ---------------------------------------------------------------------------
 // GitHub GraphQL query — fetches 12 months of activity for the authed user
 // ---------------------------------------------------------------------------
@@ -87,14 +90,31 @@ const GITHUB_GRAPHQL_QUERY = `
 export const fetchGitHubActivity = onCall(
   { region: 'us-central1' },
   async (request): Promise<GitHubActivity> => {
-    const { token, uid } = request.data as { token: string; uid: string };
-
-    if (!token || typeof token !== 'string') {
-      throw new HttpsError('invalid-argument', 'GitHub token is required.');
-    }
+    const { uid } = request.data as { uid: string };
 
     if (!uid || typeof uid !== 'string') {
       throw new HttpsError('invalid-argument', 'uid is required.');
+    }
+
+    // Verify the request is authenticated and uid matches the caller
+    if (!request.auth?.uid || request.auth.uid !== uid) {
+      throw new HttpsError('unauthenticated', 'Must be signed in as this user.');
+    }
+
+    // Retrieve GitHub token from Secret Manager
+    // SECURITY: token never passes through the client
+    let token: string;
+    try {
+      const secretName = `projects/${PROJECT_ID}/secrets/github-token-${uid}/versions/latest`;
+      const [version] = await secretClient.accessSecretVersion({ name: secretName });
+      const payload = version.payload?.data;
+      if (!payload) {
+        throw new Error('Empty secret payload');
+      }
+      token = typeof payload === 'string' ? payload : Buffer.from(payload).toString('utf8');
+    } catch (err) {
+      console.error('[fetchGitHubActivity] Could not retrieve token from Secret Manager:', err);
+      throw new HttpsError('unauthenticated', 'GitHub token not found. Please sign in again.');
     }
 
     let response: Response;

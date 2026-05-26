@@ -2,8 +2,6 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 
 import { useDemoMode } from '@/hooks/useDemoMode';
 import { useAuth } from '@/hooks/useAuth';
@@ -50,19 +48,14 @@ export default function DashboardClient() {
   // Fetch activity on mount (demo mode uses stub data immediately)
   useEffect(() => {
     if (isDemoMode) return; // Demo data already loaded in hook
-    if (!user) return;
+    if (!user?.uid) return;
+
+    console.log('[DEBUG] uid:', user.uid);
+    console.log('[DEBUG] user:', user);
 
     const loadActivity = async () => {
       try {
-        // Get stored GitHub token from Firestore
-        const tokenSnap = await getDoc(doc(db, 'users', user.uid, 'tokens', 'github'));
-        if (!tokenSnap.exists()) {
-          console.warn('[DashboardClient] No GitHub token found — redirecting to login');
-          router.replace('/');
-          return;
-        }
-        const { accessToken } = tokenSnap.data() as { accessToken: string };
-        await fetchActivity(accessToken);
+        await fetchActivity(user.uid);
       } catch (err) {
         console.error('[DashboardClient] Failed to load activity:', err);
       }
