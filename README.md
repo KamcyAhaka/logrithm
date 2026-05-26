@@ -6,7 +6,7 @@
 [![Cloud Run](https://img.shields.io/badge/Cloud_Run-GCP-blue?logo=google-cloud)](https://cloud.google.com/run)
 [![Bun](https://img.shields.io/badge/Bun-package_manager-black?logo=bun)](https://bun.sh)
 [![Gemini](https://img.shields.io/badge/Gemini-2.5_Flash-purple?logo=google)](https://ai.google.dev)
-[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![AGPL License](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
 
 > Connect your GitHub. Logrithm reads your activity log and runs the algorithm — surfacing patterns, strengths, and blind spots you didn't know were there.
 
@@ -184,6 +184,6 @@ logrithm/
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+AGPL 3.0 — see [LICENSE](LICENSE).
 
 Built with ❤️ using Next.js, Firebase, Gemini, and Bun.

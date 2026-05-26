@@ -131,7 +131,7 @@ Written for external contributors — always:
 - GitHub OAuth setup
 - GCP Secret Manager setup
 - Contributing section
-- MIT License
+- AGPL 3.0 License
 
 ## PR Review Checklist
 

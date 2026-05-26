@@ -12,7 +12,7 @@ fetches their commit history via the GitHub GraphQL API, and uses Google Gemini
 to generate AI-powered insights about their development patterns.
 
 Tagline: "Your commit history. Analyzed."
-License: MIT — open to external contributors.
+License: AGPL 3.0 — open to external contributors.
 
 Brand voice — intelligent, developer-native, slightly witty. Never generic:
 Loading → "Running the algorithm..."

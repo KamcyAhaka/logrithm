@@ -370,7 +370,7 @@ export default function LoginClient() {
           padding: '0 1rem',
         }}
       >
-        MIT License · Open Source ·{' '}
+        AGPL 3.0 License · Open Source ·{' '}
         <a
           href="https://github.com/divine/logrithm"
           target="_blank"
