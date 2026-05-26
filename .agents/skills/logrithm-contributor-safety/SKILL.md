@@ -7,7 +7,7 @@ description: Contributor compatibility rules for the Logrithm codebase. Use this
 
 ## Why This Skill Exists
 
-Logrithm is MIT-licensed and open to external contributors. Any code added
+Logrithm is AGPL-licensed and open to external contributors. Any code added
 by an AI agent must work out of the box for someone who has just cloned
 the repo on a fresh machine — regardless of OS, shell, or local setup.
 
@@ -27,7 +27,7 @@ developer's machine, environment, or accounts.
   (native deps break on different OS/architectures)
 - Never add a package that requires a paid account or private registry
 - Check the licence of any new package — must be MIT, Apache 2.0, BSD,
-  or ISC compatible. Never add GPL-licenced packages (incompatible with MIT)
+  ISC, or GPL/AGPL compatible.
 
 ### Dependency placement
 
