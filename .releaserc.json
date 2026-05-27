@@ -4,6 +4,10 @@
     {
       "name": "rebuild",
       "prerelease": true
+    },
+    {
+      "name": "feat/*",
+      "prerelease": true
     }
   ],
   "plugins": [

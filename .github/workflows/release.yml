@@ -4,15 +4,13 @@ on:
   push:
     branches:
       - main
-      - feat/*
-      - rebuild
   workflow_dispatch:
     inputs:
       dry_run:
         description: 'Run semantic-release in dry-run mode (does not push tags/commits)'
         required: true
         type: boolean
-        default: true
+        default: false
 
 jobs:
   release:
