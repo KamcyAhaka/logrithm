@@ -81,6 +81,8 @@ export default async function SharePage({ params }: SharePageProps) {
               languageTotals: data.languageTotals || {},
               currentStreak: data.currentStreak || 0,
               longestStreak: data.longestStreak || 0,
+              longestStreakStart: data.longestStreakStart,
+              longestStreakEnd: data.longestStreakEnd,
             };
           }
 

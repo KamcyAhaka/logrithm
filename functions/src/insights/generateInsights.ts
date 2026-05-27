@@ -330,6 +330,9 @@ export const generateInsightsInternal = async (
   return insights;
 };
 
+import { buildSnapshot } from '../lib/snapshotBuilder';
+import { saveSnapshot } from '../lib/firestoreService';
+
 export const generateInsights = onCall(
   { region: 'us-central1' },
   async (request): Promise<InsightObject> => {
@@ -339,6 +342,19 @@ export const generateInsights = onCall(
       isDemoMode?: boolean;
       forceRefresh?: boolean;
     };
+
+    if (forceRefresh && !isDemoMode) {
+      try {
+        const snapshot = buildSnapshot(activity);
+        await saveSnapshot(uid, snapshot);
+        console.log(`[generateInsights] Built and saved new snapshot via forceRefresh for ${uid}`);
+      } catch (err) {
+        console.error(
+          `[generateInsights] Failed to save snapshot during force refresh for ${uid}:`,
+          err
+        );
+      }
+    }
 
     return generateInsightsInternal(uid, activity, isDemoMode, forceRefresh);
   }
