@@ -1,1 +1,8 @@
+BRANCH=$(git branch --show-current)
+if [ "$BRANCH" = "main" ]; then
+  echo "Error: Direct commits to the main branch are not allowed."
+  echo "Please create a new branch and submit a Pull Request."
+  exit 1
+fi
+
 bunx lint-staged
