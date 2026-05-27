@@ -20,6 +20,8 @@ export interface ShareCardSnapshot {
   languageTotals: Record<string, number>;
   currentStreak: number;
   longestStreak: number;
+  longestStreakStart?: string;
+  longestStreakEnd?: string;
 }
 
 interface ShareCardProps {
@@ -57,8 +59,11 @@ export default function ShareCard({
       const { toPng } = await import('html-to-image');
       const dataUrl = await toPng(cardRef.current, {
         pixelRatio: 2,
+        skipFonts: true,
+        backgroundColor: '#0a0a0a',
         style: {
           transform: 'scale(1)',
+          margin: '0',
         },
       });
       const link = document.createElement('a');
@@ -100,6 +105,8 @@ export default function ShareCard({
           <StreakCard
             currentStreak={currentStreak}
             longestStreak={longestStreak}
+            longestStreakStart={snapshot?.longestStreakStart}
+            longestStreakEnd={snapshot?.longestStreakEnd}
             patterns={insights.patterns}
           />
         );

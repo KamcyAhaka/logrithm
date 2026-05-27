@@ -3,10 +3,47 @@ import { Flame, Award } from 'lucide-react';
 interface StreakCardProps {
   currentStreak: number;
   longestStreak: number;
+  longestStreakStart?: string;
+  longestStreakEnd?: string;
   patterns?: string;
 }
 
-export default function StreakCard({ currentStreak, longestStreak, patterns }: StreakCardProps) {
+function formatDateRange(start?: string, end?: string) {
+  if (!start || !end) return null;
+  const startObj = new Date(start);
+  const endObj = new Date(end);
+  const startStr = startObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const endStr = endObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+  if (
+    startObj.getFullYear() !== endObj.getFullYear() ||
+    startObj.getFullYear() !== new Date().getFullYear()
+  ) {
+    const startYearStr = startObj.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+    const endYearStr = endObj.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+    return `${startYearStr} - ${endYearStr}`;
+  }
+
+  return `${startStr} - ${endStr}`;
+}
+
+export default function StreakCard({
+  currentStreak,
+  longestStreak,
+  longestStreakStart,
+  longestStreakEnd,
+  patterns,
+}: StreakCardProps) {
+  const longestStreakDateRange = formatDateRange(longestStreakStart, longestStreakEnd);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', margin: '1.5rem 0' }}>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
@@ -17,6 +54,9 @@ export default function StreakCard({ currentStreak, longestStreak, patterns }: S
             borderRadius: '0.75rem',
             padding: '1.25rem',
             textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
           }}
         >
           <Flame size={20} color="#1D9E75" style={{ margin: '0 auto 0.5rem' }} />
@@ -50,6 +90,9 @@ export default function StreakCard({ currentStreak, longestStreak, patterns }: S
             borderRadius: '0.75rem',
             padding: '1.25rem',
             textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
           }}
         >
           <Award size={20} color="#1D9E75" style={{ margin: '0 auto 0.5rem' }} />
@@ -75,6 +118,18 @@ export default function StreakCard({ currentStreak, longestStreak, patterns }: S
             {longestStreak}{' '}
             <span style={{ fontSize: '0.8rem', fontWeight: 400, color: '#1D9E75' }}>days</span>
           </h3>
+          {longestStreakDateRange && longestStreak > 0 && (
+            <p
+              style={{
+                margin: '0.25rem 0 0 0',
+                fontSize: '0.65rem',
+                color: 'rgba(255,255,255,0.4)',
+                fontFamily: 'monospace',
+              }}
+            >
+              ({longestStreakDateRange})
+            </p>
+          )}
         </div>
       </div>
       <p
