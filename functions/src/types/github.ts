@@ -142,6 +142,8 @@ export interface SnapshotDocument {
   contributionHeatmap: HeatmapEntry[];
   currentStreak: number;
   longestStreak: number;
+  longestStreakStart?: string;
+  longestStreakEnd?: string;
 }
 
 export interface PrivacySettingsDocument {

@@ -36,16 +36,27 @@ export function buildSnapshot(
 
   let longestStreak = 0;
   let currentStreak = 0;
+  let currentStreakStart = '';
+  let longestStreakStart = '';
+  let longestStreakEnd = '';
 
   for (let i = 0; i < dailyCommits.length; i++) {
     if (dailyCommits[i].count > 0) {
+      if (currentStreak === 0) {
+        currentStreakStart = dailyCommits[i].date;
+      }
       currentStreak++;
-      longestStreak = Math.max(longestStreak, currentStreak);
+      if (currentStreak > longestStreak) {
+        longestStreak = currentStreak;
+        longestStreakStart = currentStreakStart;
+        longestStreakEnd = dailyCommits[i].date;
+      }
     } else {
       // If today (the last day) has 0 commits, the streak isn't broken yet
       // because the user still has time to commit today.
       if (i !== dailyCommits.length - 1) {
         currentStreak = 0;
+        currentStreakStart = '';
       }
     }
   }
@@ -71,5 +82,7 @@ export function buildSnapshot(
     contributionHeatmap,
     currentStreak,
     longestStreak,
+    longestStreakStart: longestStreak > 0 ? longestStreakStart : undefined,
+    longestStreakEnd: longestStreak > 0 ? longestStreakEnd : undefined,
   };
 }
