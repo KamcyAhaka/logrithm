@@ -3,6 +3,12 @@ name: Deploy — Logrithm
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy (defaults to the branch this workflow is run from)'
+        required: false
+        default: ''
 
 env:
   PROJECT_ID: logrithm-ai
