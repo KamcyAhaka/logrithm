@@ -91,13 +91,17 @@ jobs:
             --min-instances 0 \
             --max-instances 5
 
-      # 12. Deploy Cloud Functions + Firestore rules
+      # 12. Install Firebase CLI
+      - name: Install Firebase CLI
+        run: bun install -g firebase-tools
+
+      # 13. Deploy Cloud Functions + Firestore rules
       - name: Deploy functions & rules
         run: firebase deploy --only functions,firestore:rules --non-interactive
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
-      # 13. Deploy Hosting
+      # 14. Deploy Hosting
       - name: Deploy Hosting
         run: firebase deploy --only hosting --non-interactive
         env:
