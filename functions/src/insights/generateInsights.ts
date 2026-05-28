@@ -118,6 +118,60 @@ Rules:
 }
 
 // ---------------------------------------------------------------------------
+// Reproducible Activity Score calculation formula
+// ---------------------------------------------------------------------------
+function calculateActivityScore(activity: GitHubActivity): number {
+  const weights = {
+    commitVolume: 0.3, // raw output
+    consistency: 0.25, // heatmap coverage
+    collaboration: 0.2, // PR count relative to commits
+    diversity: 0.15, // number of active repos
+    recentMomentum: 0.1, // last 30 days vs 12mo average
+  };
+
+  // Commit volume — normalize against an "elite" benchmark of 1000/year
+  const commitScore = Math.min(activity.totalCommitContributions / 1000, 1) * 100;
+
+  // Consistency — percentage of weeks meeting a 5-day-a-week contribution target
+  // Penalizes spikes followed by long periods of inactivity
+  const weeks = activity.contributionCalendar.weeks;
+  let totalWeeksScore = 0;
+  for (const week of weeks) {
+    const activeDaysInWeek = week.contributionDays.filter((d) => d.contributionCount > 0).length;
+    // Target is 5 active days per week
+    const weekScore = Math.min(activeDaysInWeek / 5, 1);
+    totalWeeksScore += weekScore;
+  }
+  const consistencyScore = weeks.length > 0 ? (totalWeeksScore / weeks.length) * 100 : 0;
+
+  // Collaboration — PR ratio (PRs / commits, ideal ~0.25)
+  const prRatio =
+    activity.totalPullRequestContributions / Math.max(activity.totalCommitContributions, 1);
+  const collaborationScore = Math.min(prRatio / 0.25, 1) * 100;
+
+  // Diversity — active repos (normalize against 15 as "elite")
+  const diversityScore = Math.min(activity.totalRepositoriesWithContributedCommits / 15, 1) * 100;
+
+  // Recent momentum — last 30 days commits vs monthly average
+  const monthlyAverage = activity.totalCommitContributions / 12;
+
+  // Calculate actual recent contributions from calendar in the last 30 days
+  const allDays = activity.contributionCalendar.weeks.flatMap((w) => w.contributionDays);
+  const recentCommits = allDays.slice(-30).reduce((sum, d) => sum + d.contributionCount, 0);
+
+  const momentumScore = Math.min(recentCommits / Math.max(monthlyAverage, 1), 2) * 50;
+
+  const weighted =
+    commitScore * weights.commitVolume +
+    consistencyScore * weights.consistency +
+    collaborationScore * weights.collaboration +
+    diversityScore * weights.diversity +
+    momentumScore * weights.recentMomentum;
+
+  return Math.round(Math.min(Math.max(weighted, 1), 100));
+}
+
+// ---------------------------------------------------------------------------
 // Response parsing — strip code blocks, fallback to regex
 // ---------------------------------------------------------------------------
 function parseInsights(text: string): InsightObject {
@@ -290,6 +344,7 @@ export const generateInsightsInternal = async (
     const result = await model.generateContent(prompt);
     const text = result.response.text();
     insights = parseInsights(text);
+    insights.activityScore = calculateActivityScore(activity);
   } catch (err) {
     console.error('[generateInsights] Gemini call failed:', err);
     try {
