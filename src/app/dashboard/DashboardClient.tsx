@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { useDemoMode } from '@/hooks/useDemoMode';
@@ -17,6 +17,7 @@ import LanguageBreakdown from '@/components/dashboard/LanguageBreakdown';
 import ActivityHeatmap from '@/components/dashboard/ActivityHeatmap';
 import RepoList from '@/components/dashboard/RepoList';
 import InsightPanel from '@/components/insights/InsightPanel';
+import OnboardingFlow from '@/components/dashboard/OnboardingFlow';
 
 import { GitCommit, GitPullRequest, AlertCircle, FolderOpen } from 'lucide-react';
 
@@ -24,6 +25,8 @@ export default function DashboardClient() {
   const isDemoMode = useDemoMode();
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const [isOnboarding, setIsOnboarding] = useState(false);
+  const [excludedRepoIds, setExcludedRepoIds] = useState<Set<string>>(new Set());
 
   const {
     data: activity,
@@ -54,6 +57,23 @@ export default function DashboardClient() {
     console.log('[DEBUG] uid:', user.uid);
     console.log('[DEBUG] user:', user);
 
+    const loadRepos = async () => {
+      try {
+        const { getDocs, collection } = await import('firebase/firestore');
+        const { db } = await import('@/lib/firebase');
+        const reposSnap = await getDocs(collection(db, 'users', user.uid, 'repos'));
+        const excludedIds = new Set(
+          reposSnap.docs
+            .map((d) => d.data() as { excludedByUser?: boolean; repoId?: string; name?: string })
+            .filter((r) => r.excludedByUser)
+            .map((r) => String(r.repoId ?? r.name))
+        );
+        setExcludedRepoIds(excludedIds as Set<string>);
+      } catch (e) {
+        console.warn('[DashboardClient] Could not load repos:', e);
+      }
+    };
+
     const loadActivity = async () => {
       try {
         await fetchActivity(user.uid);
@@ -63,14 +83,21 @@ export default function DashboardClient() {
           const { db } = await import('@/lib/firebase');
           const profileSnap = await getDoc(doc(db, 'users', user.uid, 'profile', 'data'));
           if (profileSnap.exists()) {
-            const profileData = profileSnap.data() as { plan?: string };
+            const profileData = profileSnap.data() as {
+              plan?: string;
+              onboardingCompleted?: boolean;
+            };
             const plan = profileData.plan === 'pro' ? 'pro' : 'free';
             useDashboardStore.getState().setPlan(plan);
+            if (profileData.onboardingCompleted === false) {
+              setIsOnboarding(true);
+            }
           }
         } catch (err) {
           console.warn('[DashboardClient] Could not load plan:', err);
           // Non-fatal — defaults to free
         }
+        await loadRepos();
       } catch (err) {
         console.error('[DashboardClient] Failed to load activity:', err);
       }
@@ -109,116 +136,146 @@ export default function DashboardClient() {
 
       {isDemoMode && <DemoBanner />}
 
-      <main
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1.25rem',
-          maxWidth: '80rem',
-          margin: '0 auto',
-          width: '100%',
-          boxSizing: 'border-box',
-        }}
-        className="px-0 sm:px-6 sm:py-8"
-      >
-        {/* Activity fetch error */}
-        {activityError && (
-          <div
-            style={{
-              padding: '0.875rem 1.25rem',
-              background: 'rgba(255,100,100,0.06)',
-              border: '1px solid rgba(255,100,100,0.15)',
-              fontFamily: 'var(--font-mono)',
-              fontSize: '0.8rem',
-              color: 'rgba(255,100,100,0.85)',
-            }}
-            className="rounded-none sm:rounded-xl"
-          >
-            {activityError}
-          </div>
-        )}
-
-        {/* ─────────────────────────────────── */}
-        {/*  InsightPanel + RepoList      */}
-        {/* ─────────────────────────────────── */}
-        {activity && (
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[3fr_2fr]" style={{ minHeight: 500 }}>
-            <InsightPanel
-              insights={insights}
-              loading={insightsLoading}
-              error={insightsError}
-              onRun={() => {
-                const uid = isDemoMode ? 'demo' : (user?.uid ?? 'anon');
-                runInsights(activity, uid);
-              }}
-              login={login}
-            />
-            <RepoList repositories={activity.repositories} />
-          </div>
-        )}
-
-        {/* ─────────────────────────────────── */}
-        {/* Stats cards                  */}
-        {/* ─────────────────────────────────── */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '1rem',
+      {isOnboarding && activity ? (
+        <OnboardingFlow
+          activity={activity}
+          onComplete={async () => {
+            setIsOnboarding(false);
+            if (!isDemoMode && user?.uid) {
+              const { getDocs, collection } = await import('firebase/firestore');
+              const { db } = await import('@/lib/firebase');
+              const reposSnap = await getDocs(collection(db, 'users', user.uid, 'repos'));
+              const excludedIds = new Set(
+                reposSnap.docs
+                  .map(
+                    (d) => d.data() as { excludedByUser?: boolean; repoId?: string; name?: string }
+                  )
+                  .filter((r) => r.excludedByUser)
+                  .map((r) => String(r.repoId ?? r.name))
+              );
+              setExcludedRepoIds(excludedIds as Set<string>);
+            }
           }}
+        />
+      ) : (
+        <main
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1.25rem',
+            maxWidth: '80rem',
+            margin: '0 auto',
+            width: '100%',
+            boxSizing: 'border-box',
+          }}
+          className="px-0 sm:px-6 sm:py-8"
         >
-          <StatsCard
-            label="Total Commits (12mo)"
-            value={activity?.totalCommitContributions ?? '—'}
-            icon={<GitCommit size={16} />}
-          />
-          <StatsCard
-            label="PRs Merged"
-            value={activity?.totalPullRequestContributions ?? '—'}
-            icon={<GitPullRequest size={16} />}
-          />
-          <StatsCard
-            label="Open Issues"
-            value={activity?.totalIssueContributions ?? '—'}
-            icon={<AlertCircle size={16} />}
-          />
-          <StatsCard
-            label="Active Repos"
-            value={activity?.totalRepositoriesWithContributedCommits ?? '—'}
-            icon={<FolderOpen size={16} />}
-          />
-        </div>
-
-        {/* ─────────────────────────────────── */}
-        {/* Commit chart + Language pie  */}
-        {/* ─────────────────────────────────── */}
-        {activity && (
-          <div className="flex flex-col gap-4 sm:grid-cols-1 md:grid-cols-[2fr_1fr]">
-            <CommitChart contributionCalendar={activity.contributionCalendar} />
-            <LanguageBreakdown repositories={activity.repositories} />
-          </div>
-        )}
-
-        {/* ─────────────────────────────────── */}
-        {/*  Activity heatmap (full width) */}
-        {/* ─────────────────────────────────── */}
-        {activity && <ActivityHeatmap contributionCalendar={activity.contributionCalendar} />}
-
-        {/* Loading skeleton for activity */}
-        {activityLoading && (
-          <div style={{ textAlign: 'center', padding: '3rem' }}>
-            <p
+          {/* Activity fetch error */}
+          {activityError && (
+            <div
               style={{
+                padding: '0.875rem 1.25rem',
+                background: 'rgba(255,100,100,0.06)',
+                border: '1px solid rgba(255,100,100,0.15)',
                 fontFamily: 'var(--font-mono)',
                 fontSize: '0.8rem',
-                color: 'var(--green)',
+                color: 'rgba(255,100,100,0.85)',
               }}
+              className="rounded-none sm:rounded-xl"
             >
-              Running the algorithm...
-            </p>
+              {activityError}
+            </div>
+          )}
+
+          {/* ─────────────────────────────────── */}
+          {/*  InsightPanel + RepoList      */}
+          {/* ─────────────────────────────────── */}
+          {activity && (
+            <div
+              className="grid grid-cols-1 gap-4 lg:grid-cols-[3fr_2fr]"
+              style={{ minHeight: 500 }}
+            >
+              <InsightPanel
+                insights={insights}
+                loading={insightsLoading}
+                error={insightsError}
+                onRun={() => {
+                  const uid = isDemoMode ? 'demo' : (user?.uid ?? 'anon');
+                  runInsights(activity, uid);
+                }}
+                login={login}
+              />
+              <RepoList
+                repositories={activity.repositories.filter(
+                  (r) => !excludedRepoIds.has(String(r.repoId ?? r.name))
+                )}
+              />
+            </div>
+          )}
+
+          {/* ─────────────────────────────────── */}
+          {/* Stats cards                  */}
+          {/* ─────────────────────────────────── */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '1rem',
+            }}
+          >
+            <StatsCard
+              label="Total Commits (12mo)"
+              value={activity?.totalCommitContributions ?? '—'}
+              icon={<GitCommit size={16} />}
+            />
+            <StatsCard
+              label="PRs Merged"
+              value={activity?.totalPullRequestContributions ?? '—'}
+              icon={<GitPullRequest size={16} />}
+            />
+            <StatsCard
+              label="Open Issues"
+              value={activity?.totalIssueContributions ?? '—'}
+              icon={<AlertCircle size={16} />}
+            />
+            <StatsCard
+              label="Active Repos"
+              value={activity?.totalRepositoriesWithContributedCommits ?? '—'}
+              icon={<FolderOpen size={16} />}
+            />
           </div>
-        )}
-      </main>
+
+          {/* ─────────────────────────────────── */}
+          {/* Commit chart + Language pie  */}
+          {/* ─────────────────────────────────── */}
+          {activity && (
+            <div className="flex flex-col gap-4 sm:grid-cols-1 md:grid-cols-[2fr_1fr]">
+              <CommitChart contributionCalendar={activity.contributionCalendar} />
+              <LanguageBreakdown repositories={activity.repositories} />
+            </div>
+          )}
+
+          {/* ─────────────────────────────────── */}
+          {/*  Activity heatmap (full width) */}
+          {/* ─────────────────────────────────── */}
+          {activity && <ActivityHeatmap contributionCalendar={activity.contributionCalendar} />}
+
+          {/* Loading skeleton for activity */}
+          {activityLoading && (
+            <div style={{ textAlign: 'center', padding: '3rem' }}>
+              <p
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.8rem',
+                  color: 'var(--green)',
+                }}
+              >
+                Running the algorithm...
+              </p>
+            </div>
+          )}
+        </main>
+      )}
     </div>
   );
 }
