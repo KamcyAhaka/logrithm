@@ -178,7 +178,7 @@ export default function PrivacySettingsPage() {
   }
 
   return (
-    <div className="space-y-8 pb-16">
+    <div className="space-y-8 pb-24">
       <div>
         <h1 className="mb-2 font-sans text-2xl font-bold text-white">Privacy & Visibility</h1>
         <p className="text-sm text-white/40">
@@ -431,20 +431,32 @@ export default function PrivacySettingsPage() {
         <Separator className="mt-8 mb-8 bg-white/10" />
       </section>
 
-      {/* Save Button */}
-      <div className="flex items-center gap-4">
-        <Button
-          onClick={handleSave}
-          disabled={!isDirty || saving}
-          className="min-w-[140px] bg-[#1D9E75] font-mono text-sm text-white hover:bg-[#1D9E75]/90"
-        >
-          {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {!isDirty && !saving ? 'No changes' : 'Save changes'}
-        </Button>
-        {saveStatus === 'success' && <span className="text-sm text-[#1D9E75]">Saved ✓</span>}
-        {saveStatus === 'error' && (
-          <span className="text-sm text-red-500">Failed to save. Try again.</span>
-        )}
+      {/* Floating Save Button Bar */}
+      <div
+        className={`fixed right-0 bottom-0 left-0 z-50 flex items-center justify-between border-t border-white/10 bg-[#0a0a0a]/90 p-4 px-6 backdrop-blur-md transition-transform duration-300 md:px-12 lg:px-24 ${
+          isDirty ? 'translate-y-0' : 'translate-y-full'
+        }`}
+      >
+        <div className="flex flex-col">
+          <span className="text-sm font-medium text-white">Unsaved changes</span>
+          <span className="hidden text-xs text-white/40 sm:block">
+            You have modified your privacy settings
+          </span>
+        </div>
+        <div className="flex items-center gap-4">
+          {saveStatus === 'success' && <span className="text-sm text-[#1D9E75]">Saved ✓</span>}
+          {saveStatus === 'error' && (
+            <span className="text-sm text-red-500">Failed to save. Try again.</span>
+          )}
+          <Button
+            onClick={handleSave}
+            disabled={!isDirty || saving}
+            className="min-w-[140px] bg-[#1D9E75] font-mono text-sm text-white hover:bg-[#1D9E75]/90"
+          >
+            {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Save changes
+          </Button>
+        </div>
       </div>
     </div>
   );
