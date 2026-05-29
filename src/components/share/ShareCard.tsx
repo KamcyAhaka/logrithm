@@ -189,114 +189,123 @@ export default function ShareCard({
         })}
       </div>
 
-      {/* ── Captured card div — everything inside becomes the PNG ── */}
+      {/* ── Captured card wrapper for consistent PNGs across devices ── */}
       <div
-        ref={cardRef}
         style={{
-          background: '#0a0a0a',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: '1.25rem',
-          padding: '2rem',
           width: '100%',
-          maxWidth: 480,
-          fontFamily: 'sans-serif',
-          overflow: 'hidden',
-          boxSizing: 'border-box',
+          overflowX: 'auto',
+          display: 'flex',
+          justifyContent: 'center',
+          paddingBottom: '1rem',
         }}
       >
-        {/* Header */}
         <div
+          ref={cardRef}
           style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
-            marginBottom: '1rem',
+            background: '#0a0a0a',
+            border: '1px solid rgba(255,255,255,0.08)',
+            padding: '2rem',
+            width: 480,
+            minWidth: 480,
+            fontFamily: 'sans-serif',
+            overflow: 'hidden',
+            boxSizing: 'border-box',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={avatarUrl}
-              alt={`@${login}`}
-              width={44}
-              height={44}
-              style={{ borderRadius: '50%', border: '2px solid rgba(29,158,117,0.4)' }}
-              crossOrigin="anonymous"
-            />
-            <div>
-              <p
-                style={{
-                  fontFamily: 'monospace',
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  color: '#fff',
-                  margin: 0,
-                }}
-              >
-                @{login}
-              </p>
-              <p
-                style={{
-                  fontFamily: 'monospace',
-                  fontSize: '0.72rem',
-                  color: 'rgba(255,255,255,0.4)',
-                  margin: 0,
-                }}
-              >
-                Logrithm analysis
-              </p>
+          {/* Header */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              justifyContent: 'space-between',
+              marginBottom: '1rem',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={avatarUrl}
+                alt={`@${login}`}
+                width={44}
+                height={44}
+                style={{ borderRadius: '50%', border: '2px solid rgba(29,158,117,0.4)' }}
+                crossOrigin="anonymous"
+              />
+              <div>
+                <p
+                  style={{
+                    fontFamily: 'monospace',
+                    fontSize: '1rem',
+                    fontWeight: 600,
+                    color: '#fff',
+                    margin: 0,
+                  }}
+                >
+                  @{login}
+                </p>
+                <p
+                  style={{
+                    fontFamily: 'monospace',
+                    fontSize: '0.72rem',
+                    color: 'rgba(255,255,255,0.4)',
+                    margin: 0,
+                  }}
+                >
+                  Logrithm analysis
+                </p>
+              </div>
             </div>
+            <span
+              style={{
+                fontFamily: 'monospace',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                color: '#1D9E75',
+                background: 'rgba(29,158,117,0.12)',
+                border: '1px solid rgba(29,158,117,0.25)',
+                borderRadius: 9999,
+                display: 'inline-block',
+                padding: '0.25rem 0.75rem',
+              }}
+            >
+              score: {insights.activityScore}
+            </span>
           </div>
-          <span
-            style={{
-              fontFamily: 'monospace',
-              fontSize: '0.75rem',
-              fontWeight: 600,
-              color: '#1D9E75',
-              background: 'rgba(29,158,117,0.12)',
-              border: '1px solid rgba(29,158,117,0.25)',
-              borderRadius: 9999,
-              display: 'inline-block',
-              padding: '0.25rem 0.75rem',
-            }}
-          >
-            score: {insights.activityScore}
-          </span>
-        </div>
 
-        {/* Dynamic Card Variant Content */}
-        {renderCardContent()}
+          {/* Dynamic Card Variant Content */}
+          {renderCardContent()}
 
-        {/* Footer */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            borderTop: '1px solid rgba(255,255,255,0.06)',
-            paddingTop: '1rem',
-            marginTop: 'auto',
-          }}
-        >
-          <span
+          {/* Footer */}
+          <div
             style={{
-              fontFamily: 'monospace',
-              fontSize: '0.72rem',
-              color: '#1D9E75',
-              fontWeight: 500,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderTop: '1px solid rgba(255,255,255,0.06)',
+              paddingTop: '1rem',
+              marginTop: 'auto',
             }}
           >
-            logrithm.dev
-          </span>
-          <span
-            style={{
-              fontFamily: 'monospace',
-              fontSize: '0.68rem',
-              color: 'rgba(255,255,255,0.3)',
-            }}
-          >
-            {generationMonth}
-          </span>
+            <span
+              style={{
+                fontFamily: 'monospace',
+                fontSize: '0.72rem',
+                color: '#1D9E75',
+                fontWeight: 500,
+              }}
+            >
+              logrithm.dev
+            </span>
+            <span
+              style={{
+                fontFamily: 'monospace',
+                fontSize: '0.68rem',
+                color: 'rgba(255,255,255,0.3)',
+              }}
+            >
+              {generationMonth}
+            </span>
+          </div>
         </div>
       </div>
 
