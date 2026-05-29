@@ -5,15 +5,17 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import { db } from '@/lib/firebase';
+import { auth, db, functions } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
+import { signOut } from 'firebase/auth';
+import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -30,6 +32,10 @@ export default function AccountSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [githubLogin, setGithubLogin] = useState<string | null>(null);
   const [plan, setPlan] = useState<'free' | 'pro'>('free');
+
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -57,10 +63,23 @@ export default function AccountSettingsPage() {
     fetchData();
   }, [user]);
 
-  const handleDeleteAccount = async () => {
-    // Placeholder async function
-    console.log('deleteAccount called for uid:', user?.uid);
-    alert('Account deletion is not yet implemented.');
+  const handleDeleteAccount = async (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    if (confirmText !== 'DELETE') return;
+
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      const deleteAccountFn = httpsCallable(functions, 'deleteAccount');
+      await deleteAccountFn();
+      await signOut(auth);
+      router.push('/');
+    } catch (err: unknown) {
+      console.error('Failed to delete account:', err);
+      const error = err as Error;
+      setDeleteError(error.message || 'An error occurred during account deletion.');
+      setIsDeleting(false);
+    }
   };
 
   if (authLoading || loading) {
@@ -142,6 +161,10 @@ export default function AccountSettingsPage() {
               <Button
                 variant="outline"
                 className="border-red-900 font-mono text-red-500 hover:bg-red-950 hover:text-red-400"
+                onClick={() => {
+                  setConfirmText('');
+                  setDeleteError(null);
+                }}
               >
                 Delete account
               </Button>
@@ -154,16 +177,36 @@ export default function AccountSettingsPage() {
                   action cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
+
+              <div className="my-2">
+                <label className="mb-2 block text-sm font-medium text-white/80">
+                  Please type <span className="font-bold text-red-500">DELETE</span> to confirm.
+                </label>
+                <input
+                  type="text"
+                  value={confirmText}
+                  onChange={(e) => setConfirmText(e.target.value)}
+                  className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 focus:border-red-500 focus:outline-none"
+                  placeholder="DELETE"
+                />
+                {deleteError && <p className="mt-2 text-xs text-red-500">{deleteError}</p>}
+              </div>
+
               <AlertDialogFooter>
-                <AlertDialogCancel className="border-white/10 bg-transparent text-white hover:bg-white/5 hover:text-white">
+                <AlertDialogCancel
+                  className="border-white/10 bg-transparent text-white hover:bg-white/5 hover:text-white"
+                  disabled={isDeleting}
+                >
                   Cancel
                 </AlertDialogCancel>
-                <AlertDialogAction
+                <Button
                   onClick={handleDeleteAccount}
-                  className="bg-red-600 text-white hover:bg-red-700"
+                  disabled={confirmText !== 'DELETE' || isDeleting}
+                  className="bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
                 >
+                  {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Delete account
-                </AlertDialogAction>
+                </Button>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
