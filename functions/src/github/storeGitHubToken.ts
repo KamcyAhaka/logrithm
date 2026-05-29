@@ -95,7 +95,6 @@ export const storeGitHubToken = onCall(
       // Non-fatal — Secret Manager is the source of truth
     }
 
-    console.log(`[storeGitHubToken] Token stored securely for uid: ${uid}`);
     return { success: true };
   }
 );

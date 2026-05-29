@@ -19,8 +19,6 @@ export const deleteAccount = onCall(
     const auth = getAuth();
 
     try {
-      console.log(`[deleteAccount] Starting account deletion for uid: ${uid}`);
-
       // 2. Retrieve the user's githubLogin to delete the slug
       const profileSnap = await db.doc(`users/${uid}/profile/data`).get();
       const githubLogin = profileSnap.data()?.githubLogin as string | undefined;
@@ -29,12 +27,10 @@ export const deleteAccount = onCall(
       const secretName = `projects/${PROJECT_ID}/secrets/github-token-${uid}`;
       try {
         await secretClient.deleteSecret({ name: secretName });
-        console.log(`[deleteAccount] Deleted Secret Manager token for uid: ${uid}`);
       } catch (err: unknown) {
         // Code 5 is NOT_FOUND, which is fine (maybe they never connected GitHub)
         const error = err as { code?: number };
         if (error.code !== 5) {
-          console.error(`[deleteAccount] Failed to delete secret ${secretName}:`, err);
           // We don't throw here to ensure the rest of the account still gets deleted
         }
       }
@@ -43,7 +39,6 @@ export const deleteAccount = onCall(
       if (githubLogin) {
         try {
           await db.doc(`slugs/${githubLogin.toLowerCase()}`).delete();
-          console.log(`[deleteAccount] Deleted slug for ${githubLogin}`);
         } catch (err) {
           console.error(`[deleteAccount] Failed to delete slug for ${githubLogin}:`, err);
         }
@@ -52,7 +47,6 @@ export const deleteAccount = onCall(
       // 5. Delete all Firestore data for the user recursively
       try {
         await db.recursiveDelete(db.doc(`users/${uid}`));
-        console.log(`[deleteAccount] Recursively deleted Firestore data for uid: ${uid}`);
       } catch (err) {
         console.error(
           `[deleteAccount] Failed to recursively delete Firestore data for ${uid}:`,
@@ -64,7 +58,6 @@ export const deleteAccount = onCall(
       // 6. Delete the Firebase Auth user record
       try {
         await auth.deleteUser(uid);
-        console.log(`[deleteAccount] Deleted Firebase Auth user for uid: ${uid}`);
       } catch (err) {
         console.error(`[deleteAccount] Failed to delete Auth record for ${uid}:`, err);
         throw new HttpsError('internal', 'Failed to delete authentication record.');

@@ -265,15 +265,12 @@ export const generateInsightsInternal = async (
           generatedAt.getDate() === today.getDate();
 
         if (sameDay) {
-          console.log(`[generateInsights] Returning cached insights for ${uid}`);
           return data.data;
         }
       }
     } catch (err) {
       console.warn('[generateInsights] Cache check failed, continuing:', err);
     }
-  } else {
-    console.log(`[generateInsights] forceRefresh=true for ${uid}, bypassing cache check`);
   }
 
   // Step 2b: Ensure privacy settings exist for this user (idempotent)
@@ -310,13 +307,6 @@ export const generateInsightsInternal = async (
     const firestoreRepos = await getIncludedRepos(uid);
     if (firestoreRepos.length > 0) {
       filteredRepos = firestoreRepos;
-      console.log(
-        `[generateInsights] Using ${filteredRepos.length} privacy-filtered repos for ${uid}`
-      );
-    } else {
-      console.log(
-        `[generateInsights] No Firestore repos found for ${uid}, using activity.repositories`
-      );
     }
   } catch (err) {
     console.warn(
@@ -375,8 +365,6 @@ export const generateInsightsInternal = async (
       geminiModel: 'gemini-2.5-flash',
       repoScope,
     });
-
-    console.log(`[generateInsights] Insights saved for ${uid}`);
   } catch (err) {
     console.warn('[generateInsights] Could not save insights:', err);
     // Non-fatal — return insights even if persistence fails
@@ -402,7 +390,6 @@ export const generateInsights = onCall(
       try {
         const snapshot = buildSnapshot(activity);
         await saveSnapshot(uid, snapshot);
-        console.log(`[generateInsights] Built and saved new snapshot via forceRefresh for ${uid}`);
       } catch (err) {
         console.error(
           `[generateInsights] Failed to save snapshot during force refresh for ${uid}:`,

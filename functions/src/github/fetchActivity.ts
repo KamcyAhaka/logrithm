@@ -86,7 +86,6 @@ export const fetchActivityInternal = async (uid: string): Promise<GitHubActivity
 
   const localTokenOverride = process.env.GITHUB_TOKEN_OVERRIDE ?? null;
   if (localTokenOverride) {
-    console.log('[fetchGitHubActivity] Using GITHUB_TOKEN_OVERRIDE for local dev.');
     token = localTokenOverride;
   } else {
     try {
@@ -242,7 +241,6 @@ export const fetchActivityInternal = async (uid: string): Promise<GitHubActivity
     await Promise.allSettled(
       repositories.map((repo) => upsertRepo(uid, repo, repo.ownerType as 'user' | 'organization'))
     );
-    console.log(`[fetchGitHubActivity] Upserted ${repositories.length} repos for ${uid}`);
   } catch (err) {
     // Non-fatal — generateInsights falls back to activity.repositories if Firestore is empty
     console.warn('[fetchGitHubActivity] Could not upsert repos:', err);
