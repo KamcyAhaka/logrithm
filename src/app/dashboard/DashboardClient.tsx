@@ -54,9 +54,6 @@ export default function DashboardClient() {
     if (isDemoMode) return; // Demo data already loaded in hook
     if (!user?.uid) return;
 
-    console.log('[DEBUG] uid:', user.uid);
-    console.log('[DEBUG] user:', user);
-
     const loadRepos = async () => {
       try {
         const { getDocs, collection } = await import('firebase/firestore');

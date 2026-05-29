@@ -41,7 +41,6 @@ export const scheduledAnalysis = onSchedule('every 1 hours', async (event) => {
           }
 
           if (capturedAt >= todayStart) {
-            console.log(`[scheduledAnalysis] Skipping ${uid}, snapshot already exists for today.`);
             continue;
           }
         }
@@ -87,10 +86,7 @@ export const scheduledAnalysis = onSchedule('every 1 hours', async (event) => {
 
         // 5. Generate Insights
         if (shouldGenerateInsights) {
-          console.log(`[scheduledAnalysis] Threshold met for ${uid}, calling Gemini.`);
           await generateInsightsInternal(uid, activity, false, true);
-        } else {
-          console.log(`[scheduledAnalysis] Threshold not met for ${uid}, skipping Gemini.`);
         }
       } catch (err) {
         console.error(`[scheduledAnalysis] Failed to process ${uid}:`, err);
