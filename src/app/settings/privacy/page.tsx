@@ -239,7 +239,7 @@ export default function PrivacySettingsPage() {
       </section>
 
       {/* Profile Section */}
-      <section>
+      <section id="profile-visibility">
         <h2 className="mb-1 text-lg font-medium text-white">Profile</h2>
         <p className="mb-6 text-sm text-white/40">Control what appears on your public profile.</p>
 
