@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Terminal, Zap, TrendingUp, AlertCircle, Share2 } from 'lucide-react';
+import { Terminal, Zap, TrendingUp, AlertCircle, Share2, HelpCircle } from 'lucide-react';
 import InsightSkeleton from './InsightSkeleton';
 import type { InsightObject } from '@/types/github';
 
@@ -218,7 +218,46 @@ export default function InsightPanel({
               </p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <span className="score-pill">score: {insights.activityScore}</span>
+              <div
+                style={{
+                  position: 'relative',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                }}
+                className="group"
+              >
+                <span className="score-pill">score: {insights.activityScore}</span>
+                <Link
+                  href="/faq"
+                  style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }}
+                >
+                  <HelpCircle size={14} />
+                </Link>
+                {/* Tooltip */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: '100%',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    marginBottom: '8px',
+                    padding: '0.5rem 0.75rem',
+                    background: 'var(--bg-primary)',
+                    border: '1px solid var(--border-subtle, rgba(255,255,255,0.1))',
+                    borderRadius: '0.5rem',
+                    fontSize: '0.75rem',
+                    color: 'var(--text-primary)',
+                    whiteSpace: 'nowrap',
+                    pointerEvents: 'none',
+                    zIndex: 50,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                  }}
+                  className="opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                >
+                  Learn more about this score
+                </div>
+              </div>
               <button
                 className="btn btn-secondary"
                 onClick={onRun}
