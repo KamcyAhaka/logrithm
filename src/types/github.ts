@@ -32,6 +32,19 @@ export interface Repository {
   forkCount: number;
   primaryLanguage: PrimaryLanguage | null;
   commitCount: number;
+  // New fields — additive only
+  repoId?: string;
+  fullName?: string;
+  description?: string | null;
+  visibility?: 'public' | 'private_personal' | 'private_org';
+  ownerType?: 'user' | 'organization';
+  ownerLogin?: string;
+  isArchived?: boolean;
+  isFork?: boolean;
+  isPrivate?: boolean;
+  prCount?: number;
+  issueCount?: number;
+  languages?: Record<string, number>;
 }
 
 export interface GitHubActivity {
