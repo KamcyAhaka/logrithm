@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { Lock } from 'lucide-react';
 import { getAdminDb } from '@/lib/firebase-admin';
 import type { InsightObject, UserProfile } from '@/types/github';
 import ShareCard, { type ShareCardSnapshot } from '@/components/share/ShareCard';
@@ -181,12 +182,14 @@ function NoPublicInsights({
   username: string;
   reason?: 'demo' | 'no-insights' | undefined;
 }) {
+  const isPrivate = !reason;
+
   const message =
     reason === 'demo'
       ? 'Public sharing is only available with a live account.'
       : reason === 'no-insights'
         ? `@${username} hasn't generated any insights yet.`
-        : `No public insights for @${username}.`;
+        : `The profile for @${username} is private.`;
 
   return (
     <main
@@ -202,15 +205,34 @@ function NoPublicInsights({
         textAlign: 'center',
       }}
     >
-      <p
-        style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: '2rem',
-          color: 'var(--text-muted)',
-        }}
-      >
-        404
-      </p>
+      {!isPrivate && (
+        <p
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '2rem',
+            color: 'var(--text-muted)',
+          }}
+        >
+          404
+        </p>
+      )}
+      {isPrivate && (
+        <div
+          style={{
+            width: 56,
+            height: 56,
+            borderRadius: '50%',
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '0.5rem',
+          }}
+        >
+          <Lock size={24} style={{ color: 'var(--text-muted)' }} />
+        </div>
+      )}
       <h1
         style={{
           fontFamily: 'var(--font-mono)',
@@ -220,17 +242,39 @@ function NoPublicInsights({
       >
         {message}
       </h1>
+
+      {isPrivate && (
+        <p
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: '0.9rem',
+            color: 'var(--text-secondary)',
+            maxWidth: '300px',
+            lineHeight: 1.5,
+          }}
+        >
+          If this is your profile, you can make it public in your{' '}
+          <Link
+            href="/settings/privacy#profile-visibility"
+            style={{ color: 'var(--green)', textDecoration: 'underline' }}
+          >
+            privacy settings
+          </Link>
+          .
+        </p>
+      )}
+
       <Link
         href="/"
         style={{
           fontFamily: 'var(--font-mono)',
           fontSize: '0.8rem',
-          color: 'var(--green)',
+          color: 'var(--text-muted)',
           textDecoration: 'none',
-          marginTop: '0.5rem',
+          marginTop: '1rem',
         }}
       >
-        ← logrithm.dev
+        ← back to logrithm.dev
       </Link>
     </main>
   );
