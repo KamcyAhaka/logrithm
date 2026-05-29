@@ -65,6 +65,7 @@ export default function LoginClient() {
           createdAt: new Date().toISOString(),
           plan: 'free', // hardcoded — pro comes in Phase 2
           isPublic: false, // user must opt in
+          onboardingCompleted: false,
         });
       } else {
         // Only update safely overwritable fields for returning users

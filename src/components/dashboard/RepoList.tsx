@@ -12,6 +12,7 @@ export default function RepoList({ repositories }: RepoListProps) {
       style={{
         padding: '1.5rem',
         height: '100%',
+        minHeight: 0,
         display: 'flex',
         flexDirection: 'column',
       }}
@@ -36,9 +37,10 @@ export default function RepoList({ repositories }: RepoListProps) {
           gap: '0.625rem',
           flex: 1,
           overflowY: 'auto',
+          minHeight: 0,
         }}
       >
-        {repositories.slice(0, 8).map((repo) => (
+        {repositories.map((repo) => (
           <a
             key={repo.name}
             href={repo.url}
