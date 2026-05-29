@@ -4,6 +4,7 @@
 export { storeGitHubToken } from './github/storeGitHubToken';
 export { fetchGitHubActivity } from './github/fetchActivity';
 export { generateInsights } from './insights/generateInsights';
+export { deleteAccount } from './auth/deleteAccount';
 
 // Phase 2:
 export { scheduledAnalysis } from './scheduler/runBackgroundAnalysis';
