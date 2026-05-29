@@ -29,6 +29,14 @@ const GITHUB_GRAPHQL_QUERY = `
             }
           }
         }
+        commitContributionsByRepository(maxRepositories: 100) {
+          repository {
+            databaseId
+          }
+          contributions {
+            totalCount
+          }
+        }
       }
       repositories(first: 15, orderBy: { field: UPDATED_AT, direction: DESC }, ownerAffiliations: [OWNER, COLLABORATOR, ORGANIZATION_MEMBER]) {
         nodes {
@@ -45,15 +53,6 @@ const GITHUB_GRAPHQL_QUERY = `
           primaryLanguage {
             name
             color
-          }
-          defaultBranchRef {
-            target {
-              ... on Commit {
-                history(first: 1) {
-                  totalCount
-                }
-              }
-            }
           }
         }
       }
@@ -72,15 +71,6 @@ const GITHUB_GRAPHQL_QUERY = `
           primaryLanguage {
             name
             color
-          }
-          defaultBranchRef {
-            target {
-              ... on Commit {
-                history(first: 1) {
-                  totalCount
-                }
-              }
-            }
           }
         }
       }
@@ -151,6 +141,14 @@ export const fetchActivityInternal = async (uid: string): Promise<GitHubActivity
             totalContributions: number;
             weeks: { contributionDays: { date: string; contributionCount: number }[] }[];
           };
+          commitContributionsByRepository: Array<{
+            repository: {
+              databaseId: number;
+            };
+            contributions: {
+              totalCount: number;
+            };
+          }>;
         };
         repositories: {
           nodes: Array<{
@@ -165,9 +163,6 @@ export const fetchActivityInternal = async (uid: string): Promise<GitHubActivity
             stargazerCount: number;
             forkCount: number;
             primaryLanguage: { name: string; color: string | null } | null;
-            defaultBranchRef: {
-              target: { history: { totalCount: number } } | null;
-            } | null;
           }>;
         };
         repositoriesContributedTo: {
@@ -183,9 +178,6 @@ export const fetchActivityInternal = async (uid: string): Promise<GitHubActivity
             stargazerCount: number;
             forkCount: number;
             primaryLanguage: { name: string; color: string | null } | null;
-            defaultBranchRef: {
-              target: { history: { totalCount: number } } | null;
-            } | null;
           }>;
         };
       };
@@ -204,6 +196,15 @@ export const fetchActivityInternal = async (uid: string): Promise<GitHubActivity
   }
 
   const { contributionsCollection } = viewer;
+
+  // Build a map of repo ID to user commit counts from contributionsCollection
+  const userCommitsMap = new Map<number, number>();
+  const commitContribs = contributionsCollection.commitContributionsByRepository || [];
+  for (const contrib of commitContribs) {
+    if (contrib.repository?.databaseId) {
+      userCommitsMap.set(contrib.repository.databaseId, contrib.contributions?.totalCount ?? 0);
+    }
+  }
 
   // Merge repositories and repositoriesContributedTo, then deduplicate by URL
   const allRepos = [
@@ -231,7 +232,7 @@ export const fetchActivityInternal = async (uid: string): Promise<GitHubActivity
       stargazerCount: repo.stargazerCount,
       forkCount: repo.forkCount,
       primaryLanguage: repo.primaryLanguage ?? null,
-      commitCount: repo.defaultBranchRef?.target?.history?.totalCount ?? 0,
+      commitCount: userCommitsMap.get(repo.databaseId) ?? 0,
     }))
     .slice(0, 15);
 
