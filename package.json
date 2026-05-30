@@ -1,6 +1,6 @@
 {
   "name": "logrithm",
-  "version": "1.0.0-rebuild.1",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "cross-env NEXT_PUBLIC_DEMO_MODE=true next dev",

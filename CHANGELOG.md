@@ -1,3 +1,34 @@
+# 1.0.0 (2026-05-30)
+
+
+### Bug Fixes
+
+* wrap ShareCard in a container to ensure consistent PNG rendering dimensions across devices ([e41cb89](https://github.com/KamcyAhaka/logrithm/commit/e41cb892a10d6cd2d4aa0e71e5c966533b2394f1))
+
+
+### Features
+
+* add private profile UI and navigation anchor for privacy settings ([364c56d](https://github.com/KamcyAhaka/logrithm/commit/364c56d571d9f4c2f9f21ce03dc7b13a824acf9b))
+* **backend:** initialize firebase project and cloud functions ([4073afe](https://github.com/KamcyAhaka/logrithm/commit/4073afe05ad715e0b573bff2c0eff116baa5d651))
+* create FAQ page with Accordion component and link from InsightPanel score ([92376d3](https://github.com/KamcyAhaka/logrithm/commit/92376d313f7dafa75c6e3ce10c6fd146e0018235))
+* fetch commit counts via commitContributionsByRepository instead of defaultBranchRef history ([7e2eb42](https://github.com/KamcyAhaka/logrithm/commit/7e2eb42d9c3b097b5bb1aba4f7b99c1c796b4276))
+* **frontend:** implement dashboard and insight UI components ([de593ac](https://github.com/KamcyAhaka/logrithm/commit/de593ac2b05cf8e4ab02ecfc6e0cf5077ebd298f))
+* implement activity score calculation for GitHub insights and update image remote patterns ([9a4954e](https://github.com/KamcyAhaka/logrithm/commit/9a4954e5d256354623a43c228a3376a35c6fc8b2))
+* implement configurable share card variants with streak calculations and new modular card components ([88f5cb5](https://github.com/KamcyAhaka/logrithm/commit/88f5cb5f3d118b0fc108d1c987f72717b345e2ba))
+* implement Husky pre-commit hooks and Prettier configuration ([3e8b1ff](https://github.com/KamcyAhaka/logrithm/commit/3e8b1ffb06d578132b8b4cc7c9270a6b80904c6a))
+* implement plan-based gating system with client-side synchronization and server-side usage limits ([8f5ce4d](https://github.com/KamcyAhaka/logrithm/commit/8f5ce4de406d8fd9cd1ee6a90cb03f413f75c365))
+* implement public-facing profile pages with customizable card and full view layouts ([a3eaf46](https://github.com/KamcyAhaka/logrithm/commit/a3eaf4692f0816d00d2e77c6220b238f59a19412))
+* implement repository persistence in Firestore to enable privacy-aware insight generation ([921e060](https://github.com/KamcyAhaka/logrithm/commit/921e0608d9c88291eb30c3c00baa8d7ad7496173))
+* implement repository selection onboarding flow and extend GitHub repository type definitions ([e786b04](https://github.com/KamcyAhaka/logrithm/commit/e786b047075ad6f0d1e01062fb5badf87abb7443))
+* implement scheduled background analysis for automated GitHub activity snapshots and insights generation ([e484376](https://github.com/KamcyAhaka/logrithm/commit/e484376bca65b9f420610b00e64f37899788007d))
+* implement secure account deletion with recursive Firestore cleanup and secret removal ([361b82d](https://github.com/KamcyAhaka/logrithm/commit/361b82d7217fa8494d4a56a56e6c8911060b122a))
+* implement settings dashboard and layout with reusable UI components ([ddbc48c](https://github.com/KamcyAhaka/logrithm/commit/ddbc48cab930a419242fbd9a4c01f29689a34f01))
+* implement user navigation dropdown and enforce mandatory dark mode styling conventions ([85703c1](https://github.com/KamcyAhaka/logrithm/commit/85703c1010a128e5e3fdc5a14bb97ec490a9ae53))
+* initialize shadcn/ui and add project utility configurations ([274c149](https://github.com/KamcyAhaka/logrithm/commit/274c149883669b3c27881b6f067c8f913f952adb))
+* replace static save button with a sticky floating footer for privacy settings ([37fec05](https://github.com/KamcyAhaka/logrithm/commit/37fec058a00d01689a3fbfea73ac95045c3971ef))
+* track and display longest streak date range in insights and ShareCard UI ([9983e9a](https://github.com/KamcyAhaka/logrithm/commit/9983e9a50b50ba8318891e46921f9113da5c3db1))
+* update GitHub fetching logic, replace html2canvas with html-to-image, and refactor Firebase Admin auth configuration. ([07caf9a](https://github.com/KamcyAhaka/logrithm/commit/07caf9a8ce02f9af83ada42e70039b3fec2ae8b3))
+
 # 1.0.0-rebuild.1 (2026-05-27)
 
 ### Features
