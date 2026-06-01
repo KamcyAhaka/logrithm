@@ -1,0 +1,102 @@
+name: 🐛 Bug Report
+description: Report something that is broken or not working as expected
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill in as much detail as you can — you don't need to know which file or component is at fault, just describe what you're experiencing.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part of the app is affected?
+      description: Pick the area that best matches what you were doing when the bug occurred.
+      options:
+        - Share page (logrithm.dev/share/...)
+        - Dashboard
+        - Insights / AI summary
+        - Streak or score display
+        - Downloading a share card image
+        - Sign in / authentication
+        - Settings or profile
+        - Something else
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe what went wrong. A screenshot or screen recording is very helpful if you can share one.
+      placeholder: |
+        e.g. "When I tap Download on mobile, the image comes out blank."
+        e.g. "The current streak shows a dash even though I committed today."
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+      placeholder: e.g. "The downloaded image should show my stats in JetBrains Mono, matching what I see on screen."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Walk us through exactly what you did so we can see the same thing.
+      placeholder: |
+        1. Go to logrithm.dev/share/my-username
+        2. Switch to the "Streak" card
+        3. Tap "Download Streak PNG"
+        4. Open the downloaded image — it is blank
+    validations:
+      required: true
+
+  - type: dropdown
+    id: device
+    attributes:
+      label: What device are you on?
+      options:
+        - Desktop (Mac)
+        - Desktop (Windows)
+        - Desktop (Linux)
+        - Mobile (iOS / Safari)
+        - Mobile (Android / Chrome)
+        - Mobile (Android / other browser)
+        - Tablet
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      placeholder: e.g. Chrome 124, Safari 17.4, Firefox 126
+    validations:
+      required: false
+
+  - type: dropdown
+    id: account-type
+    attributes:
+      label: Account type
+      description: Helps us narrow down whether the issue is data-related.
+      options:
+        - Signed-in user (live GitHub account connected)
+        - Demo mode (no account)
+        - Not sure
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Error messages from the browser console, network errors, links to your share page — anything that might help.
+      placeholder: Paste any console errors here, or add a link to your share page if it's public.
+    validations:
+      required: false
