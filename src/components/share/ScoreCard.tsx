@@ -52,7 +52,7 @@ export default function ScoreCard({ activityScore }: ScoreCardProps) {
         >
           <span
             style={{
-              fontFamily: 'monospace',
+              fontFamily: "'JetBrains Mono', monospace",
               fontSize: '2.5rem',
               fontWeight: 700,
               color: '#fff',
@@ -70,7 +70,7 @@ export default function ScoreCard({ activityScore }: ScoreCardProps) {
       </div>
       <h3
         style={{
-          fontFamily: 'monospace',
+          fontFamily: "'JetBrains Mono', monospace",
           fontSize: '0.9rem',
           color: '#1D9E75',
           letterSpacing: '0.15em',
@@ -83,7 +83,7 @@ export default function ScoreCard({ activityScore }: ScoreCardProps) {
       </h3>
       <p
         style={{
-          fontFamily: 'sans-serif',
+          fontFamily: "'Inter', sans-serif",
           fontSize: '0.8rem',
           color: 'rgba(255,255,255,0.6)',
           textAlign: 'center',
