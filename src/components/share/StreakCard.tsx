@@ -46,7 +46,9 @@ export default function StreakCard({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', margin: '1.5rem 0' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+      <div
+        style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '1rem' }}
+      >
         <div
           style={{
             background: 'rgba(255,255,255,0.02)',
@@ -65,7 +67,7 @@ export default function StreakCard({
               margin: 0,
               fontSize: '0.7rem',
               color: 'rgba(255,255,255,0.4)',
-              fontFamily: 'monospace',
+              fontFamily: "'JetBrains Mono', monospace",
             }}
           >
             CURRENT STREAK
@@ -73,14 +75,22 @@ export default function StreakCard({
           <h3
             style={{
               margin: '0.25rem 0 0',
-              fontSize: '2rem',
-              color: '#fff',
-              fontFamily: 'monospace',
+              fontSize: currentStreak > 0 ? '2rem' : '1.25rem',
+              color: currentStreak > 0 ? '#fff' : 'rgba(255,255,255,0.25)',
+              fontFamily: "'JetBrains Mono', monospace",
               fontWeight: 700,
             }}
           >
-            {currentStreak}{' '}
-            <span style={{ fontSize: '0.8rem', fontWeight: 400, color: '#1D9E75' }}>days</span>
+            {currentStreak > 0 ? (
+              <>
+                {currentStreak}{' '}
+                <span style={{ fontSize: '0.8rem', fontWeight: 400, color: '#1D9E75' }}>
+                  day {currentStreak >= 2 ? 's' : ''}
+                </span>
+              </>
+            ) : (
+              '—'
+            )}
           </h3>
         </div>
         <div
@@ -101,7 +111,7 @@ export default function StreakCard({
               margin: 0,
               fontSize: '0.7rem',
               color: 'rgba(255,255,255,0.4)',
-              fontFamily: 'monospace',
+              fontFamily: "'JetBrains Mono', monospace",
             }}
           >
             LONGEST STREAK
@@ -111,7 +121,7 @@ export default function StreakCard({
               margin: '0.25rem 0 0',
               fontSize: '2rem',
               color: '#fff',
-              fontFamily: 'monospace',
+              fontFamily: "'JetBrains Mono', monospace",
               fontWeight: 700,
             }}
           >
@@ -124,7 +134,7 @@ export default function StreakCard({
                 margin: '0.25rem 0 0 0',
                 fontSize: '0.65rem',
                 color: 'rgba(255,255,255,0.4)',
-                fontFamily: 'monospace',
+                fontFamily: "'JetBrains Mono', monospace",
               }}
             >
               ({longestStreakDateRange})
@@ -134,7 +144,7 @@ export default function StreakCard({
       </div>
       <p
         style={{
-          fontFamily: 'sans-serif',
+          fontFamily: "'Inter', sans-serif",
           fontSize: '0.8rem',
           color: 'rgba(255,255,255,0.6)',
           textAlign: 'center',
