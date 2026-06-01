@@ -1,12 +1,10 @@
 {
   "branches": [
+    "main",
     {
-      "name": "main",
-      "prerelease": "beta"
-    },
-    {
-      "name": "rebuild",
-      "prerelease": true
+      "name": "beta",
+      "prerelease": "beta",
+      "channel": "beta"
     },
     {
       "name": "feat/*",
