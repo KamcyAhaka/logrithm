@@ -23,7 +23,11 @@ export default function PrStatsCard({ totalPRs, totalIssues }: PrStatsCardProps)
           }}
         >
           <span
-            style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace' }}
+            style={{
+              fontSize: '0.7rem',
+              color: 'rgba(255,255,255,0.4)',
+              fontFamily: "'JetBrains Mono', monospace",
+            }}
           >
             PRS MERGED
           </span>
@@ -32,7 +36,7 @@ export default function PrStatsCard({ totalPRs, totalIssues }: PrStatsCardProps)
               margin: '0.25rem 0 0',
               fontSize: '2.25rem',
               color: '#fff',
-              fontFamily: 'monospace',
+              fontFamily: "'JetBrains Mono', monospace",
               fontWeight: 700,
             }}
           >
@@ -58,7 +62,7 @@ export default function PrStatsCard({ totalPRs, totalIssues }: PrStatsCardProps)
               margin: '0.25rem 0 0',
               fontSize: '2.25rem',
               color: '#fff',
-              fontFamily: 'monospace',
+              fontFamily: "'JetBrains Mono', monospace",
               fontWeight: 700,
             }}
           >
@@ -75,7 +79,7 @@ export default function PrStatsCard({ totalPRs, totalIssues }: PrStatsCardProps)
               justifyContent: 'space-between',
               fontSize: '0.7rem',
               color: 'rgba(255,255,255,0.4)',
-              fontFamily: 'monospace',
+              fontFamily: "'JetBrains Mono', monospace",
             }}
           >
             <span>PRs ({prPercentage}%)</span>

@@ -38,7 +38,7 @@ export default function WrappedCard({
               style={{
                 fontSize: '0.65rem',
                 color: 'rgba(255,255,255,0.4)',
-                fontFamily: 'monospace',
+                fontFamily: "'JetBrains Mono', monospace",
               }}
             >
               TOTAL COMMITS
@@ -48,7 +48,7 @@ export default function WrappedCard({
                 margin: 0,
                 fontSize: '1.5rem',
                 color: '#fff',
-                fontFamily: 'monospace',
+                fontFamily: "'JetBrains Mono', monospace",
                 fontWeight: 700,
               }}
             >
@@ -67,7 +67,7 @@ export default function WrappedCard({
               style={{
                 fontSize: '0.65rem',
                 color: 'rgba(255,255,255,0.4)',
-                fontFamily: 'monospace',
+                fontFamily: "'JetBrains Mono', monospace",
               }}
             >
               ACTIVE REPOSITORIES
@@ -77,7 +77,7 @@ export default function WrappedCard({
                 margin: 0,
                 fontSize: '1.5rem',
                 color: '#fff',
-                fontFamily: 'monospace',
+                fontFamily: "'JetBrains Mono', monospace",
                 fontWeight: 700,
               }}
             >
@@ -103,7 +103,7 @@ export default function WrappedCard({
             style={{
               fontSize: '0.65rem',
               color: 'rgba(255,255,255,0.4)',
-              fontFamily: 'monospace',
+              fontFamily: "'JetBrains Mono', monospace",
               marginBottom: '0.25rem',
             }}
           >
@@ -120,7 +120,7 @@ export default function WrappedCard({
                     display: 'flex',
                     justifyContent: 'space-between',
                     fontSize: '0.75rem',
-                    fontFamily: 'monospace',
+                    fontFamily: "'JetBrains Mono', monospace",
                     color: '#fff',
                   }}
                 >
@@ -151,7 +151,7 @@ export default function WrappedCard({
               style={{
                 fontSize: '0.75rem',
                 color: 'rgba(255,255,255,0.3)',
-                fontFamily: 'monospace',
+                fontFamily: "'JetBrains Mono', monospace",
               }}
             >
               No language data

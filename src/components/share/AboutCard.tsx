@@ -9,7 +9,7 @@ export default function AboutCard({ insights }: AboutCardProps) {
     <>
       <p
         style={{
-          fontFamily: 'sans-serif',
+          fontFamily: "'Inter', sans-serif",
           fontSize: '0.875rem',
           color: 'rgba(255,255,255,0.75)',
           lineHeight: 1.65,
@@ -33,7 +33,7 @@ export default function AboutCard({ insights }: AboutCardProps) {
               key={tag}
               style={{
                 display: 'inline-block',
-                fontFamily: 'monospace',
+                fontFamily: "'JetBrains Mono', monospace",
                 fontSize: '0.65rem',
                 fontWeight: 500,
                 letterSpacing: '0.08em',
@@ -57,7 +57,7 @@ export default function AboutCard({ insights }: AboutCardProps) {
               key={lang}
               style={{
                 display: 'inline-block',
-                fontFamily: 'monospace',
+                fontFamily: "'JetBrains Mono', monospace",
                 fontSize: '0.65rem',
                 fontWeight: 500,
                 letterSpacing: '0.08em',
