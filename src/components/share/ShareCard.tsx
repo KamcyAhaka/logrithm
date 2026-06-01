@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Download, Link2, Check, User, Flame, Award, BarChart3, Gift } from 'lucide-react';
 import type { InsightObject, ShareCardType } from '@/types/github';
 
@@ -32,6 +32,10 @@ interface ShareCardProps {
   generatedAt: string; // ISO string
 }
 
+// The card is always this wide in the DOM → html-to-image always captures
+// at this width regardless of the device's viewport.
+const CARD_WIDTH = 480;
+
 export default function ShareCard({
   login,
   avatarUrl,
@@ -43,6 +47,21 @@ export default function ShareCard({
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [activeVariant, setActiveVariant] = useState<ShareCardType>('about');
+
+  // CSS `zoom` shrinks the card proportionally on small screens.
+  // Unlike transform:scale it participates in layout flow, so there is
+  // no overflow and no manual height calculation needed.
+  const [zoom, setZoom] = useState(1);
+
+  useEffect(() => {
+    const update = () => {
+      const available = window.innerWidth - 32; // 16 px margin each side
+      setZoom(available < CARD_WIDTH ? available / CARD_WIDTH : 1);
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
 
   const generationMonth = new Date(generatedAt).toLocaleDateString('en-US', {
     month: 'long',
@@ -57,15 +76,17 @@ export default function ShareCard({
     setDownloading(true);
     try {
       const { toPng } = await import('html-to-image');
+
+      // cardRef.current is always CARD_WIDTH px wide in the DOM, so
+      // html-to-image reads offsetWidth = 480 and captures at 480 px on
+      // every device. The zoom wrapper is a parent — it is not captured.
       const dataUrl = await toPng(cardRef.current, {
         pixelRatio: 2,
-        skipFonts: true,
+        skipFonts: false,
         backgroundColor: '#0a0a0a',
-        style: {
-          transform: 'scale(1)',
-          margin: '0',
-        },
+        style: { margin: '0' },
       });
+
       const link = document.createElement('a');
       link.download = `logrithm-${login}-${activeVariant}.png`;
       link.href = dataUrl;
@@ -158,6 +179,8 @@ export default function ShareCard({
           padding: '0.25rem',
           flexWrap: 'wrap',
           justifyContent: 'center',
+          width: '100%',
+          boxSizing: 'border-box',
         }}
       >
         {menuItems.map((item) => {
@@ -189,25 +212,26 @@ export default function ShareCard({
         })}
       </div>
 
-      {/* ── Captured card wrapper for consistent PNGs across devices ── */}
-      <div
-        style={{
-          width: '100%',
-          overflowX: 'auto',
-          display: 'flex',
-          justifyContent: 'center',
-          paddingBottom: '1rem',
-        }}
-      >
+      {/*
+        ── Card wrapper ──
+        CSS `zoom` scales the 480 px card down to fit the viewport on mobile.
+        zoom participates in layout flow (unlike transform:scale), so the
+        parent container naturally collapses to the zoomed size — no overflow,
+        no explicit height calculation.
+
+        The card itself stays at 480 px in the DOM, so html-to-image always
+        reads offsetWidth = 480 and produces a consistent PNG on every device.
+      */}
+      <div style={{ zoom } as React.CSSProperties}>
         <div
           ref={cardRef}
           style={{
             background: '#0a0a0a',
             border: '1px solid rgba(255,255,255,0.08)',
             padding: '2rem',
-            width: 480,
-            minWidth: 480,
-            fontFamily: 'sans-serif',
+            width: CARD_WIDTH,
+            minWidth: CARD_WIDTH,
+            fontFamily: "'Inter', sans-serif",
             overflow: 'hidden',
             boxSizing: 'border-box',
           }}
@@ -234,7 +258,7 @@ export default function ShareCard({
               <div>
                 <p
                   style={{
-                    fontFamily: 'monospace',
+                    fontFamily: "'JetBrains Mono', monospace",
                     fontSize: '1rem',
                     fontWeight: 600,
                     color: '#fff',
@@ -245,7 +269,7 @@ export default function ShareCard({
                 </p>
                 <p
                   style={{
-                    fontFamily: 'monospace',
+                    fontFamily: "'JetBrains Mono', monospace",
                     fontSize: '0.72rem',
                     color: 'rgba(255,255,255,0.4)',
                     margin: 0,
@@ -257,7 +281,7 @@ export default function ShareCard({
             </div>
             <span
               style={{
-                fontFamily: 'monospace',
+                fontFamily: "'JetBrains Mono', monospace",
                 fontSize: '0.75rem',
                 fontWeight: 600,
                 color: '#1D9E75',
@@ -288,7 +312,7 @@ export default function ShareCard({
           >
             <span
               style={{
-                fontFamily: 'monospace',
+                fontFamily: "'JetBrains Mono', monospace",
                 fontSize: '0.72rem',
                 color: '#1D9E75',
                 fontWeight: 500,
@@ -298,7 +322,7 @@ export default function ShareCard({
             </span>
             <span
               style={{
-                fontFamily: 'monospace',
+                fontFamily: "'JetBrains Mono', monospace",
                 fontSize: '0.68rem',
                 color: 'rgba(255,255,255,0.3)',
               }}
@@ -316,6 +340,7 @@ export default function ShareCard({
           gap: '0.75rem',
           marginTop: '0.5rem',
           flexWrap: 'wrap',
+          justifyContent: 'center',
         }}
       >
         <button
