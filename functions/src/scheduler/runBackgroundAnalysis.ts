@@ -4,6 +4,7 @@ import { getLatestSnapshot, saveSnapshot } from '../lib/firestoreService';
 import { fetchActivityInternal } from '../github/fetchActivity';
 import { generateInsightsInternal } from '../insights/generateInsights';
 import { buildSnapshot } from '../lib/snapshotBuilder';
+import { computeAndSaveStats } from '../lib/leaderboardService';
 
 export const scheduledAnalysis = onSchedule('every 1 hours', async (event) => {
   try {
@@ -92,6 +93,14 @@ export const scheduledAnalysis = onSchedule('every 1 hours', async (event) => {
         console.error(`[scheduledAnalysis] Failed to process ${uid}:`, err);
       }
     } // End of for loop
+
+    // Recompute global/language/country percentile stats
+    try {
+      await computeAndSaveStats();
+      console.log('[scheduler] Stats recomputed successfully');
+    } catch (err) {
+      console.warn('[scheduler] Could not recompute stats (non-fatal):', err);
+    }
   } catch (err) {
     console.error('[scheduledAnalysis] FATAL UNHANDLED ERROR:', err);
   }

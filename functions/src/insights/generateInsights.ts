@@ -11,7 +11,10 @@ import {
 } from '../lib/firestoreService';
 import type { RepoDocument } from '../types/github';
 import { db } from '../lib/firebase'; // Added to resolve db.doc TS error
-import { getRepoLimit, assertCanRefresh } from '../lib/planService';
+import { getRepoLimit, assertCanRefresh, getUserPlan } from '../lib/planService';
+import { calculateActivityScore } from '../lib/scoreCalculator';
+import { upsertLeaderboardEntry } from '../lib/leaderboardService';
+import { parseCountryCode } from '../lib/locationParser';
 
 // ---------------------------------------------------------------------------
 // Demo fallback — returned when key is missing or demo mode is active
@@ -52,7 +55,11 @@ if (getApps().length === 0) {
 // ---------------------------------------------------------------------------
 // Gemini prompt builder
 // ---------------------------------------------------------------------------
-function buildPrompt(activity: GitHubActivity, filteredRepos?: RepoDocument[]): string {
+function buildPrompt(
+  activity: GitHubActivity,
+  filteredRepos?: RepoDocument[],
+  activityScore?: number
+): string {
   const reposToUse = filteredRepos ?? activity.repositories;
   const topLangs = reposToUse
     .filter((r) => r.primaryLanguage)
@@ -102,7 +109,7 @@ Return this exact JSON shape:
   "improvements": ["full sentence 1", "full sentence 2", "full sentence 3"],
   "patterns": "paragraph describing timing patterns, streaks, and working rhythm",
   "topLanguages": ["Language1", "Language2", "Language3"],
-  "activityScore": <number 1-100>,
+  "activityScore": ${activityScore ?? '<number 1-100>'},
   "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"]
 }
 
@@ -110,65 +117,12 @@ Rules:
 - strengths: exactly 3 items, full sentences
 - improvements: exactly 3 items, full sentences
 - topLanguages: exactly 3 language names
-- activityScore: integer 1-100 based on consistency, volume, and diversity
+- activityScore: MUST be exactly ${activityScore ?? 'an integer 1-100'}.
+  Do not generate your own score — use this exact value.
 - tags: 5-7 short keyword tags, max 2 words each, all lowercase, no punctuation.
   Derived from data patterns — not copied from strengths/improvements sentences.
   Examples: typescript, high output, multi-repo, pr focused, vue specialist
 `.trim();
-}
-
-// ---------------------------------------------------------------------------
-// Reproducible Activity Score calculation formula
-// ---------------------------------------------------------------------------
-function calculateActivityScore(activity: GitHubActivity): number {
-  const weights = {
-    commitVolume: 0.3, // raw output
-    consistency: 0.25, // heatmap coverage
-    collaboration: 0.2, // PR count relative to commits
-    diversity: 0.15, // number of active repos
-    recentMomentum: 0.1, // last 30 days vs 12mo average
-  };
-
-  // Commit volume — normalize against an "elite" benchmark of 1000/year
-  const commitScore = Math.min(activity.totalCommitContributions / 1000, 1) * 100;
-
-  // Consistency — percentage of weeks meeting a 5-day-a-week contribution target
-  // Penalizes spikes followed by long periods of inactivity
-  const weeks = activity.contributionCalendar.weeks;
-  let totalWeeksScore = 0;
-  for (const week of weeks) {
-    const activeDaysInWeek = week.contributionDays.filter((d) => d.contributionCount > 0).length;
-    // Target is 5 active days per week
-    const weekScore = Math.min(activeDaysInWeek / 5, 1);
-    totalWeeksScore += weekScore;
-  }
-  const consistencyScore = weeks.length > 0 ? (totalWeeksScore / weeks.length) * 100 : 0;
-
-  // Collaboration — PR ratio (PRs / commits, ideal ~0.25)
-  const prRatio =
-    activity.totalPullRequestContributions / Math.max(activity.totalCommitContributions, 1);
-  const collaborationScore = Math.min(prRatio / 0.25, 1) * 100;
-
-  // Diversity — active repos (normalize against 15 as "elite")
-  const diversityScore = Math.min(activity.totalRepositoriesWithContributedCommits / 15, 1) * 100;
-
-  // Recent momentum — last 30 days commits vs monthly average
-  const monthlyAverage = activity.totalCommitContributions / 12;
-
-  // Calculate actual recent contributions from calendar in the last 30 days
-  const allDays = activity.contributionCalendar.weeks.flatMap((w) => w.contributionDays);
-  const recentCommits = allDays.slice(-30).reduce((sum, d) => sum + d.contributionCount, 0);
-
-  const momentumScore = Math.min(recentCommits / Math.max(monthlyAverage, 1), 2) * 50;
-
-  const weighted =
-    commitScore * weights.commitVolume +
-    consistencyScore * weights.consistency +
-    collaborationScore * weights.collaboration +
-    diversityScore * weights.diversity +
-    momentumScore * weights.recentMomentum;
-
-  return Math.round(Math.min(Math.max(weighted, 1), 100));
 }
 
 // ---------------------------------------------------------------------------
@@ -320,6 +274,11 @@ export const generateInsightsInternal = async (
     filteredRepos = filteredRepos.slice(0, repoLimit);
   }
 
+  // Calculate deterministic score BEFORE Gemini call
+  // This score is passed into the prompt — Gemini is told to use it exactly
+  const scoreBreakdown = calculateActivityScore(activity);
+  const deterministicScore = scoreBreakdown.total;
+
   // Step 4: Call Gemini
   let insights: InsightObject;
   try {
@@ -330,11 +289,12 @@ export const generateInsightsInternal = async (
         temperature: 0.85, // Add randomness so manual updates feel fresh
       },
     });
-    const prompt = buildPrompt(activity, filteredRepos);
+    const prompt = buildPrompt(activity, filteredRepos, deterministicScore);
     const result = await model.generateContent(prompt);
     const text = result.response.text();
     insights = parseInsights(text);
-    insights.activityScore = calculateActivityScore(activity);
+    // Override LLM score with deterministic calculation
+    insights.activityScore = deterministicScore;
   } catch (err) {
     console.error('[generateInsights] Gemini call failed:', err);
     try {
@@ -361,10 +321,30 @@ export const generateInsightsInternal = async (
       excludedCount: 0, // populated when excludedByUser logic is fully wired
     };
 
-    await saveInsightHistory(uid, insights, {
-      geminiModel: 'gemini-2.5-flash',
-      repoScope,
-    });
+    await saveInsightHistory(
+      uid,
+      { ...insights, scoreBreakdown: scoreBreakdown.components },
+      {
+        geminiModel: 'gemini-2.5-flash',
+        repoScope,
+      }
+    );
+
+    // Update anonymous leaderboard entry for comparison system
+    try {
+      const plan = await getUserPlan(uid);
+      const countryCode = parseCountryCode(activity.location ?? null);
+      await upsertLeaderboardEntry(
+        uid,
+        deterministicScore,
+        scoreBreakdown.components,
+        insights.topLanguages,
+        countryCode,
+        plan
+      );
+    } catch (err) {
+      console.warn('[generateInsights] Could not upsert leaderboard entry (non-fatal):', err);
+    }
   } catch (err) {
     console.warn('[generateInsights] Could not save insights:', err);
     // Non-fatal — return insights even if persistence fails
