@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
 import Accordion from '@/components/ui/Accordion';
 
 export default function FAQPage() {
@@ -22,20 +21,10 @@ export default function FAQPage() {
         <div style={{ marginBottom: '2rem' }}>
           <Link
             href="/dashboard"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              color: 'var(--text-muted)',
-              textDecoration: 'none',
-              fontSize: '0.875rem',
-              fontFamily: 'var(--font-mono)',
-              transition: 'color 0.2s',
-            }}
-            className="hover-text-primary"
+            className="font-mono text-xs text-white/40 transition-colors hover:text-[#1D9E75]"
+            style={{ textDecoration: 'none' }}
           >
-            <ArrowLeft size={16} />
-            Back to Dashboard
+            ← return to dashboard
           </Link>
         </div>
 
