@@ -15,6 +15,7 @@ const GITHUB_GRAPHQL_QUERY = `
       login
       name
       avatarUrl
+      location
       contributionsCollection {
         totalCommitContributions
         totalPullRequestContributions
@@ -131,6 +132,7 @@ export const fetchActivityInternal = async (uid: string): Promise<GitHubActivity
         login: string;
         name: string | null;
         avatarUrl: string;
+        location: string | null;
         contributionsCollection: {
           totalCommitContributions: number;
           totalPullRequestContributions: number;
@@ -250,6 +252,7 @@ export const fetchActivityInternal = async (uid: string): Promise<GitHubActivity
     login: viewer.login,
     name: viewer.name,
     avatarUrl: viewer.avatarUrl,
+    location: viewer.location ?? null,
     totalCommitContributions: contributionsCollection.totalCommitContributions,
     totalPullRequestContributions: contributionsCollection.totalPullRequestContributions,
     totalIssueContributions: contributionsCollection.totalIssueContributions,
