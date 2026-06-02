@@ -9,6 +9,8 @@ export const defaultPrivacySettings: Omit<PrivacySettingsDocument, 'updatedAt'> 
     showPrivateRepoNames: false,
     showOrgRepoNames: false,
     shareCardDataScope: 'public_only',
+    includeInComparisons: true,
+    showComparisonOnProfile: false,
   },
   profile: {
     showScore: true,
