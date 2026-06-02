@@ -4,6 +4,9 @@ import Link from 'next/link';
 import { Terminal, Zap, TrendingUp, AlertCircle, Share2, HelpCircle } from 'lucide-react';
 import InsightSkeleton from './InsightSkeleton';
 import type { InsightObject } from '@/types/github';
+import ScoreBreakdown from './ScoreBreakdown';
+import ComparisonPanel from './ComparisonPanel';
+import type { ComparisonStats } from '@/hooks/useComparisonStats';
 
 interface InsightPanelProps {
   insights: InsightObject | null;
@@ -11,6 +14,10 @@ interface InsightPanelProps {
   error: string | null;
   onRun?: () => void;
   login?: string;
+  countryCode?: string | null;
+  globalStats?: ComparisonStats | null;
+  languageStats?: ComparisonStats | null;
+  countryStats?: ComparisonStats | null;
 }
 
 export default function InsightPanel({
@@ -19,6 +26,10 @@ export default function InsightPanel({
   error,
   onRun,
   login,
+  countryCode,
+  globalStats,
+  languageStats,
+  countryStats,
 }: InsightPanelProps) {
   return (
     <div
@@ -114,9 +125,19 @@ export default function InsightPanel({
           >
             {error}
           </p>
-          <button className="btn btn-secondary" onClick={onRun} style={{ marginTop: '0.5rem' }}>
-            Try again
-          </button>
+          {error.includes('Upgrade to Pro') ? (
+            <Link
+              href="/settings/account"
+              className="btn btn-primary"
+              style={{ marginTop: '0.5rem', background: 'var(--green)', border: 'none' }}
+            >
+              Upgrade to Pro →
+            </Link>
+          ) : (
+            <button className="btn btn-secondary" onClick={onRun} style={{ marginTop: '0.5rem' }}>
+              Try again
+            </button>
+          )}
         </div>
       )}
 
@@ -303,6 +324,23 @@ export default function InsightPanel({
               ))}
             </div>
           )}
+
+          {/* Score Breakdown & Peer Comparison Panels */}
+          {insights.scoreBreakdown && (
+            <ScoreBreakdown
+              scoreBreakdown={insights.scoreBreakdown}
+              globalStats={globalStats ?? null}
+            />
+          )}
+
+          <ComparisonPanel
+            activityScore={insights.activityScore}
+            primaryLanguage={insights.topLanguages[0] ?? null}
+            countryCode={countryCode ?? null}
+            globalStats={globalStats ?? null}
+            languageStats={languageStats ?? null}
+            countryStats={countryStats ?? null}
+          />
 
           {/* Strengths */}
           <div>
