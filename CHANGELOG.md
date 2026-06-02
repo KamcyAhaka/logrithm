@@ -1,3 +1,22 @@
+# [1.1.0-beta.1](https://github.com/KamcyAhaka/logrithm/compare/v1.0.1-beta.1...v1.1.0-beta.1) (2026-06-02)
+
+
+### Bug Fixes
+
+* **database:** use flat 2-segment paths for stats documents ([f434127](https://github.com/KamcyAhaka/logrithm/commit/f4341276add77fba209b49ef6c32e90a2d0f5958))
+* **ui:** resolve mobile layout overflow and correct prerelease branch config ([8a5c09b](https://github.com/KamcyAhaka/logrithm/commit/8a5c09bafaa9b6876eb36df3060038aef39b0775))
+
+
+### Features
+
+* **backend:** implement deterministic scoring calculator and location parser ([edc0800](https://github.com/KamcyAhaka/logrithm/commit/edc0800acc763709f5e906fb728158a21821b884))
+* **database:** restrict leaderboard collections and configure compound indexes ([81ee853](https://github.com/KamcyAhaka/logrithm/commit/81ee853cdd576940c48e478bcc388692e49c732f))
+* **functions:** wire deterministic scoring and leaderboard upsert ([6372e48](https://github.com/KamcyAhaka/logrithm/commit/6372e4840f6b506ea48a9e0704df7a34d93a768c))
+* **settings:** implement comparisons settings section with Pro-gating ([a66459a](https://github.com/KamcyAhaka/logrithm/commit/a66459a296e5ba33abc6b1952686077bffab5055))
+* **types:** add location fields and score breakdown interface ([daffcb3](https://github.com/KamcyAhaka/logrithm/commit/daffcb3517daac440d1736abec127ddd9a6e6d3b))
+* **ui:** create ScoreBreakdown and ComparisonPanel components ([e20285f](https://github.com/KamcyAhaka/logrithm/commit/e20285feba9d1c22fd3ca1596180709add128482))
+* **ui:** wire peer comparisons to dashboard and handle plan limits error ([f6c3f79](https://github.com/KamcyAhaka/logrithm/commit/f6c3f793e5ae91cb6651d664310b0b8c4494723a))
+
 ## [1.0.1-beta.1](https://github.com/KamcyAhaka/logrithm/compare/v1.0.0...v1.0.1-beta.1) (2026-06-02)
 
 
