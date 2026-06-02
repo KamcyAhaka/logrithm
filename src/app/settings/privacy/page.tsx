@@ -20,6 +20,8 @@ const DEFAULT_PRIVACY: Omit<PrivacySettingsDocument, 'updatedAt'> = {
     showPrivateRepoNames: false,
     showOrgRepoNames: false,
     shareCardDataScope: 'public_only',
+    includeInComparisons: true,
+    showComparisonOnProfile: false,
   },
   profile: { showScore: true, showLanguages: true, showRepoList: true, displayStyle: 'card' },
 };
@@ -31,6 +33,8 @@ interface PrivacyFormState {
   };
   display: {
     shareCardDataScope: 'public_only' | 'aggregated';
+    includeInComparisons: boolean;
+    showComparisonOnProfile: boolean;
   };
   profile: {
     isPublic: boolean;
@@ -51,6 +55,7 @@ export default function PrivacySettingsPage() {
 
   const [savedState, setSavedState] = useState<PrivacyFormState | null>(null);
   const [currentState, setCurrentState] = useState<PrivacyFormState | null>(null);
+  const [userPlan, setUserPlan] = useState<'free' | 'pro'>('free');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -75,6 +80,8 @@ export default function PrivacySettingsPage() {
           : DEFAULT_PRIVACY;
 
         const isPublic = profileSnap.exists() ? !!profileSnap.data()?.isPublic : false;
+        const plan = profileSnap.exists() ? (profileSnap.data()?.plan ?? 'free') : 'free';
+        setUserPlan(plan);
 
         const initialState: PrivacyFormState = {
           analysis: {
@@ -87,6 +94,12 @@ export default function PrivacySettingsPage() {
           display: {
             shareCardDataScope:
               privacyData.display.shareCardDataScope ?? DEFAULT_PRIVACY.display.shareCardDataScope,
+            includeInComparisons:
+              privacyData.display.includeInComparisons ??
+              DEFAULT_PRIVACY.display.includeInComparisons,
+            showComparisonOnProfile:
+              privacyData.display.showComparisonOnProfile ??
+              DEFAULT_PRIVACY.display.showComparisonOnProfile,
           },
           profile: {
             isPublic,
@@ -428,6 +441,75 @@ export default function PrivacySettingsPage() {
             </div>
           </div>
         </RadioGroup>
+        <Separator className="mt-8 mb-8 bg-white/10" />
+      </section>
+
+      {/* Comparisons Section */}
+      <section>
+        <h2 className="mb-1 text-lg font-medium text-white">Comparisons</h2>
+        <p className="mb-6 text-sm text-white/40">
+          Compare your activity score with global peers, countries, and languages.
+        </p>
+
+        <div className="space-y-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <label className="text-sm font-medium text-white">
+                Include in global and segment-specific comparisons (anonymous)
+              </label>
+              <p className="mt-1 text-sm text-white/40">
+                When enabled, your anonymised scores are factored into aggregate performance
+                statistics. Disabling this excludes you from all leaderboards and comparisons.
+              </p>
+            </div>
+            <Switch
+              checked={currentState.display.includeInComparisons}
+              onCheckedChange={(checked) =>
+                setCurrentState({
+                  ...currentState,
+                  display: { ...currentState.display, includeInComparisons: checked },
+                })
+              }
+            />
+          </div>
+
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-white">
+                  Display peer comparisons on your profile
+                </label>
+                {userPlan !== 'pro' && (
+                  <span className="rounded bg-[#1D9E75]/10 px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-[#1D9E75] uppercase">
+                    PRO
+                  </span>
+                )}
+              </div>
+              <p className="mt-1 text-sm text-white/40">
+                Show how your score compares against the global average directly on your public
+                profile.
+              </p>
+              {userPlan !== 'pro' && (
+                <a
+                  href="/settings/account"
+                  className="mt-1 inline-block animate-pulse text-xs text-[#1D9E75] hover:underline"
+                >
+                  Upgrade to Pro to display comparison card on your profile →
+                </a>
+              )}
+            </div>
+            <Switch
+              checked={currentState.display.showComparisonOnProfile && userPlan === 'pro'}
+              disabled={userPlan !== 'pro'}
+              onCheckedChange={(checked) =>
+                setCurrentState({
+                  ...currentState,
+                  display: { ...currentState.display, showComparisonOnProfile: checked },
+                })
+              }
+            />
+          </div>
+        </div>
         <Separator className="mt-8 mb-8 bg-white/10" />
       </section>
 
