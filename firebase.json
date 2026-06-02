@@ -1,18 +1,36 @@
 {
-  "hosting": {
-    "public": "public",
-    "cleanUrls": true,
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-    "rewrites": [
-      {
-        "source": "**",
-        "run": {
-          "serviceId": "logrithm",
-          "region": "us-central1"
+  "hosting": [
+    {
+      "site": "logrithm-ai",
+      "public": "public",
+      "cleanUrls": true,
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "rewrites": [
+        {
+          "source": "**",
+          "run": {
+            "serviceId": "logrithm",
+            "region": "us-central1"
+          }
         }
-      }
-    ]
-  },
+      ]
+    },
+    {
+      "site": "logrithm-ai-beta",
+      "public": "public",
+      "cleanUrls": true,
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "rewrites": [
+        {
+          "source": "**",
+          "run": {
+            "serviceId": "logrithm-beta",
+            "region": "us-central1"
+          }
+        }
+      ]
+    }
+  ],
   "functions": [
     {
       "source": "functions",

@@ -1,7 +1,7 @@
 BRANCH=$(git branch --show-current)
-if [ "$BRANCH" = "main" ]; then
-  echo "Error: Direct commits to the main branch are not allowed."
-  echo "Please create a new branch and submit a Pull Request."
+if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "beta" ]; then
+  echo "Error: Direct commits to the $BRANCH branch are not allowed."
+  echo "Please create a new branch and submit a Pull Request to $BRANCH."
   exit 1
 fi
 
