@@ -1,3 +1,10 @@
+## [1.0.1-beta.1](https://github.com/KamcyAhaka/logrithm/compare/v1.0.0...v1.0.1-beta.1) (2026-06-02)
+
+
+### Bug Fixes
+
+* standardize return to dashboard links and prevent share card text wrapping on mobile ([0471e97](https://github.com/KamcyAhaka/logrithm/commit/0471e9745f4348c99e644991daecfbae8c4263e0))
+
 # 1.0.0 (2026-06-01)
 
 
