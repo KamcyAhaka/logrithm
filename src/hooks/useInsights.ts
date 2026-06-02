@@ -68,9 +68,21 @@ export function useInsights(isDemoMode: boolean, uid?: string): UseInsightsRetur
         // Force refresh to bypass Cloud Function cache
         const result = await callGenerateInsights({ activity, uid: runUid, forceRefresh: true });
         setInsights(result);
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('[useInsights] Error:', err);
-        setError('The log is empty. Try again.');
+        const errorObj = err as { code?: string; message?: string };
+        const errorMsg = errorObj.message || '';
+        const errorCode = errorObj.code || '';
+
+        if (
+          errorCode === 'resource-exhausted' ||
+          errorCode === 'functions/resource-exhausted' ||
+          errorMsg.toLowerCase().includes('limit reached')
+        ) {
+          setError('Daily analysis limit reached. Upgrade to Pro for unlimited refreshes.');
+        } else {
+          setError(errorMsg || 'The log is empty. Try again.');
+        }
       } finally {
         setLoading(false);
       }

@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useGitHubActivity } from '@/hooks/useGitHubActivity';
 import { useDashboardStore } from '@/store/useDashboardStore';
 import { useInsights } from '@/hooks/useInsights';
+import { useComparisonStats } from '@/hooks/useComparisonStats';
 
 import Navbar from '@/components/layout/Navbar';
 import DemoBanner from '@/components/layout/DemoBanner';
@@ -27,6 +28,7 @@ export default function DashboardClient() {
   const router = useRouter();
   const [isOnboarding, setIsOnboarding] = useState(false);
   const [excludedRepoIds, setExcludedRepoIds] = useState<Set<string>>(new Set());
+  const [countryCode, setCountryCode] = useState<string | null>(null);
 
   const {
     data: activity,
@@ -41,6 +43,11 @@ export default function DashboardClient() {
     error: insightsError,
     run: runInsights,
   } = useInsights(isDemoMode, user?.uid);
+
+  const { globalStats, countryStats, languageStats } = useComparisonStats(
+    countryCode,
+    insights?.topLanguages[0] ?? null
+  );
 
   // Auth guard — redirect to / if not authenticated in live mode
   useEffect(() => {
@@ -83,9 +90,11 @@ export default function DashboardClient() {
             const profileData = profileSnap.data() as {
               plan?: string;
               onboardingCompleted?: boolean;
+              countryCode?: string | null;
             };
             const plan = profileData.plan === 'pro' ? 'pro' : 'free';
             useDashboardStore.getState().setPlan(plan);
+            setCountryCode(profileData.countryCode ?? null);
             if (profileData.onboardingCompleted === false) {
               setIsOnboarding(true);
             }
@@ -201,6 +210,10 @@ export default function DashboardClient() {
                   runInsights(activity, uid);
                 }}
                 login={login}
+                countryCode={countryCode}
+                globalStats={globalStats}
+                languageStats={languageStats}
+                countryStats={countryStats}
               />
               <RepoList
                 repositories={activity.repositories.filter(
