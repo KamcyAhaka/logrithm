@@ -24,6 +24,16 @@ export function CardProfile({
 
   return (
     <main className="flex min-h-screen flex-col items-center bg-[#0a0a0a] px-4 py-8 font-sans sm:py-16">
+      {/* Top Left Return Link */}
+      <div className="mb-6 w-full max-w-[680px] text-left">
+        <Link
+          href="/dashboard"
+          className="font-mono text-xs text-white/40 transition-colors hover:text-[#1D9E75]"
+        >
+          ← return to dashboard
+        </Link>
+      </div>
+
       <div className="w-full max-w-[680px] rounded-2xl border border-white/10 bg-[#0f0f0f] p-8 shadow-2xl sm:p-12">
         <ProfileHeader
           login={profile.githubLogin}

@@ -166,6 +166,7 @@ export default function ShareCard({
         gap: '1.5rem',
         alignItems: 'center',
         width: '100%',
+        maxWidth: '480px',
       }}
     >
       {/* ── Selection Pills ── */}
