@@ -55,6 +55,12 @@ export function FullProfile({
         {/* Sidebar */}
         <aside className="shrink-0 md:w-72">
           <div className="sticky top-12 space-y-8 rounded-2xl border border-white/5 bg-[#0f0f0f] p-6 shadow-2xl">
+            <Link
+              href="/dashboard"
+              className="block font-mono text-xs text-white/40 transition-colors hover:text-[#1D9E75]"
+            >
+              ← return to dashboard
+            </Link>
             <ProfileHeader
               login={profile.githubLogin}
               avatarUrl={profile.avatarUrl}

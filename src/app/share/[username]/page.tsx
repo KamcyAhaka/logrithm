@@ -116,7 +116,6 @@ export default async function SharePage({ params }: SharePageProps) {
   if (errorReason === 'no-insights') {
     return <NoPublicInsights username={username} reason="no-insights" />;
   }
-
   return (
     <main
       style={{
@@ -125,10 +124,27 @@ export default async function SharePage({ params }: SharePageProps) {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
         padding: '2rem 1rem',
       }}
     >
+      {/* Top Left Return Link */}
+      <div
+        style={{
+          width: '100%',
+          maxWidth: '480px',
+          textAlign: 'left',
+          marginBottom: '2rem',
+        }}
+      >
+        <Link
+          href="/dashboard"
+          className="font-mono text-xs text-white/40 transition-colors hover:text-[#1D9E75]"
+          style={{ textDecoration: 'none' }}
+        >
+          ← return to dashboard
+        </Link>
+      </div>
+
       <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
         <p
           style={{
@@ -158,19 +174,6 @@ export default async function SharePage({ params }: SharePageProps) {
         snapshot={snapshot || undefined}
         generatedAt={generatedAt}
       />
-
-      <Link
-        href="/dashboard"
-        style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: '0.8rem',
-          color: 'var(--text-muted)',
-          textDecoration: 'none',
-          marginTop: '2rem',
-        }}
-      >
-        ← return to dashboard
-      </Link>
     </main>
   );
 }
