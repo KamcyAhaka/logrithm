@@ -8,7 +8,7 @@
     },
     {
       "name": "feat/*",
-      "prerelease": true
+      "prerelease": "feat"
     }
   ],
   "plugins": [

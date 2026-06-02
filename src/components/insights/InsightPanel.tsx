@@ -212,6 +212,7 @@ export default function InsightPanel({
           <div
             style={{
               display: 'flex',
+              flexWrap: 'wrap',
               alignItems: 'flex-start',
               justifyContent: 'space-between',
               gap: '0.75rem',
