@@ -35,7 +35,7 @@ export function useComparisonStats(countryCode: string | null, primaryLanguage: 
         // Segmented stats are loaded for Pro users
         if (isPro) {
           if (countryCode) {
-            const countryDocRef = doc(db, 'stats', 'countries', countryCode.toUpperCase());
+            const countryDocRef = doc(db, 'stats', `country_${countryCode.toLowerCase()}`);
             const countrySnap = await getDoc(countryDocRef);
             if (countrySnap.exists()) {
               setCountryStats(countrySnap.data() as ComparisonStats);
@@ -47,7 +47,7 @@ export function useComparisonStats(countryCode: string | null, primaryLanguage: 
           }
 
           if (primaryLanguage) {
-            const langDocRef = doc(db, 'stats', 'languages', primaryLanguage.toLowerCase());
+            const langDocRef = doc(db, 'stats', `lang_${primaryLanguage.toLowerCase()}`);
             const langSnap = await getDoc(langDocRef);
             if (langSnap.exists()) {
               setLanguageStats(langSnap.data() as ComparisonStats);

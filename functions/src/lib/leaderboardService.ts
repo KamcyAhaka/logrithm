@@ -88,7 +88,7 @@ export async function computeAndSaveStats(): Promise<void> {
   const langBatch = db.batch();
   for (const [lang, langScores] of langMap.entries()) {
     if (langScores.length < 10) continue; // minimum sample size
-    langBatch.set(db.doc(`stats/languages/${lang.toLowerCase()}`), {
+    langBatch.set(db.doc(`stats/lang_${lang.toLowerCase()}`), {
       ...computePercentiles(langScores.sort((a, b) => a - b)),
       totalUsers: langScores.length,
       language: lang,
@@ -109,7 +109,7 @@ export async function computeAndSaveStats(): Promise<void> {
   const countryBatch = db.batch();
   for (const [code, countryScores] of countryMap.entries()) {
     if (countryScores.length < 10) continue; // minimum sample size
-    countryBatch.set(db.doc(`stats/countries/${code}`), {
+    countryBatch.set(db.doc(`stats/country_${code.toLowerCase()}`), {
       ...computePercentiles(countryScores.sort((a, b) => a - b)),
       totalUsers: countryScores.length,
       countryCode: code,
