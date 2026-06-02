@@ -82,7 +82,7 @@ export default function ScoreBreakdown({ scoreBreakdown, globalStats }: ScoreBre
 
   return (
     <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-md">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="font-sans text-lg font-semibold text-white">Score Breakdown</h3>
           <p className="text-xs text-white/40">
