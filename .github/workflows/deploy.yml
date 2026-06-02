@@ -2,7 +2,7 @@ name: Deploy — Logrithm
 
 on:
   push:
-    branches: [main]
+    branches: [main, beta]
   workflow_dispatch:
     inputs:
       branch:
@@ -25,6 +25,17 @@ jobs:
       # 1. Checkout
       - name: Checkout
         uses: actions/checkout@v4
+
+      # 1.5 Set dynamic environment variables based on branch
+      - name: Set environment variables
+        run: |
+          if [ "${{ github.ref_name }}" = "beta" ]; then
+            echo "SERVICE=logrithm-beta" >> $GITHUB_ENV
+            echo "SITE=logrithm-ai-beta" >> $GITHUB_ENV
+          else
+            echo "SERVICE=logrithm" >> $GITHUB_ENV
+            echo "SITE=logrithm-ai" >> $GITHUB_ENV
+          fi
 
       # 2. Setup Bun
       - name: Setup Bun
@@ -103,6 +114,6 @@ jobs:
 
       # 14. Deploy Hosting
       - name: Deploy Hosting
-        run: firebase deploy --only hosting --non-interactive
+        run: firebase deploy --only hosting:${{ env.SITE }} --non-interactive
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}

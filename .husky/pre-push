@@ -1,6 +1,6 @@
 BRANCH=$(git branch --show-current)
-if [ "$BRANCH" = "main" ]; then
-  echo "Error: Direct pushes to the main branch are not allowed."
+if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "beta" ]; then
+  echo "Error: Direct pushes to the $BRANCH branch are not allowed."
   echo "Please push to a different branch and submit a Pull Request."
   exit 1
 fi
