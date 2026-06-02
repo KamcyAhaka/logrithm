@@ -73,6 +73,7 @@ export const DUMMY_GITHUB_DATA: GitHubActivity = {
   login: 'demo-dev',
   name: 'Demo Developer',
   avatarUrl: 'https://avatars.githubusercontent.com/u/583231', // octocat
+  location: 'San Francisco, CA',
   totalCommitContributions: 847,
   totalPullRequestContributions: 134,
   totalIssueContributions: 89,
@@ -163,6 +164,13 @@ export const DUMMY_INSIGHTS: InsightObject = {
     'Peak activity falls on Tuesday–Wednesday between 10am and 2pm. Quarterly streaks of 14+ days followed by short recovery periods reveal a sprint-and-rest pattern — likely aligned with project milestones rather than calendar weeks.',
   topLanguages: ['TypeScript', 'JavaScript', 'Dart'],
   activityScore: 82,
+  scoreBreakdown: {
+    volume: 85,
+    consistency: 80,
+    collaboration: 90,
+    diversity: 75,
+    momentum: 82,
+  },
   tags: [
     'typescript',
     'high output',
