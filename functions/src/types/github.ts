@@ -48,6 +48,7 @@ export interface GitHubActivity {
   login: string;
   name: string | null;
   avatarUrl: string;
+  location: string | null;
   totalCommitContributions: number;
   totalPullRequestContributions: number;
   totalIssueContributions: number;
@@ -64,6 +65,13 @@ export interface InsightObject {
   topLanguages: string[];
   activityScore: number;
   tags: string[];
+  scoreBreakdown?: {
+    volume: number;
+    consistency: number;
+    collaboration: number;
+    diversity: number;
+    momentum: number;
+  };
 }
 
 export interface ScoreEntry {
@@ -155,6 +163,8 @@ export interface PrivacySettingsDocument {
     showPrivateRepoNames: boolean;
     showOrgRepoNames: boolean;
     shareCardDataScope: 'public_only' | 'aggregated';
+    includeInComparisons: boolean;
+    showComparisonOnProfile: boolean;
   };
   profile: {
     showScore: boolean;
