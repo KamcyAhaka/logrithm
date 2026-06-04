@@ -2,6 +2,7 @@ import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
+import { computeAnonymousId } from '../lib/leaderboardService';
 
 const secretClient = new SecretManagerServiceClient();
 const PROJECT_ID = process.env.GCLOUD_PROJECT ?? 'logrithm-ai';
@@ -42,6 +43,14 @@ export const deleteAccount = onCall(
         } catch (err) {
           console.error(`[deleteAccount] Failed to delete slug for ${githubLogin}:`, err);
         }
+      }
+
+      // 4b. Delete the user's anonymous leaderboard entry
+      try {
+        const anonymousId = await computeAnonymousId(uid);
+        await db.doc(`leaderboard/${anonymousId}`).delete();
+      } catch (err) {
+        console.error(`[deleteAccount] Failed to delete leaderboard entry for ${uid}:`, err);
       }
 
       // 5. Delete all Firestore data for the user recursively
