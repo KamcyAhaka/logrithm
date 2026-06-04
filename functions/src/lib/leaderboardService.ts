@@ -1,7 +1,39 @@
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
+import { createHmac } from 'crypto';
+import { getSecret } from '../secrets/getSecret';
 import type { ScoreBreakdown } from './scoreCalculator';
 
 const db = getFirestore();
+
+let cachedSalt: string | null = null;
+
+async function getSalt(): Promise<string> {
+  if (cachedSalt) return cachedSalt;
+
+  let salt = process.env.LEADERBOARD_SALT ?? null;
+  if (!salt) {
+    salt = await getSecret('LEADERBOARD_SALT');
+  }
+
+  if (!salt) {
+    console.warn(
+      '[leaderboardService] LEADERBOARD_SALT environment variable/secret is not set. Using local development fallback.'
+    );
+    salt = 'local-dev-default-salt';
+  }
+
+  cachedSalt = salt;
+  return salt;
+}
+
+/**
+ * Computes a secure, non-reversible, one-way anonymous ID from a user's UID.
+ * Uses HMAC-SHA256 with a server-side salt.
+ */
+export async function computeAnonymousId(uid: string): Promise<string> {
+  const salt = await getSalt();
+  return createHmac('sha256', salt).update(uid).digest('hex').slice(0, 16);
+}
 
 export interface LeaderboardEntry {
   anonymousId: string; // hash of uid — never expose raw uid
@@ -36,8 +68,7 @@ export async function upsertLeaderboardEntry(
   countryCode: string | null,
   plan: 'free' | 'pro'
 ): Promise<void> {
-  // Simple hash — good enough for anonymisation, not cryptographic
-  const anonymousId = Buffer.from(uid).toString('base64').replace(/[/+=]/g, '').slice(0, 16);
+  const anonymousId = await computeAnonymousId(uid);
 
   const entry: LeaderboardEntry = {
     anonymousId,
