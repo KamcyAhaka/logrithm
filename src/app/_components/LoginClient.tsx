@@ -26,9 +26,12 @@ export default function LoginClient() {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       setAuthChecking(false);
+      if (user) {
+        router.replace('/dashboard');
+      }
     });
     return () => unsubscribe();
-  }, []);
+  }, [router]);
 
   const handleGitHubLogin = async () => {
     setLoading(true);
@@ -108,6 +111,25 @@ export default function LoginClient() {
   const handleDemo = () => {
     router.push('/dashboard?demo');
   };
+
+  if (authChecking || currentUser) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontFamily: 'var(--font-mono)',
+          fontSize: '0.8rem',
+          color: 'var(--text-muted)',
+          background: 'var(--bg-page)',
+        }}
+      >
+        Running the algorithm...
+      </div>
+    );
+  }
 
   return (
     <main

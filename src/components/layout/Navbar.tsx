@@ -49,7 +49,7 @@ export default function Navbar() {
         {/* Nav links + auth */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
           <a
-            href="https://github.com/divine/logrithm"
+            href="https://github.com/KamcyAhaka/logrithm"
             target="_blank"
             rel="noopener noreferrer"
             style={{
