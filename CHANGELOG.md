@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/KamcyAhaka/logrithm/compare/v1.1.0...v1.1.1) (2026-06-05)
+
+
+### Bug Fixes
+
+* **leaderboard:** use salted HMAC for anonymousId and delete on account removal ([4a7606b](https://github.com/KamcyAhaka/logrithm/commit/4a7606b14985354d1842f14f332c503f53685938)), closes [#16](https://github.com/KamcyAhaka/logrithm/issues/16)
+
 # [1.1.0](https://github.com/KamcyAhaka/logrithm/compare/v1.0.0...v1.1.0) (2026-06-03)
 
 
