@@ -32,6 +32,8 @@ interface PrivacyFormState {
     includeOrgRepos: boolean;
   };
   display: {
+    showPrivateRepoNames: boolean;
+    showOrgRepoNames: boolean;
     shareCardDataScope: 'public_only' | 'aggregated';
     includeInComparisons: boolean;
     showComparisonOnProfile: boolean;
@@ -56,6 +58,7 @@ export default function PrivacySettingsPage() {
   const [savedState, setSavedState] = useState<PrivacyFormState | null>(null);
   const [currentState, setCurrentState] = useState<PrivacyFormState | null>(null);
   const [userPlan, setUserPlan] = useState<'free' | 'pro'>('free');
+  const [githubLogin, setGithubLogin] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -81,7 +84,9 @@ export default function PrivacySettingsPage() {
 
         const isPublic = profileSnap.exists() ? !!profileSnap.data()?.isPublic : false;
         const plan = profileSnap.exists() ? (profileSnap.data()?.plan ?? 'free') : 'free';
+        const login = profileSnap.exists() ? (profileSnap.data()?.githubLogin ?? null) : null;
         setUserPlan(plan);
+        setGithubLogin(login);
 
         const initialState: PrivacyFormState = {
           analysis: {
@@ -92,13 +97,18 @@ export default function PrivacySettingsPage() {
               privacyData.analysis.includeOrgRepos ?? DEFAULT_PRIVACY.analysis.includeOrgRepos,
           },
           display: {
+            showPrivateRepoNames:
+              privacyData.display?.showPrivateRepoNames ??
+              DEFAULT_PRIVACY.display.showPrivateRepoNames,
+            showOrgRepoNames:
+              privacyData.display?.showOrgRepoNames ?? DEFAULT_PRIVACY.display.showOrgRepoNames,
             shareCardDataScope:
-              privacyData.display.shareCardDataScope ?? DEFAULT_PRIVACY.display.shareCardDataScope,
+              privacyData.display?.shareCardDataScope ?? DEFAULT_PRIVACY.display.shareCardDataScope,
             includeInComparisons:
-              privacyData.display.includeInComparisons ??
+              privacyData.display?.includeInComparisons ??
               DEFAULT_PRIVACY.display.includeInComparisons,
             showComparisonOnProfile:
-              privacyData.display.showComparisonOnProfile ??
+              privacyData.display?.showComparisonOnProfile ??
               DEFAULT_PRIVACY.display.showComparisonOnProfile,
           },
           profile: {
@@ -138,7 +148,13 @@ export default function PrivacySettingsPage() {
         privacyRef,
         {
           analysis: currentState.analysis,
-          display: currentState.display,
+          display: {
+            showPrivateRepoNames: currentState.display.showPrivateRepoNames,
+            showOrgRepoNames: currentState.display.showOrgRepoNames,
+            shareCardDataScope: currentState.display.shareCardDataScope,
+            includeInComparisons: currentState.display.includeInComparisons,
+            showComparisonOnProfile: currentState.display.showComparisonOnProfile,
+          },
           profile: {
             showScore: currentState.profile.showScore,
             showLanguages: currentState.profile.showLanguages,
@@ -265,6 +281,61 @@ export default function PrivacySettingsPage() {
               <p className="mt-1 text-sm text-white/40">
                 When enabled, anyone with your profile link can view your insights.
               </p>
+              {currentState.profile.isPublic && githubLogin && (
+                <div className="mt-3 space-y-2 font-mono text-xs">
+                  <div className="rounded-lg border border-white/5 bg-white/5 p-3">
+                    <div className="mb-1 text-[10px] tracking-wider text-white/30 uppercase">
+                      Public Profile Link
+                    </div>
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="truncate text-white/60">
+                        {typeof window !== 'undefined'
+                          ? `${window.location.origin}/u/${githubLogin}`
+                          : `https://logrithm.dev/u/${githubLogin}`}
+                      </span>
+                      <button
+                        onClick={() => {
+                          const url =
+                            typeof window !== 'undefined'
+                              ? `${window.location.origin}/u/${githubLogin}`
+                              : `https://logrithm.dev/u/${githubLogin}`;
+                          navigator.clipboard.writeText(url);
+                          alert('Copied profile link!');
+                        }}
+                        className="cursor-pointer text-[#1D9E75] hover:text-[#1D9E75]/80 hover:underline"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border border-white/5 bg-white/5 p-3">
+                    <div className="mb-1 text-[10px] tracking-wider text-white/30 uppercase">
+                      Share Card Builder Link
+                    </div>
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="truncate text-white/60">
+                        {typeof window !== 'undefined'
+                          ? `${window.location.origin}/share/${githubLogin}`
+                          : `https://logrithm.dev/share/${githubLogin}`}
+                      </span>
+                      <button
+                        onClick={() => {
+                          const url =
+                            typeof window !== 'undefined'
+                              ? `${window.location.origin}/share/${githubLogin}`
+                              : `https://logrithm.dev/share/${githubLogin}`;
+                          navigator.clipboard.writeText(url);
+                          alert('Copied share card link!');
+                        }}
+                        className="cursor-pointer text-[#1D9E75] hover:text-[#1D9E75]/80 hover:underline"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             <Switch
               checked={currentState.profile.isPublic}
@@ -393,54 +464,100 @@ export default function PrivacySettingsPage() {
           Control what data appears in shared insight cards.
         </p>
 
-        <RadioGroup
-          value={currentState.display.shareCardDataScope}
-          onValueChange={(val: 'public_only' | 'aggregated') =>
-            setCurrentState({
-              ...currentState,
-              display: { ...currentState.display, shareCardDataScope: val },
-            })
-          }
-          className="space-y-4"
-        >
-          <div className="flex items-start space-x-3">
-            <RadioGroupItem
-              value="public_only"
-              id="public_only"
-              className="mt-1 border-white/40 text-[#1D9E75]"
-            />
-            <div className="grid gap-1.5">
-              <label
-                htmlFor="public_only"
-                className="cursor-pointer text-sm leading-none font-medium text-white"
-              >
-                Public data only
-              </label>
-              <p className="text-sm text-white/40">
-                Shared cards only include stats from public repositories.
-              </p>
+        <div className="space-y-6">
+          <RadioGroup
+            value={currentState.display.shareCardDataScope}
+            onValueChange={(val: 'public_only' | 'aggregated') =>
+              setCurrentState({
+                ...currentState,
+                display: { ...currentState.display, shareCardDataScope: val },
+              })
+            }
+            className="space-y-4"
+          >
+            <div className="flex items-start space-x-3">
+              <RadioGroupItem
+                value="public_only"
+                id="public_only"
+                className="mt-1 border-white/40 text-[#1D9E75]"
+              />
+              <div className="grid gap-1.5">
+                <label
+                  htmlFor="public_only"
+                  className="cursor-pointer text-sm leading-none font-medium text-white"
+                >
+                  Public data only
+                </label>
+                <p className="text-sm text-white/40">
+                  Shared cards only include stats from public repositories.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <RadioGroupItem
+                value="aggregated"
+                id="aggregated"
+                className="mt-1 border-white/40 text-[#1D9E75]"
+              />
+              <div className="grid gap-1.5">
+                <label
+                  htmlFor="aggregated"
+                  className="cursor-pointer text-sm leading-none font-medium text-white"
+                >
+                  Aggregated totals
+                </label>
+                <p className="text-sm text-white/40">
+                  Shared cards include combined totals from all analysed repos. You can choose
+                  whether to reveal private or organization repo names below.
+                </p>
+              </div>
+            </div>
+          </RadioGroup>
+
+          <div className="space-y-6 pt-2">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <label className="text-sm font-medium text-white">
+                  Show private repository names
+                </label>
+                <p className="mt-1 text-sm text-white/40">
+                  When enabled, names of private repositories are shown on your public profile or
+                  shared cards. When disabled, they are masked (e.g., &quot;private-repo&quot;).
+                </p>
+              </div>
+              <Switch
+                checked={currentState.display.showPrivateRepoNames}
+                onCheckedChange={(checked) =>
+                  setCurrentState({
+                    ...currentState,
+                    display: { ...currentState.display, showPrivateRepoNames: checked },
+                  })
+                }
+              />
+            </div>
+
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <label className="text-sm font-medium text-white">
+                  Show organization repository names
+                </label>
+                <p className="mt-1 text-sm text-white/40">
+                  When enabled, names of organization repositories are shown on your public profile
+                  or shared cards. When disabled, they are masked (e.g., &quot;org-repo&quot;).
+                </p>
+              </div>
+              <Switch
+                checked={currentState.display.showOrgRepoNames}
+                onCheckedChange={(checked) =>
+                  setCurrentState({
+                    ...currentState,
+                    display: { ...currentState.display, showOrgRepoNames: checked },
+                  })
+                }
+              />
             </div>
           </div>
-          <div className="flex items-start space-x-3">
-            <RadioGroupItem
-              value="aggregated"
-              id="aggregated"
-              className="mt-1 border-white/40 text-[#1D9E75]"
-            />
-            <div className="grid gap-1.5">
-              <label
-                htmlFor="aggregated"
-                className="cursor-pointer text-sm leading-none font-medium text-white"
-              >
-                Aggregated totals
-              </label>
-              <p className="text-sm text-white/40">
-                Shared cards include combined totals from all analysed repos without revealing
-                private repo names.
-              </p>
-            </div>
-          </div>
-        </RadioGroup>
+        </div>
         <Separator className="mt-8 mb-8 bg-white/10" />
       </section>
 
