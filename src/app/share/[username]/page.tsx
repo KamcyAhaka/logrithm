@@ -132,7 +132,9 @@ export default async function SharePage({ params }: SharePageProps) {
         style={{
           width: '100%',
           maxWidth: '480px',
-          textAlign: 'left',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
           marginBottom: '2rem',
         }}
       >
@@ -142,6 +144,13 @@ export default async function SharePage({ params }: SharePageProps) {
           style={{ textDecoration: 'none' }}
         >
           ← return to dashboard
+        </Link>
+        <Link
+          href="/faq"
+          className="rounded-full border border-[#1D9E75]/20 bg-[#1D9E75]/5 px-2.5 py-1 font-mono text-xs text-[#1D9E75] transition-colors hover:text-[#1D9E75]/80"
+          style={{ textDecoration: 'none' }}
+        >
+          how is this score calculated? (FAQ)
         </Link>
       </div>
 
