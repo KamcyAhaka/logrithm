@@ -2,9 +2,10 @@ import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { initializeApp, getApps } from 'firebase-admin/app';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getSecret } from '../secrets/getSecret';
-import type { GitHubActivity, InsightObject } from '../types/github';
+import type { GitHubActivity, InsightObject, PrivacySettingsDocument } from '../types/github';
 import {
   initUserPrivacySettings,
+  getPrivacySettings,
   getIncludedRepos,
   saveInsightHistory,
   updateAnalysisStatus,
@@ -55,10 +56,12 @@ if (getApps().length === 0) {
 // ---------------------------------------------------------------------------
 // Gemini prompt builder
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 function buildPrompt(
   activity: GitHubActivity,
   filteredRepos?: RepoDocument[],
-  activityScore?: number
+  activityScore?: number,
+  privacySettings?: Omit<PrivacySettingsDocument, 'updatedAt'> | PrivacySettingsDocument
 ): string {
   const reposToUse = filteredRepos ?? activity.repositories;
   const topLangs = reposToUse
@@ -76,10 +79,41 @@ function buildPrompt(
 
   const devName = activity.name ? `${activity.name} (@${activity.login})` : `@${activity.login}`;
 
+  let privateRepoIndex = 1;
+  let orgRepoIndex = 1;
+
+  const repoListText = reposToUse
+    .slice(0, 10)
+    .map((r) => {
+      let repoName = r.name;
+      const isPrivate =
+        r.isPrivate === true ||
+        r.visibility === 'private_personal' ||
+        r.visibility === 'private_org';
+      const isOrg = r.ownerType === 'organization' || r.visibility === 'private_org';
+
+      if (isPrivate) {
+        if (isOrg) {
+          if (privacySettings && !privacySettings.display.showOrgRepoNames) {
+            repoName = `private-org-repo-${orgRepoIndex++}`;
+          }
+        } else {
+          if (privacySettings && !privacySettings.display.showPrivateRepoNames) {
+            repoName = `private-personal-repo-${privateRepoIndex++}`;
+          }
+        }
+      }
+
+      return `  - ${repoName}: ${r.commitCount} commits, lang: ${r.primaryLanguage?.name ?? 'unknown'}, ★${r.stargazerCount}`;
+    })
+    .join('\n');
+
   return `
 You are an expert developer analytics engine. Analyse the following GitHub activity data for the developer ${devName} and return a JSON insight object.
 
 Return ONLY a valid JSON object with no markdown, no code blocks, no explanation.
+
+CRITICAL SECURITY INSTRUCTION: Some repository names may be masked as placeholder names (e.g. "private-personal-repo-X" or "private-org-repo-Y") to protect private source code and organization details. You MUST NOT use or output these literal placeholder names in your summary, strengths, improvements, or patterns fields. Instead, refer to them generally as "a private repository", "a personal project", or "an organization codebase" to ensure the user's private data is kept secure.
 
 CRITICAL INSTRUCTION: You MUST use the developer's name (${activity.name || activity.login}) in the summary! Do NOT use abstract terms like "This developer" or "The user". Write directly about them.
 
@@ -94,13 +128,7 @@ GitHub Activity Summary:
 - Top languages by commit: ${sortedLangs.join(', ')}
 - Total calendar contributions: ${activity.contributionCalendar.totalContributions}
 - Active repos (with details):
-${reposToUse
-  .slice(0, 10)
-  .map(
-    (r) =>
-      `  - ${r.name}: ${r.commitCount} commits, lang: ${r.primaryLanguage?.name ?? 'unknown'}, ★${r.stargazerCount}`
-  )
-  .join('\n')}
+${repoListText}
 
 Return this exact JSON shape:
 {
@@ -274,6 +302,14 @@ export const generateInsightsInternal = async (
     filteredRepos = filteredRepos.slice(0, repoLimit);
   }
 
+  // Load privacy settings for masking
+  let privacySettings: PrivacySettingsDocument | undefined;
+  try {
+    privacySettings = await getPrivacySettings(uid);
+  } catch (err) {
+    console.warn('[generateInsights] Could not load privacy settings for masking:', err);
+  }
+
   // Calculate deterministic score BEFORE Gemini call
   // This score is passed into the prompt — Gemini is told to use it exactly
   const scoreBreakdown = calculateActivityScore(activity);
@@ -289,7 +325,7 @@ export const generateInsightsInternal = async (
         temperature: 0.85, // Add randomness so manual updates feel fresh
       },
     });
-    const prompt = buildPrompt(activity, filteredRepos, deterministicScore);
+    const prompt = buildPrompt(activity, filteredRepos, deterministicScore, privacySettings);
     const result = await model.generateContent(prompt);
     const text = result.response.text();
     insights = parseInsights(text);
