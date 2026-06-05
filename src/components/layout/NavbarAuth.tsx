@@ -5,7 +5,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import Image from 'next/image';
 import Link from 'next/link';
-import { LogOut, User as UserIcon, Settings } from 'lucide-react';
+import { LogOut, User as UserIcon, Settings, Share2 } from 'lucide-react';
 import { useDashboardStore } from '@/store/useDashboardStore';
 import {
   DropdownMenu,
@@ -91,17 +91,34 @@ export default function NavbarAuth() {
           <DropdownMenuSeparator className="bg-border-subtle" />
 
           {username ? (
-            <Link href={`/share/${username}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-              <DropdownMenuItem className="cursor-pointer transition-colors focus:bg-white/10 focus:text-white">
-                <UserIcon className="mr-2 h-4 w-4" />
-                <span>Profile</span>
-              </DropdownMenuItem>
-            </Link>
+            <>
+              <Link href={`/u/${username}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                <DropdownMenuItem className="cursor-pointer transition-colors focus:bg-white/10 focus:text-white">
+                  <UserIcon className="mr-2 h-4 w-4" />
+                  <span>Public Profile</span>
+                </DropdownMenuItem>
+              </Link>
+              <Link
+                href={`/share/${username}`}
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
+                <DropdownMenuItem className="cursor-pointer transition-colors focus:bg-white/10 focus:text-white">
+                  <Share2 className="mr-2 h-4 w-4" />
+                  <span>Share Card</span>
+                </DropdownMenuItem>
+              </Link>
+            </>
           ) : (
-            <DropdownMenuItem disabled className="opacity-50">
-              <UserIcon className="mr-2 h-4 w-4" />
-              <span>Profile</span>
-            </DropdownMenuItem>
+            <>
+              <DropdownMenuItem disabled className="opacity-50">
+                <UserIcon className="mr-2 h-4 w-4" />
+                <span>Public Profile</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem disabled className="opacity-50">
+                <Share2 className="mr-2 h-4 w-4" />
+                <span>Share Card</span>
+              </DropdownMenuItem>
+            </>
           )}
 
           <Link href="/settings" style={{ textDecoration: 'none', color: 'inherit' }}>
