@@ -160,9 +160,9 @@ export default function ComparisonPanel({
               <span className="text-[10px] text-white/20">Requires 10+ users to compile stats</span>
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-5">
+            <div className="grid gap-6 lg:grid-cols-5">
               {/* Left summary cards */}
-              <div className="col-span-2 space-y-4">
+              <div className="space-y-4 lg:col-span-2">
                 <div className="rounded-lg border border-white/5 bg-white/5 p-4">
                   <div className="flex items-center gap-2 text-xs text-white/40">
                     <TrendingUp className="h-4 w-4 text-[#1D9E75]" />
@@ -190,7 +190,7 @@ export default function ComparisonPanel({
               </div>
 
               {/* Right distribution visualizer */}
-              <div className="col-span-3 flex flex-col justify-center space-y-4">
+              <div className="flex flex-col justify-center space-y-4 lg:col-span-3">
                 <span className="text-xs font-medium text-white/60">
                   Distribution Cohort Spread ({name})
                 </span>
@@ -219,7 +219,10 @@ export default function ComparisonPanel({
                   {/* User marker position indicator */}
                   <div
                     className="absolute top-1/2 z-10 flex -translate-y-1/2 flex-col items-center"
-                    style={{ left: `${percentile}%`, transform: 'translate(-50%, -50%)' }}
+                    style={{
+                      left: `${Math.min(96, Math.max(4, percentile))}%`,
+                      transform: 'translate(-50%, -50%)',
+                    }}
                   >
                     <div className="flex h-5 w-5 animate-bounce items-center justify-center rounded-full border-2 border-white bg-[#1D9E75] shadow-lg shadow-[#1D9E75]/50">
                       <span className="text-[8px] font-bold text-white">{activityScore}</span>
