@@ -1,7 +1,17 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { Terminal, Zap, TrendingUp, AlertCircle, Share2, HelpCircle } from 'lucide-react';
+import {
+  Terminal,
+  Zap,
+  TrendingUp,
+  AlertCircle,
+  Share2,
+  HelpCircle,
+  Check,
+  Copy,
+} from 'lucide-react';
 import InsightSkeleton from './InsightSkeleton';
 import type { InsightObject } from '@/types/github';
 import ScoreBreakdown from './ScoreBreakdown';
@@ -31,9 +41,27 @@ export default function InsightPanel({
   languageStats,
   countryStats,
 }: InsightPanelProps) {
+  const [showToast, setShowToast] = useState(false);
+
+  const handleCopyProfileLink = async () => {
+    if (!login) return;
+    const profileUrl =
+      typeof window !== 'undefined'
+        ? `${window.location.origin}/u/${login}`
+        : `https://logrithm.dev/u/${login}`;
+
+    try {
+      await navigator.clipboard.writeText(profileUrl);
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 2500);
+    } catch (err) {
+      console.error('Failed to copy profile URL:', err);
+    }
+  };
+
   return (
     <div
-      className="glass-card"
+      className="glass-card relative"
       style={{
         padding: '1.5rem',
         height: '100%',
@@ -41,6 +69,19 @@ export default function InsightPanel({
         flexDirection: 'column',
       }}
     >
+      {/* Toast Notification */}
+      {showToast && (
+        <div
+          className="fixed bottom-6 left-1/2 z-50 flex w-auto max-w-[90vw] -translate-x-1/2 items-center gap-3 rounded-lg border border-white/10 bg-[#141414]/90 px-4 py-3 font-mono text-xs whitespace-nowrap text-white shadow-xl shadow-black/50 backdrop-blur-md"
+          style={{ transition: 'all 0.3s ease' }}
+        >
+          <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#1D9E75]/15 text-[#1D9E75]">
+            <Check size={11} />
+          </div>
+          <span>Profile link copied to clipboard!</span>
+        </div>
+      )}
+
       <div
         style={{
           display: 'flex',
@@ -61,14 +102,37 @@ export default function InsightPanel({
           AI Insights
         </h3>
         {insights && login && (
-          <Link
-            href={`/share/${login}`}
-            className="btn btn-secondary"
-            style={{ padding: '0.3rem 0.875rem', fontSize: '0.72rem', gap: '0.3rem' }}
+          <div
+            style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}
           >
-            <Share2 size={12} />
-            Share insight ↗
-          </Link>
+            <button
+              onClick={handleCopyProfileLink}
+              className="btn btn-secondary"
+              style={{
+                padding: '0.3rem 0.875rem',
+                fontSize: '0.72rem',
+                gap: '0.3rem',
+                whiteSpace: 'nowrap',
+                cursor: 'pointer',
+              }}
+            >
+              <Copy size={12} />
+              Copy profile
+            </button>
+            <Link
+              href={`/share/${login}`}
+              className="btn btn-secondary"
+              style={{
+                padding: '0.3rem 0.875rem',
+                fontSize: '0.72rem',
+                gap: '0.3rem',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <Share2 size={12} />
+              Share card ↗
+            </Link>
+          </div>
         )}
       </div>
 

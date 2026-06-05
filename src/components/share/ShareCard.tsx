@@ -69,7 +69,9 @@ export default function ShareCard({
   });
 
   const shareUrl =
-    typeof window !== 'undefined' ? window.location.href : `https://logrithm.dev/share/${login}`;
+    typeof window !== 'undefined'
+      ? `${window.location.origin}/u/${login}`
+      : `https://logrithm.dev/u/${login}`;
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
