@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { GitBranch, Settings } from 'lucide-react';
 import NavbarAuth from './NavbarAuth';
 
@@ -35,15 +36,19 @@ export default function Navbar() {
         <Link
           href="/"
           style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '1.1rem',
-            fontWeight: 500,
-            letterSpacing: '-0.02em',
-            color: 'var(--text-primary)',
+            display: 'flex',
+            alignItems: 'center',
             textDecoration: 'none',
           }}
         >
-          log<span style={{ color: 'var(--green)' }}>r</span>ithm
+          <Image
+            src="/logrithm-logo-white.png"
+            alt="logrithm logo"
+            width={110}
+            height={30}
+            style={{ objectFit: 'contain' }}
+            priority
+          />
         </Link>
 
         {/* Nav links + auth */}
