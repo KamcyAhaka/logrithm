@@ -72,7 +72,7 @@ bun run dev:emulator
 ### 1. Clone & install
 
 ```bash
-git clone https://github.com/your-org/logrithm.git
+git clone https://github.com/KamcyAhaka/logrithm.git
 cd logrithm
 bun install
 cd functions && bun install
