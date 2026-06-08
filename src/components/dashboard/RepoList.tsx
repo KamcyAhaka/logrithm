@@ -17,7 +17,8 @@ export default function RepoList({ repositories }: RepoListProps) {
         flexDirection: 'column',
       }}
     >
-      <h3
+      <a
+        href="/settings/repositories"
         style={{
           fontFamily: 'var(--font-mono)',
           fontSize: '0.8rem',
@@ -26,9 +27,10 @@ export default function RepoList({ repositories }: RepoListProps) {
           letterSpacing: '0.1em',
           marginBottom: '1rem',
         }}
+        className="underline-offset-3 transition hover:underline"
       >
-        Repositories
-      </h3>
+        Repositories →
+      </a>
 
       <div
         style={{
