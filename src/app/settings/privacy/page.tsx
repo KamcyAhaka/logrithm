@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Check, AlertCircle } from 'lucide-react';
 import type { PrivacySettingsDocument } from '@/types/github';
 
 // Default privacy settings fallback
@@ -59,6 +59,10 @@ export default function PrivacySettingsPage() {
   const [currentState, setCurrentState] = useState<PrivacyFormState | null>(null);
   const [userPlan, setUserPlan] = useState<'free' | 'pro'>('free');
   const [githubLogin, setGithubLogin] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -294,13 +298,19 @@ export default function PrivacySettingsPage() {
                           : `https://logrithm.dev/u/${githubLogin}`}
                       </span>
                       <button
-                        onClick={() => {
+                        onClick={async () => {
                           const url =
                             typeof window !== 'undefined'
                               ? `${window.location.origin}/u/${githubLogin}`
                               : `https://logrithm.dev/u/${githubLogin}`;
-                          navigator.clipboard.writeText(url);
-                          alert('Copied profile link!');
+                          try {
+                            await navigator.clipboard.writeText(url);
+                            setToastMessage({ type: 'success', text: 'Profile link copied!' });
+                            setTimeout(() => setToastMessage(null), 2500);
+                          } catch {
+                            setToastMessage({ type: 'error', text: 'Failed to copy link.' });
+                            setTimeout(() => setToastMessage(null), 2500);
+                          }
                         }}
                         className="cursor-pointer text-[#1D9E75] hover:text-[#1D9E75]/80 hover:underline"
                       >
@@ -320,13 +330,19 @@ export default function PrivacySettingsPage() {
                           : `https://logrithm.dev/share/${githubLogin}`}
                       </span>
                       <button
-                        onClick={() => {
+                        onClick={async () => {
                           const url =
                             typeof window !== 'undefined'
                               ? `${window.location.origin}/share/${githubLogin}`
                               : `https://logrithm.dev/share/${githubLogin}`;
-                          navigator.clipboard.writeText(url);
-                          alert('Copied share card link!');
+                          try {
+                            await navigator.clipboard.writeText(url);
+                            setToastMessage({ type: 'success', text: 'Share card link copied!' });
+                            setTimeout(() => setToastMessage(null), 2500);
+                          } catch {
+                            setToastMessage({ type: 'error', text: 'Failed to copy link.' });
+                            setTimeout(() => setToastMessage(null), 2500);
+                          }
                         }}
                         className="cursor-pointer text-[#1D9E75] hover:text-[#1D9E75]/80 hover:underline"
                       >
@@ -629,6 +645,25 @@ export default function PrivacySettingsPage() {
         </div>
         <Separator className="mt-8 mb-8 bg-white/10" />
       </section>
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div
+          className="fixed bottom-6 left-1/2 z-50 flex w-auto max-w-[90vw] -translate-x-1/2 items-center gap-3 rounded-lg border border-white/10 bg-[#141414]/90 px-4 py-3 font-mono text-xs whitespace-nowrap text-white shadow-xl shadow-black/50 backdrop-blur-md"
+          style={{ transition: 'all 0.3s ease' }}
+        >
+          {toastMessage.type === 'success' ? (
+            <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#1D9E75]/15 text-[#1D9E75]">
+              <Check size={11} />
+            </div>
+          ) : (
+            <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-500/15 text-red-500">
+              <AlertCircle size={11} />
+            </div>
+          )}
+          <span>{toastMessage.text}</span>
+        </div>
+      )}
 
       {/* Floating Save Button Bar */}
       <div

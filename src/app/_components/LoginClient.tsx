@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import {
   GithubAuthProvider,
   signInWithPopup,
@@ -145,56 +144,6 @@ export default function LoginClient() {
         overflow: 'hidden',
       }}
     >
-      {/* Navbar for logged in user */}
-      {!authChecking && currentUser && (
-        <nav
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            padding: '1.5rem 2rem',
-            display: 'flex',
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-            zIndex: 10,
-          }}
-        >
-          <div
-            onClick={() => router.push('/dashboard')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              cursor: 'pointer',
-              background: 'rgba(255,255,255,0.05)',
-              padding: '0.5rem 1rem',
-              borderRadius: '2rem',
-              border: '1px solid var(--border)',
-            }}
-          >
-            <span
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '0.8rem',
-                color: 'var(--text-primary)',
-              }}
-            >
-              Dashboard
-            </span>
-            {currentUser.photoURL && (
-              <Image
-                src={currentUser.photoURL}
-                alt="Profile"
-                width={28}
-                height={28}
-                style={{ borderRadius: '50%', objectFit: 'cover' }}
-              />
-            )}
-          </div>
-        </nav>
-      )}
-
       {/* Ambient glow */}
       <div
         aria-hidden
