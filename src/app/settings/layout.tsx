@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Shield, User, Bell } from 'lucide-react';
+import { Shield, User, Bell, GitBranch } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 
 const navigation = [
   { name: 'Privacy & Visibility', href: '/settings/privacy', icon: Shield },
+  { name: 'Repositories', href: '/settings/repositories', icon: GitBranch },
   { name: 'Account', href: '/settings/account', icon: User },
   { name: 'Notifications', href: '/settings/notifications', icon: Bell },
 ];
