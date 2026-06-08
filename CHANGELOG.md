@@ -1,3 +1,23 @@
+# [1.2.0](https://github.com/KamcyAhaka/logrithm/compare/v1.1.1...v1.2.0) (2026-06-08)
+
+
+### Bug Fixes
+
+* ensure correct repository tracking by matching via repoId instead of array index ([e33e74d](https://github.com/KamcyAhaka/logrithm/commit/e33e74de90202352146c6128000fe1550ca51684))
+* **ui:** style FAQ link as a green action pill and resolve horizontal page overflow ([5d08848](https://github.com/KamcyAhaka/logrithm/commit/5d088489cc51561093fd5b893832b8a5442cf637))
+
+
+### Features
+
+* add repositories settings page to manage repository inclusion preferences ([4b5b3ab](https://github.com/KamcyAhaka/logrithm/commit/4b5b3ab57048761dab37789dcf2e7aebe6ace15a))
+* **auth/nav:** redirect logged-in users to dashboard and add profile/share-card options to navbar ([4903ec8](https://github.com/KamcyAhaka/logrithm/commit/4903ec892750993cf3008df75f7ebc7a097e7599))
+* **backend:** enforce fail-closed checks for private and org repo name masking ([5f716a5](https://github.com/KamcyAhaka/logrithm/commit/5f716a51f8aa4a9f6c917953f4ea3a72214cdf9c))
+* **backend:** mask private and org repository names in Gemini insights based on user settings ([5579762](https://github.com/KamcyAhaka/logrithm/commit/5579762544eef1000235bead779df9681dd16dda))
+* convert Repositories header into a navigable link to settings ([992ca4c](https://github.com/KamcyAhaka/logrithm/commit/992ca4cb6b7d6a3dfb23cc12e879080bfd8e7b19))
+* implement PWA manifest and add custom icons ([11808be](https://github.com/KamcyAhaka/logrithm/commit/11808bec9a738e38ad2ed0bdbd597d0f9e153ebd))
+* **ui:** add copy profile button with toast notification and polish comparison panel layout ([25273df](https://github.com/KamcyAhaka/logrithm/commit/25273df05771fc4bad7ccc160bce37bf493349bc))
+* **ui:** add private and org repo visibility toggle switches to settings page ([efcb69a](https://github.com/KamcyAhaka/logrithm/commit/efcb69a28d42892be08380c5b93e08b807eff351))
+
 ## [1.1.1](https://github.com/KamcyAhaka/logrithm/compare/v1.1.0...v1.1.1) (2026-06-05)
 
 
