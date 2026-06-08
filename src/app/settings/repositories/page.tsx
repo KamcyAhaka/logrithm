@@ -99,8 +99,9 @@ export default function RepositoriesSettingsPage() {
       const batch = writeBatch(db);
 
       // Save only changed repository documents
-      const changedRepos = repos.filter((r, idx) => {
-        return r.excludedByUser !== initialRepos[idx]?.excludedByUser;
+      const changedRepos = repos.filter((r) => {
+        const initial = initialRepos.find((ir) => ir.repoId === r.repoId);
+        return initial && r.excludedByUser !== initial.excludedByUser;
       });
 
       for (const repo of changedRepos) {
