@@ -34,6 +34,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={cn('dark font-sans', inter.variable, jetbrainsMonoHeading.variable)}>
+      <head>
+        <meta name="apple-mobile-web-app-title" content="Logrithm" />
+      </head>
       <body style={{ minHeight: '100vh', background: 'var(--bg-page)' }}>{children}</body>
     </html>
   );
