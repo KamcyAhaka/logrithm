@@ -94,11 +94,11 @@ function buildPrompt(
 
       if (isPrivate) {
         if (isOrg) {
-          if (privacySettings && !privacySettings.display.showOrgRepoNames) {
+          if (privacySettings?.display?.showOrgRepoNames !== true) {
             repoName = `private-org-repo-${orgRepoIndex++}`;
           }
         } else {
-          if (privacySettings && !privacySettings.display.showPrivateRepoNames) {
+          if (privacySettings?.display?.showPrivateRepoNames !== true) {
             repoName = `private-personal-repo-${privateRepoIndex++}`;
           }
         }
