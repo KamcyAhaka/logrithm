@@ -1,3 +1,23 @@
+# [1.1.0-beta.3](https://github.com/KamcyAhaka/logrithm/compare/v1.1.0-beta.2...v1.1.0-beta.3) (2026-06-08)
+
+
+### Bug Fixes
+
+* ensure correct repository tracking by matching via repoId instead of array index ([c76799f](https://github.com/KamcyAhaka/logrithm/commit/c76799fcb09fed80c0ef603df8cd3c6c41ba74eb))
+* **ui:** style FAQ link as a green action pill and resolve horizontal page overflow ([89c2b20](https://github.com/KamcyAhaka/logrithm/commit/89c2b20861a48e7df6f839c6dabe96453048bf7b))
+
+
+### Features
+
+* add repositories settings page to manage repository inclusion preferences ([cb0ccd9](https://github.com/KamcyAhaka/logrithm/commit/cb0ccd91c0f2618bcdb1404ff9af59804508d09e))
+* **auth/nav:** redirect logged-in users to dashboard and add profile/share-card options to navbar ([6fbf29b](https://github.com/KamcyAhaka/logrithm/commit/6fbf29b61f2b890462ee9929e5d6465c5407cbed))
+* **backend:** enforce fail-closed checks for private and org repo name masking ([a66e67d](https://github.com/KamcyAhaka/logrithm/commit/a66e67d11941d98dabb616f9064f71b9c6d67939))
+* **backend:** mask private and org repository names in Gemini insights based on user settings ([4402cd4](https://github.com/KamcyAhaka/logrithm/commit/4402cd4089c2cce1648a16f6d845f1b706164f50))
+* convert Repositories header into a navigable link to settings ([df9e21b](https://github.com/KamcyAhaka/logrithm/commit/df9e21b2be1da93aa1daf2fae5095179ec95fc5b))
+* implement PWA manifest and add custom icons ([6f7be0b](https://github.com/KamcyAhaka/logrithm/commit/6f7be0b26be6f8e9e74370be0be80899c70236ef))
+* **ui:** add copy profile button with toast notification and polish comparison panel layout ([2d5e95e](https://github.com/KamcyAhaka/logrithm/commit/2d5e95ee9b85429f80bd7e8eee885a73b08617ff))
+* **ui:** add private and org repo visibility toggle switches to settings page ([c45c01a](https://github.com/KamcyAhaka/logrithm/commit/c45c01a928e094426c69cda81a8d650e9fa04eb9))
+
 # [1.1.0-beta.2](https://github.com/KamcyAhaka/logrithm/compare/v1.1.0-beta.1...v1.1.0-beta.2) (2026-06-04)
 
 
