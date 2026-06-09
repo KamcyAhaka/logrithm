@@ -1,0 +1,44 @@
+name: Delete Merged Branch
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  delete-branch:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete head branch
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const headRef = context.payload.pull_request.head.ref;
+            
+            // Safety check: Never try to delete critical branches
+            const protectedBranches = ['main', 'beta', 'dev'];
+            if (protectedBranches.includes(headRef)) {
+              console.log(`Skipping safety check for branch: ${headRef}`);
+              return;
+            }
+            
+            try {
+              await github.rest.git.deleteRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `heads/${headRef}`
+              });
+              console.log(`Successfully deleted branch: ${headRef}`);
+            } catch (error) {
+              // 422 indicates the branch has already been deleted
+              if (error.status === 422) {
+                console.log(`Branch ${headRef} was already deleted.`);
+              } else {
+                throw error;
+              }
+            }
