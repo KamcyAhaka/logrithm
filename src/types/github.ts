@@ -84,6 +84,8 @@ export interface UserProfile {
   createdAt: string; // ISO string
   plan: Plan;
   isPublic: boolean; // controls /share/[username] visibility
+  agreedToTerms?: boolean;
+  agreedAt?: string;
 }
 
 // Phase 2 data model shapes — scaffolded now, written by scheduler later
