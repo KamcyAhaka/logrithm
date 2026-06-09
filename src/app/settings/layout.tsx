@@ -16,7 +16,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
   const pathname = usePathname();
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#0a0a0a] font-sans text-white/70">
+    <div className="flex min-h-screen flex-col overflow-x-hidden bg-[#0a0a0a] font-sans text-white/70">
       <Navbar />
 
       <div className="mx-auto mt-4 flex w-full max-w-5xl flex-1 flex-col gap-8 p-4 md:mt-8 md:flex-row md:p-8">
@@ -56,7 +56,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
           </div>
         </aside>
 
-        <main className="max-w-2xl flex-1">{children}</main>
+        <main className="max-w-2xl min-w-0 flex-1">{children}</main>
       </div>
     </div>
   );
