@@ -27,6 +27,8 @@ export const metadata: Metadata = {
   },
 };
 
+import Footer from '@/components/layout/Footer';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -37,7 +39,17 @@ export default function RootLayout({
       <head>
         <meta name="apple-mobile-web-app-title" content="Logrithm" />
       </head>
-      <body style={{ minHeight: '100vh', background: 'var(--bg-page)' }}>{children}</body>
+      <body
+        style={{
+          minHeight: '100vh',
+          background: 'var(--bg-page)',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>{children}</div>
+        <Footer />
+      </body>
     </html>
   );
 }
