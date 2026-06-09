@@ -28,6 +28,7 @@ export const metadata: Metadata = {
 };
 
 import Footer from '@/components/layout/Footer';
+import ScrollToTop from '@/components/layout/ScrollToTop';
 
 export default function RootLayout({
   children,
@@ -47,6 +48,7 @@ export default function RootLayout({
           flexDirection: 'column',
         }}
       >
+        <ScrollToTop />
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>{children}</div>
         <Footer />
       </body>
