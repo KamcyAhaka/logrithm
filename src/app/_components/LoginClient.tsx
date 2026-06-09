@@ -12,6 +12,7 @@ import {
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { storeGitHubToken } from '@/lib/functions';
+import Link from 'next/link';
 import { GitBranch, Zap } from 'lucide-react';
 
 export default function LoginClient() {
@@ -20,6 +21,7 @@ export default function LoginClient() {
   const [error, setError] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [authChecking, setAuthChecking] = useState(true);
+  const [agreed, setAgreed] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -68,6 +70,8 @@ export default function LoginClient() {
           plan: 'free', // hardcoded — pro comes in Phase 2
           isPublic: false, // user must opt in
           onboardingCompleted: false,
+          agreedToTerms: true,
+          agreedAt: new Date().toISOString(),
         });
       } else {
         // Only update safely overwritable fields for returning users
@@ -270,6 +274,65 @@ export default function LoginClient() {
         )}
       </div>
 
+      {/* Checkbox */}
+      {!currentUser && !authChecking && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '0.75rem',
+            width: '100%',
+            maxWidth: 320,
+            marginBottom: '1rem',
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.75rem',
+            color: 'var(--text-secondary)',
+          }}
+        >
+          <input
+            id="terms-checkbox"
+            type="checkbox"
+            checked={agreed}
+            onChange={(e) => setAgreed(e.target.checked)}
+            style={{
+              marginTop: '0.15rem',
+              cursor: 'pointer',
+              accentColor: 'var(--green)',
+            }}
+          />
+          <label
+            htmlFor="terms-checkbox"
+            style={{ cursor: 'pointer', lineHeight: 1.4 }}
+            className="transition-colors hover:text-white"
+          >
+            I agree to the{' '}
+            <Link
+              href="/terms"
+              style={{ color: 'var(--green)', textDecoration: 'none' }}
+              className="hover:underline"
+            >
+              Terms of Service
+            </Link>
+            ,{' '}
+            <Link
+              href="/privacy"
+              style={{ color: 'var(--green)', textDecoration: 'none' }}
+              className="hover:underline"
+            >
+              Privacy Policy
+            </Link>
+            , and{' '}
+            <Link
+              href="/refund"
+              style={{ color: 'var(--green)', textDecoration: 'none' }}
+              className="hover:underline"
+            >
+              Refund Policy
+            </Link>
+          </label>
+        </div>
+      )}
+
       {/* CTAs */}
       <div
         style={{
@@ -296,7 +359,7 @@ export default function LoginClient() {
             id="connect-github-btn"
             className="btn btn-primary"
             onClick={handleGitHubLogin}
-            disabled={loading || authChecking}
+            disabled={loading || authChecking || !agreed}
             style={{ width: '100%', padding: '0.875rem 1.5rem', fontSize: '0.9rem' }}
           >
             <GitBranch size={16} />
@@ -329,29 +392,6 @@ export default function LoginClient() {
           {error}
         </p>
       )}
-
-      {/* Footer */}
-      <p
-        style={{
-          position: 'absolute',
-          bottom: '1.5rem',
-          fontFamily: 'var(--font-mono)',
-          fontSize: '0.68rem',
-          color: 'var(--text-muted)',
-          textAlign: 'center',
-          padding: '0 1rem',
-        }}
-      >
-        AGPL 3.0 License · Open Source ·{' '}
-        <a
-          href="https://github.com/divine/logrithm"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: 'var(--green)', textDecoration: 'none' }}
-        >
-          GitHub ↗
-        </a>
-      </p>
     </main>
   );
 }

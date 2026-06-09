@@ -19,6 +19,7 @@ import ActivityHeatmap from '@/components/dashboard/ActivityHeatmap';
 import RepoList from '@/components/dashboard/RepoList';
 import InsightPanel from '@/components/insights/InsightPanel';
 import OnboardingFlow from '@/components/dashboard/OnboardingFlow';
+import TermsModal from '@/components/dashboard/TermsModal';
 
 import { GitCommit, GitPullRequest, AlertCircle, FolderOpen } from 'lucide-react';
 
@@ -27,6 +28,7 @@ export default function DashboardClient() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [isOnboarding, setIsOnboarding] = useState(false);
+  const [mustAcceptTerms, setMustAcceptTerms] = useState(false);
   const [excludedRepoIds, setExcludedRepoIds] = useState<Set<string>>(new Set());
   const [countryCode, setCountryCode] = useState<string | null>(null);
 
@@ -91,10 +93,14 @@ export default function DashboardClient() {
               plan?: string;
               onboardingCompleted?: boolean;
               countryCode?: string | null;
+              agreedToTerms?: boolean;
             };
             const plan = profileData.plan === 'pro' ? 'pro' : 'free';
             useDashboardStore.getState().setPlan(plan);
             setCountryCode(profileData.countryCode ?? null);
+            if (profileData.agreedToTerms !== true) {
+              setMustAcceptTerms(true);
+            }
             if (profileData.onboardingCompleted === false) {
               setIsOnboarding(true);
             }
@@ -141,6 +147,10 @@ export default function DashboardClient() {
       <Navbar />
 
       {isDemoMode && <DemoBanner />}
+
+      {!isDemoMode && mustAcceptTerms && user && (
+        <TermsModal uid={user.uid} onAccept={() => setMustAcceptTerms(false)} />
+      )}
 
       {isOnboarding && activity ? (
         <OnboardingFlow
