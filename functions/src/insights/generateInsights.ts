@@ -402,6 +402,18 @@ export const generateInsights = onCall(
       forceRefresh?: boolean;
     };
 
+    if (!isDemoMode) {
+      if (!request.auth) {
+        throw new HttpsError('unauthenticated', 'The function must be called while authenticated.');
+      }
+      if (request.auth.uid !== uid) {
+        throw new HttpsError(
+          'permission-denied',
+          'You do not have permission to generate insights for this user.'
+        );
+      }
+    }
+
     if (forceRefresh && !isDemoMode) {
       try {
         const snapshot = buildSnapshot(activity);
