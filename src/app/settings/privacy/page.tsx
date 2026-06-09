@@ -228,7 +228,7 @@ export default function PrivacySettingsPage() {
 
         <div className="space-y-6">
           <div className="flex items-start justify-between gap-4">
-            <div>
+            <div className="min-w-0 flex-1">
               <label className="text-sm font-medium text-white">
                 Include your own private repos in analysis
               </label>
@@ -248,7 +248,7 @@ export default function PrivacySettingsPage() {
           </div>
 
           <div className="flex items-start justify-between gap-4">
-            <div>
+            <div className="min-w-0 flex-1">
               <label className="text-sm font-medium text-white">
                 Include org repos you&apos;ve contributed to
               </label>
@@ -278,7 +278,7 @@ export default function PrivacySettingsPage() {
 
         <div className="space-y-6">
           <div className="flex items-start justify-between gap-4">
-            <div>
+            <div className="min-w-0 flex-1">
               <label className="text-sm font-medium text-white">
                 Make your profile publicly accessible
               </label>
@@ -291,8 +291,8 @@ export default function PrivacySettingsPage() {
                     <div className="mb-1 text-[10px] tracking-wider text-white/30 uppercase">
                       Public Profile Link
                     </div>
-                    <div className="flex items-center justify-between gap-4">
-                      <span className="truncate text-white/60">
+                    <div className="flex min-w-0 items-center justify-between gap-4">
+                      <span className="min-w-0 truncate text-white/60">
                         {typeof window !== 'undefined'
                           ? `${window.location.origin}/u/${githubLogin}`
                           : `https://logrithm.dev/u/${githubLogin}`}
@@ -323,8 +323,8 @@ export default function PrivacySettingsPage() {
                     <div className="mb-1 text-[10px] tracking-wider text-white/30 uppercase">
                       Share Card Builder Link
                     </div>
-                    <div className="flex items-center justify-between gap-4">
-                      <span className="truncate text-white/60">
+                    <div className="flex min-w-0 items-center justify-between gap-4">
+                      <span className="min-w-0 truncate text-white/60">
                         {typeof window !== 'undefined'
                           ? `${window.location.origin}/share/${githubLogin}`
                           : `https://logrithm.dev/share/${githubLogin}`}
@@ -365,7 +365,7 @@ export default function PrivacySettingsPage() {
           </div>
 
           <div className="flex items-start justify-between gap-4 opacity-90">
-            <div>
+            <div className="min-w-0 flex-1">
               <label className="text-sm font-medium text-white">
                 Display your activity score on your profile
               </label>
@@ -383,7 +383,7 @@ export default function PrivacySettingsPage() {
           </div>
 
           <div className="flex items-start justify-between gap-4 opacity-90">
-            <div>
+            <div className="min-w-0 flex-1">
               <label className="text-sm font-medium text-white">
                 Display your top languages on your profile
               </label>
@@ -401,7 +401,7 @@ export default function PrivacySettingsPage() {
           </div>
 
           <div className="flex items-start justify-between gap-4 opacity-90">
-            <div>
+            <div className="min-w-0 flex-1">
               <label className="text-sm font-medium text-white">
                 Display your active repositories on your profile
               </label>
@@ -532,7 +532,7 @@ export default function PrivacySettingsPage() {
 
           <div className="space-y-6 pt-2">
             <div className="flex items-start justify-between gap-4">
-              <div>
+              <div className="min-w-0 flex-1">
                 <label className="text-sm font-medium text-white">
                   Show private repository names
                 </label>
@@ -553,7 +553,7 @@ export default function PrivacySettingsPage() {
             </div>
 
             <div className="flex items-start justify-between gap-4">
-              <div>
+              <div className="min-w-0 flex-1">
                 <label className="text-sm font-medium text-white">
                   Show organization repository names
                 </label>
@@ -586,7 +586,7 @@ export default function PrivacySettingsPage() {
 
         <div className="space-y-6">
           <div className="flex items-start justify-between gap-4">
-            <div>
+            <div className="min-w-0 flex-1">
               <label className="text-sm font-medium text-white">
                 Include in global and segment-specific comparisons (anonymous)
               </label>
@@ -607,7 +607,7 @@ export default function PrivacySettingsPage() {
           </div>
 
           <div className="flex items-start justify-between gap-4">
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <label className="text-sm font-medium text-white">
                   Display peer comparisons on your profile
