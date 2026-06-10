@@ -78,7 +78,7 @@ export default function ComparisonPanel({
   const isTabLocked = (activeTab === 'language' || activeTab === 'country') && !isPro;
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-md">
+    <div className="border border-white/10 bg-white/5 p-6 backdrop-blur-md md:rounded-xl">
       <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h3 className="font-sans text-lg font-semibold text-white">Peer Comparison</h3>
@@ -160,37 +160,36 @@ export default function ComparisonPanel({
               <span className="text-[10px] text-white/20">Requires 10+ users to compile stats</span>
             </div>
           ) : (
-            <div className="grid gap-6 lg:grid-cols-5">
-              {/* Left summary cards */}
-              <div className="space-y-4 lg:col-span-2">
-                <div className="rounded-lg border border-white/5 bg-white/5 p-4">
-                  <div className="flex items-center gap-2 text-xs text-white/40">
-                    <TrendingUp className="h-4 w-4 text-[#1D9E75]" />
-                    <span>Percentile Rank</span>
-                  </div>
-                  <div className="mt-1.5 flex items-baseline gap-1">
-                    <span className="text-3xl font-extrabold text-white">{percentile}th</span>
-                    <span className="text-xs text-white/60">percentile</span>
-                  </div>
-                  <p className="mt-1 text-xs text-white/40">
-                    You score higher than {percentile}% of developers in this cohort ({name}).
-                  </p>
+            <div className="flex flex-col gap-4">
+              {/* Percentile Rank Card */}
+              <div className="rounded-lg border border-white/5 bg-white/5 p-4">
+                <div className="flex items-center gap-2 text-xs text-white/40">
+                  <TrendingUp className="h-4 w-4 text-[#1D9E75]" />
+                  <span>Percentile Rank</span>
                 </div>
+                <div className="mt-1.5 flex items-baseline gap-1">
+                  <span className="text-3xl font-extrabold text-white">{percentile}th</span>
+                  <span className="text-xs text-white/60">percentile</span>
+                </div>
+                <p className="mt-1 text-xs text-white/40">
+                  You score higher than {percentile}% of developers in this cohort ({name}).
+                </p>
+              </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="rounded-lg border border-white/5 bg-white/5 p-3">
-                    <span className="text-[10px] text-white/40 uppercase">Cohort Mean</span>
-                    <div className="text-xl font-bold text-white/80">{stats.mean}</div>
-                  </div>
-                  <div className="rounded-lg border border-white/5 bg-white/5 p-3">
-                    <span className="text-[10px] text-white/40 uppercase">Cohort Size</span>
-                    <div className="text-xl font-bold text-white/80">{stats.totalUsers}</div>
-                  </div>
+              {/* Cohort Size & Mean Grid */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-lg border border-white/5 bg-white/5 p-3">
+                  <span className="text-[10px] text-white/40 uppercase">Cohort Size</span>
+                  <div className="text-xl font-bold text-white/80">{stats.totalUsers}</div>
+                </div>
+                <div className="rounded-lg border border-white/5 bg-white/5 p-3">
+                  <span className="text-[10px] text-white/40 uppercase">Cohort Mean</span>
+                  <div className="text-xl font-bold text-white/80">{stats.mean}</div>
                 </div>
               </div>
 
-              {/* Right distribution visualizer */}
-              <div className="flex flex-col justify-center space-y-4 lg:col-span-3">
+              {/* Distribution visualizer */}
+              <div className="flex flex-col justify-center space-y-4 rounded-lg border border-white/5 bg-white/5 p-4">
                 <span className="text-xs font-medium text-white/60">
                   Distribution Cohort Spread ({name})
                 </span>
