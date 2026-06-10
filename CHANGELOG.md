@@ -1,3 +1,11 @@
+# [1.5.0](https://github.com/KamcyAhaka/logrithm/compare/v1.4.0...v1.5.0) (2026-06-10)
+
+
+### Features
+
+* add custom 404 not found page for missing routes ([1e44953](https://github.com/KamcyAhaka/logrithm/commit/1e44953e791b830d1e75acb842c456a654e61095))
+* add dynamic SVG README badge component and API endpoint to privacy settings ([8b957c9](https://github.com/KamcyAhaka/logrithm/commit/8b957c9ab2d48e28e0b974c17c90ded643e39b2a))
+
 # [1.4.0](https://github.com/KamcyAhaka/logrithm/compare/v1.3.0...v1.4.0) (2026-06-10)
 
 
