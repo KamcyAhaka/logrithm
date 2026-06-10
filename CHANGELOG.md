@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/KamcyAhaka/logrithm/compare/v1.3.0...v1.4.0) (2026-06-10)
+
+
+### Features
+
+* overhaul landing page with modular sections and preview assets ([6c65667](https://github.com/KamcyAhaka/logrithm/commit/6c656679fca276e3f629fd47e1c3af949cad8c28))
+
 # [1.3.0](https://github.com/KamcyAhaka/logrithm/compare/v1.2.0...v1.3.0) (2026-06-10)
 
 
