@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { Loader2, Check, AlertCircle } from 'lucide-react';
 import type { PrivacySettingsDocument } from '@/types/github';
+import ReadmeBadge from '@/components/dashboard/ReadmeBadge';
 
 // Default privacy settings fallback
 const DEFAULT_PRIVACY: Omit<PrivacySettingsDocument, 'updatedAt'> = {
@@ -88,7 +89,9 @@ export default function PrivacySettingsPage() {
 
         const isPublic = profileSnap.exists() ? !!profileSnap.data()?.isPublic : false;
         const plan = profileSnap.exists() ? (profileSnap.data()?.plan ?? 'free') : 'free';
-        const login = profileSnap.exists() ? (profileSnap.data()?.githubLogin ?? null) : null;
+        const rawLogin = profileSnap.exists() ? (profileSnap.data()?.githubLogin ?? null) : null;
+        const login =
+          rawLogin || (process.env.NEXT_PUBLIC_DEMO_MODE === 'true' ? 'demo-dev' : null);
         setUserPlan(plan);
         setGithubLogin(login);
 
@@ -472,6 +475,14 @@ export default function PrivacySettingsPage() {
         </div>
         <Separator className="mt-8 mb-8 bg-white/10" />
       </section>
+
+      {/* README Badge Section */}
+      {githubLogin && (
+        <section>
+          <ReadmeBadge username={githubLogin} />
+          <Separator className="mt-8 mb-8 bg-white/10" />
+        </section>
+      )}
 
       {/* Sharing Section */}
       <section>
