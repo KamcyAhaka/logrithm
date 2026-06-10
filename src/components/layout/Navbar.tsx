@@ -73,20 +73,6 @@ export default function Navbar() {
             github
           </a>
 
-          <Link
-            href="/settings"
-            style={{
-              color: 'var(--text-muted)',
-              display: 'flex',
-              alignItems: 'center',
-              transition: 'color 0.15s',
-            }}
-            className="hover:text-white"
-            aria-label="Settings"
-          >
-            <Settings size={16} />
-          </Link>
-
           {/* Client component handles auth state */}
           <NavbarAuth />
         </div>
