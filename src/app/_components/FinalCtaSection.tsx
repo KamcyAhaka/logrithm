@@ -131,7 +131,7 @@ export default function FinalCtaSection({
               disabled={loading || !agreed}
               style={{
                 width: '100%',
-                padding: '1rem 1.5rem',
+                padding: '0.625rem 1.5rem',
                 fontSize: '0.95rem',
                 fontWeight: 600,
                 borderRadius: '9999px',
