@@ -18,6 +18,7 @@ import LanguageBreakdown from '@/components/dashboard/LanguageBreakdown';
 import ActivityHeatmap from '@/components/dashboard/ActivityHeatmap';
 import RepoList from '@/components/dashboard/RepoList';
 import InsightPanel from '@/components/insights/InsightPanel';
+import ComparisonPanel from '@/components/insights/ComparisonPanel';
 import OnboardingFlow from '@/components/dashboard/OnboardingFlow';
 import TermsModal from '@/components/dashboard/TermsModal';
 
@@ -225,11 +226,23 @@ export default function DashboardClient() {
                 languageStats={languageStats}
                 countryStats={countryStats}
               />
-              <RepoList
-                repositories={activity.repositories.filter(
-                  (r) => !excludedRepoIds.has(String(r.repoId ?? r.name))
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <RepoList
+                  repositories={activity.repositories.filter(
+                    (r) => !excludedRepoIds.has(String(r.repoId ?? r.name))
+                  )}
+                />
+                {insights && (
+                  <ComparisonPanel
+                    activityScore={insights.activityScore}
+                    primaryLanguage={insights.topLanguages[0] ?? null}
+                    countryCode={countryCode ?? null}
+                    globalStats={globalStats}
+                    languageStats={languageStats}
+                    countryStats={countryStats}
+                  />
                 )}
-              />
+              </div>
             </div>
           )}
 

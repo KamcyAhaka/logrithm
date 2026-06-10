@@ -15,7 +15,6 @@ import {
 import InsightSkeleton from './InsightSkeleton';
 import type { InsightObject } from '@/types/github';
 import ScoreBreakdown from './ScoreBreakdown';
-import ComparisonPanel from './ComparisonPanel';
 import type { ComparisonStats } from '@/hooks/useComparisonStats';
 
 interface InsightPanelProps {
@@ -397,15 +396,6 @@ export default function InsightPanel({
               globalStats={globalStats ?? null}
             />
           )}
-
-          <ComparisonPanel
-            activityScore={insights.activityScore}
-            primaryLanguage={insights.topLanguages[0] ?? null}
-            countryCode={countryCode ?? null}
-            globalStats={globalStats ?? null}
-            languageStats={languageStats ?? null}
-            countryStats={countryStats ?? null}
-          />
 
           {/* Strengths */}
           <div>
