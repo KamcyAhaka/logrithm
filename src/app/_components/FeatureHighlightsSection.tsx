@@ -21,15 +21,7 @@ export default function FeatureHighlightsSection() {
       >
         {/* Feature 1 — Activity Dashboard */}
         <FadeInSection>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr',
-              gap: '3.5rem',
-              alignItems: 'center',
-            }}
-            className="lg:grid-cols-12"
-          >
+          <div className="grid grid-cols-1 items-center gap-14 lg:grid-cols-12">
             <div
               className="lg:col-span-5"
               style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}
@@ -94,15 +86,7 @@ export default function FeatureHighlightsSection() {
 
         {/* Feature 2 — Score Breakdown */}
         <FadeInSection>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr',
-              gap: '3.5rem',
-              alignItems: 'center',
-            }}
-            className="lg:grid-cols-12"
-          >
+          <div className="grid grid-cols-1 items-center gap-14 lg:grid-cols-12">
             <div
               className="lg:order-2 lg:col-span-7"
               style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}
@@ -170,15 +154,7 @@ export default function FeatureHighlightsSection() {
 
         {/* Feature 3 — Peer Comparison */}
         <FadeInSection>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr',
-              gap: '3.5rem',
-              alignItems: 'center',
-            }}
-            className="lg:grid-cols-12"
-          >
+          <div className="grid grid-cols-1 items-center gap-14 lg:grid-cols-12">
             <div
               className="lg:col-span-5"
               style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}
@@ -243,15 +219,7 @@ export default function FeatureHighlightsSection() {
 
         {/* Feature 4 — Share Cards (Carousel) */}
         <FadeInSection>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr',
-              gap: '3.5rem',
-              alignItems: 'center',
-            }}
-            className="lg:grid-cols-12"
-          >
+          <div className="grid grid-cols-1 items-center gap-14 lg:grid-cols-12">
             <div
               className="lg:order-2 lg:col-span-7"
               style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}
