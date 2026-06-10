@@ -47,11 +47,9 @@ export default function HowItWorksSection() {
         <div
           style={{
             position: 'relative',
-            display: 'grid',
-            gridTemplateColumns: '1fr',
             gap: '2.5rem',
           }}
-          className="md:grid-cols-3"
+          className="grid grid-cols-1 md:grid-cols-3"
         >
           {/* Steps */}
           {[

@@ -214,40 +214,42 @@ export default function HeroSection({
             </div>
 
             {/* Action buttons */}
-            <div style={{ display: 'flex', gap: '0.75rem', width: '100%' }}>
+            <div className="flex w-full flex-col gap-3 lg:flex-row">
               <button
                 id="connect-github-btn-hero"
-                className="btn btn-primary"
+                className="btn btn-primary whitespace-nowrap"
                 onClick={handleGitHubLogin}
                 disabled={loading || !agreed}
                 style={{
                   flex: 1,
-                  padding: '1rem 1.5rem',
-                  fontSize: '0.95rem',
+                  padding: '0.625rem 1.25rem',
+                  fontSize: '0.825rem',
                   fontWeight: 600,
                   borderRadius: '9999px',
                   backgroundColor: agreed ? '#1d9e75' : 'rgba(29, 158, 117, 0.4)',
                   cursor: agreed ? 'pointer' : 'not-allowed',
                   opacity: agreed ? 1 : 0.6,
+                  whiteSpace: 'nowrap',
                 }}
               >
-                <GitBranch size={16} />
+                <GitBranch size={15} />
                 {loading ? 'Analyzing...' : 'Connect with GitHub'}
               </button>
 
               <button
                 id="try-demo-btn-hero"
-                className="btn btn-secondary"
+                className="btn btn-secondary whitespace-nowrap"
                 onClick={handleDemo}
                 style={{
                   flex: 0.9,
-                  padding: '1rem 1.5rem',
-                  fontSize: '0.95rem',
+                  padding: '0.625rem 1.25rem',
+                  fontSize: '0.825rem',
                   borderRadius: '9999px',
                   borderColor: 'rgba(255, 255, 255, 0.15)',
+                  whiteSpace: 'nowrap',
                 }}
               >
-                <Zap size={14} />
+                <Zap size={13} />
                 Try the Demo
               </button>
             </div>
