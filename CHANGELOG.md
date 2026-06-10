@@ -1,3 +1,18 @@
+# [1.3.0](https://github.com/KamcyAhaka/logrithm/compare/v1.2.0...v1.3.0) (2026-06-10)
+
+
+### Bug Fixes
+
+* add auth validation to generateInsights function ([6b82de8](https://github.com/KamcyAhaka/logrithm/commit/6b82de86518b7827d2e5897ff06ec00bbe3b61b6))
+* prevent layout overflow and improve text truncation in settings pages ([f860964](https://github.com/KamcyAhaka/logrithm/commit/f860964cc57e40c0ea585fb2ab60ed7d453efa9d))
+* restrict slug deletion permissions to require only authentication and ownership verification ([17f14fc](https://github.com/KamcyAhaka/logrithm/commit/17f14fc374fa961288b827aed180b04e72ec43d8))
+
+
+### Features
+
+* add legal policy pages and update site footer with navigation links ([2391dec](https://github.com/KamcyAhaka/logrithm/commit/2391decf2a77662e84a76dd3418f23305db6431c))
+* add ScrollToTop component to reset scroll position on route changes ([521a20b](https://github.com/KamcyAhaka/logrithm/commit/521a20b70b7abfabe4f29f0974f89cf885e2a2c7))
+
 # [1.2.0](https://github.com/KamcyAhaka/logrithm/compare/v1.1.1...v1.2.0) (2026-06-08)
 
 
