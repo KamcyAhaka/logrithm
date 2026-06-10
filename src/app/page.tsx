@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import LoginClient from './_components/LoginClient';
+import HomeClient from './_components/HomeClient';
 
 // Login page requires Firebase at runtime — disable static prerender
 export const dynamic = 'force-dynamic';
@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export default function LoginPage() {
   return (
     <Suspense>
-      <LoginClient />
+      <HomeClient />
     </Suspense>
   );
 }
