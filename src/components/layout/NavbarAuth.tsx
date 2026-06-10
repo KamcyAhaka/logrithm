@@ -39,7 +39,21 @@ export default function NavbarAuth() {
   const username = activity?.login;
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+      <Link
+        href="/settings"
+        style={{
+          color: 'var(--text-muted)',
+          display: 'flex',
+          alignItems: 'center',
+          transition: 'color 0.15s',
+        }}
+        className="hover:text-white"
+        aria-label="Settings"
+      >
+        <Settings size={16} />
+      </Link>
+
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
