@@ -1,6 +1,7 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 import type { GitHubActivity } from '../types/github';
+import { db } from '../lib/firebase';
 import { upsertRepo, saveSnapshot } from '../lib/firestoreService';
 import { buildSnapshot } from '../lib/snapshotBuilder';
 
@@ -90,7 +91,14 @@ export const fetchActivityInternal = async (uid: string): Promise<GitHubActivity
     token = localTokenOverride;
   } else {
     try {
-      const secretName = `projects/${PROJECT_ID}/secrets/github-token-${uid}/versions/latest`;
+      // Get secretRef from Firestore users/{uid}/tokens/github
+      const tokenDoc = await db.doc(`users/${uid}/tokens/github`).get();
+      const secretRef = tokenDoc.exists ? tokenDoc.data()?.secretRef : null;
+
+      // Fallback to default secret name path if secretRef is not set in Firestore
+      const secretName =
+        secretRef || `projects/${PROJECT_ID}/secrets/github-token-${uid}/versions/latest`;
+
       const [version] = await secretClient.accessSecretVersion({ name: secretName });
       const payload = version.payload?.data;
       if (!payload) {
@@ -98,7 +106,10 @@ export const fetchActivityInternal = async (uid: string): Promise<GitHubActivity
       }
       token = typeof payload === 'string' ? payload : Buffer.from(payload).toString('utf8');
     } catch (err) {
-      console.error('[fetchGitHubActivity] Could not retrieve token from Secret Manager:', err);
+      console.error(
+        '[fetchGitHubActivity] Could not retrieve token from Secret Manager or Firestore:',
+        err
+      );
       throw new HttpsError('unauthenticated', 'GitHub token not found. Please sign in again.');
     }
   }
