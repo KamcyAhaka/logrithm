@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { GitHubActivity, Repository } from '@/types/github';
+import type { GitHubActivity } from '@/types/github';
 import { db } from '@/lib/firebase';
 import { doc, writeBatch } from 'firebase/firestore';
 import { useAuth } from '@/hooks/useAuth';
