@@ -49,6 +49,21 @@
         { "fieldPath": "countryCode", "order": "ASCENDING" },
         { "fieldPath": "score", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "profile",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [{ "fieldPath": "githubLogin", "order": "ASCENDING" }]
+    },
+    {
+      "collectionGroup": "goals",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [{ "fieldPath": "pendingInvites", "arrayConfig": "CONTAINS" }]
+    },
+    {
+      "collectionGroup": "goals",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [{ "fieldPath": "invitedUsers", "arrayConfig": "CONTAINS" }]
     }
   ],
   "fieldOverrides": []
