@@ -52,22 +52,22 @@ export const inviteAccountabilityPartner = onCall({ region: 'us-central1' }, asy
     if (profileSnap.empty) {
       return {
         success: false,
-        error: "This user either hasn't joined Logrithm or is not on a Pro plan",
+        error: "This user hasn't joined Logrithm yet.",
       };
     }
 
     const profileDoc = profileSnap.docs[0];
     const profileData = profileDoc.data();
+    const invitedUid = profileDoc.ref.parent.parent?.id;
 
-    // 2. Validate that the user is on the Pro plan
-    if (profileData.plan !== 'pro') {
+    if (!invitedUid) {
       return {
         success: false,
-        error: "This user either hasn't joined Logrithm or is not on a Pro plan",
+        error: 'Failed to resolve invited user ID.',
       };
     }
 
-    // 3. Fetch the caller's active goal
+    // 2. Fetch the caller's active goal
     const goalRef = db.doc(`users/${callerUid}/goals/${goalId}`);
     const goalSnap = await goalRef.get();
 
@@ -79,6 +79,26 @@ export const inviteAccountabilityPartner = onCall({ region: 'us-central1' }, asy
     const pendingInvites = (goalData.pendingInvites as string[]) || [];
     const invitedUsers = (goalData.invitedUsers as string[]) || [];
     const partnerUsername = profileData.githubLogin as string;
+
+    // 3. Enforce Pro-only goal restrictions
+    if (goalData.isProOnly === true && profileData.plan !== 'pro') {
+      return {
+        success: false,
+        error: 'Only Pro users can be invited to Pro-only goals.',
+      };
+    }
+
+    // 4. Enforce Free user goal limits
+    if (profileData.plan !== 'pro') {
+      const invitedGoalsSnap = await db.collection(`users/${invitedUid}/goals`).get();
+      if (invitedGoalsSnap.size >= 1) {
+        return {
+          success: false,
+          error:
+            'Free accounts are limited to one goal. This user already has a goal and cannot be invited.',
+        };
+      }
+    }
 
     if (invitedUsers.includes(partnerUsername)) {
       return {
