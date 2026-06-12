@@ -7,7 +7,7 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { signOut } from 'firebase/auth';
 import { auth, db, functions } from '@/lib/firebase';
-import { Loader2, ShieldAlert, Check } from 'lucide-react';
+import { Loader2, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface TermsModalProps {
