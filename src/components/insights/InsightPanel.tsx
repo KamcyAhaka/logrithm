@@ -35,10 +35,7 @@ export default function InsightPanel({
   error,
   onRun,
   login,
-  countryCode,
   globalStats,
-  languageStats,
-  countryStats,
 }: InsightPanelProps) {
   const [showToast, setShowToast] = useState(false);
 

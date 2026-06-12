@@ -6,7 +6,7 @@ import { generateInsightsInternal } from '../insights/generateInsights';
 import { buildSnapshot } from '../lib/snapshotBuilder';
 import { computeAndSaveStats } from '../lib/leaderboardService';
 
-export const scheduledAnalysis = onSchedule('every 1 hours', async (event) => {
+export const scheduledAnalysis = onSchedule('every 1 hours', async () => {
   try {
     const currentHour = new Date().getHours();
     const todayStart = new Date();
