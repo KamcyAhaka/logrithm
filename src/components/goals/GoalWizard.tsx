@@ -1,14 +1,9 @@
 'use client';
 
-import { ChevronRight, Loader2, Calendar, CheckCircle2 } from 'lucide-react';
+import { ChevronRight, Loader2, Calendar, CheckCircle2, Lock } from 'lucide-react';
 import type { GoalActionPlanResult } from '@/lib/functions';
 import type { InsightObject } from '@/types/github';
-
-interface Preset {
-  label: 'Good' | 'Great' | 'Elite' | 'Perfect';
-  score: number;
-  description: string;
-}
+import type { Preset } from '@/types/goals';
 
 interface GoalWizardProps {
   step: 1 | 2;
@@ -19,6 +14,8 @@ interface GoalWizardProps {
   generatingPlan: boolean;
   actionPlan: GoalActionPlanResult | null;
   savingGoal: boolean;
+  isPro: boolean;
+  onUpgradeClick: () => void;
   onCancel: () => void;
   onNext: () => void;
   onBack: () => void;
@@ -34,6 +31,8 @@ export default function GoalWizard({
   generatingPlan,
   actionPlan,
   savingGoal,
+  isPro,
+  onUpgradeClick,
   onCancel,
   onNext,
   onBack,
@@ -70,26 +69,42 @@ export default function GoalWizard({
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {filteredPresets.map((preset) => (
-                <button
-                  key={preset.label}
-                  type="button"
-                  onClick={() => setSelectedTarget(preset)}
-                  className={`flex flex-col rounded-2xl border p-5 text-left transition-all ${
-                    selectedTarget?.label === preset.label
-                      ? 'border-[#1D9E75] bg-[#1D9E75]/5'
-                      : 'border-white/5 bg-black/20 hover:border-white/10'
-                  }`}
-                >
-                  <div className="mb-1 flex w-full items-center justify-between">
-                    <span className="font-mono font-bold text-white">{preset.label}</span>
-                    <span className="font-mono text-sm font-semibold text-[#1D9E75]">
-                      Target: {preset.score}
-                    </span>
-                  </div>
-                  <p className="text-xs text-white/40">{preset.description}</p>
-                </button>
-              ))}
+              {filteredPresets.map((preset) => {
+                const isLocked = preset.isProOnly && !isPro;
+                return (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    onClick={() => {
+                      if (isLocked) {
+                        onUpgradeClick();
+                      } else {
+                        setSelectedTarget(preset);
+                      }
+                    }}
+                    className={`flex flex-col rounded-2xl border p-5 text-left transition-all ${
+                      selectedTarget?.label === preset.label
+                        ? 'border-[#1D9E75] bg-[#1D9E75]/5'
+                        : 'border-white/5 bg-black/20 hover:border-white/10'
+                    } ${isLocked ? 'cursor-pointer hover:border-purple-500/30' : ''}`}
+                  >
+                    <div className="mb-1 flex w-full items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-bold text-white">{preset.label}</span>
+                        {preset.isProOnly && (
+                          <span className="flex items-center gap-1 rounded-full border border-purple-500/20 bg-purple-500/10 px-2 py-0.5 font-mono text-[9px] font-bold text-purple-400">
+                            <Lock size={9} /> PRO
+                          </span>
+                        )}
+                      </div>
+                      <span className="font-mono text-sm font-semibold text-[#1D9E75]">
+                        Target: {preset.score}
+                      </span>
+                    </div>
+                    <p className="text-xs text-white/40">{preset.description}</p>
+                  </button>
+                );
+              })}
             </div>
           )}
 
