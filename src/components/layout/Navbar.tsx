@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { GitBranch, Settings } from 'lucide-react';
+import { GitBranch } from 'lucide-react';
 import NavbarAuth from './NavbarAuth';
 
 // Wordmark: "log" normal · "r" green · "ithm" normal — consistent with login page
