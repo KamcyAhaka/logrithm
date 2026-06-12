@@ -86,6 +86,10 @@ export interface UserProfile {
   isPublic: boolean; // controls /share/[username] visibility
   agreedToTerms?: boolean;
   agreedAt?: string;
+  currentScore?: number;
+  lastAnalyzedAt?: string;
+  analysisStatus?: string;
+  updatedAt?: string;
 }
 
 // Phase 2 data model shapes — scaffolded now, written by scheduler later
