@@ -5,7 +5,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import Image from 'next/image';
 import Link from 'next/link';
-import { LogOut, User as UserIcon, Settings, Share2 } from 'lucide-react';
+import { LogOut, User as UserIcon, Settings, Share2, Target } from 'lucide-react';
 import { useDashboardStore } from '@/store/useDashboardStore';
 import {
   DropdownMenu,
@@ -40,6 +40,24 @@ export default function NavbarAuth() {
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+      <Link
+        href="/goals"
+        style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: '0.8rem',
+          color: 'var(--text-muted)',
+          textDecoration: 'none',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.375rem',
+          transition: 'color 0.15s',
+        }}
+        className="hover:text-white"
+      >
+        <Target size={13} />
+        goals
+      </Link>
+
       <Link
         href="/settings"
         style={{
