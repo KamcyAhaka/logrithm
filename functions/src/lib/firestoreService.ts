@@ -159,6 +159,25 @@ export const saveInsightHistory = async (
     { merge: true }
   );
 
+  // Check if there is an active goal that has been achieved
+  try {
+    const goalsRef = db.collection(`users/${uid}/goals`);
+    const activeGoalsSnap = await goalsRef.where('status', '==', 'active').limit(1).get();
+    if (!activeGoalsSnap.empty) {
+      const activeGoalDoc = activeGoalsSnap.docs[0];
+      const activeGoalData = activeGoalDoc.data();
+      if (insight.activityScore >= activeGoalData.targetScore) {
+        batch.update(activeGoalDoc.ref, {
+          status: 'achieved',
+          achievedAt: timestamp,
+          updatedAt: timestamp,
+        });
+      }
+    }
+  } catch (err) {
+    console.error(`[saveInsightHistory] Error checking active goals for ${uid}:`, err);
+  }
+
   await batch.commit();
 
   return newInsightDoc.id;
