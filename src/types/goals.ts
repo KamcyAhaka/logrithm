@@ -4,9 +4,10 @@ import type { Timestamp } from 'firebase/firestore';
 // ─── Shared Goal Types ────────────────────────────────────────────────────────
 
 export interface Preset {
-  label: 'Good' | 'Great' | 'Elite' | 'Perfect';
+  label: 'Good' | 'Great' | 'Elite' | 'Perfect' | 'Grandmaster' | 'Godlike';
   score: number;
   description: string;
+  isProOnly?: boolean;
 }
 
 export const PRESETS: Preset[] = [
@@ -40,4 +41,5 @@ export interface GoalDocument {
   updatedAt: Date | Timestamp | FieldValue;
   achievedAt: Date | Timestamp | FieldValue | null;
   invitedUsers: string[];
+  isProOnly?: boolean;
 }
