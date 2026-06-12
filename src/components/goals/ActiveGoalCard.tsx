@@ -1,6 +1,6 @@
 'use client';
 
-import { Trash2, TrendingUp, Calendar } from 'lucide-react';
+import { Trash2, TrendingUp, Calendar, Lock } from 'lucide-react';
 import type { GoalDocument } from '@/types/goals';
 
 interface ActiveGoalCardProps {
@@ -8,6 +8,8 @@ interface ActiveGoalCardProps {
   currentScore: number;
   estimatedWeeksText: string;
   progressPercent: number;
+  isPro: boolean;
+  onUpgradeClick: () => void;
   onChangeGoal: () => void;
   onAbandonGoal: () => void;
 }
@@ -17,6 +19,8 @@ export default function ActiveGoalCard({
   currentScore,
   estimatedWeeksText,
   progressPercent,
+  isPro,
+  onUpgradeClick,
   onChangeGoal,
   onAbandonGoal,
 }: ActiveGoalCardProps) {
@@ -37,9 +41,16 @@ export default function ActiveGoalCard({
 
         <div className="flex items-center gap-3">
           <button
-            onClick={onChangeGoal}
-            className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 font-mono text-xs font-medium text-white transition-colors hover:bg-white/10"
+            onClick={() => {
+              if (!isPro) {
+                onUpgradeClick();
+              } else {
+                onChangeGoal();
+              }
+            }}
+            className="flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 font-mono text-xs font-medium text-white transition-colors hover:bg-white/10"
           >
+            {!isPro && <Lock className="h-3 w-3 text-purple-400" />}
             Change goal
           </button>
           <button

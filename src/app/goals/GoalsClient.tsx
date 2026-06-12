@@ -9,8 +9,6 @@ import { db } from '@/lib/firebase';
 import {
   collection,
   query,
-  where,
-  limit,
   getDocs,
   getDoc,
   doc,
@@ -34,10 +32,9 @@ import type { UserProfile, InsightObject } from '@/types/github';
 import type { ComparisonStats } from '@/hooks/useComparisonStats';
 import { type GoalDocument, PRESETS } from '@/types/goals';
 
-// Layout
+import { Target, Loader2, Lock, X } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import DemoBanner from '@/components/layout/DemoBanner';
-import { Target, Loader2 } from 'lucide-react';
 
 // Goals subcomponents
 import FreeGate from '@/components/goals/FreeGate';
@@ -47,6 +44,7 @@ import ActiveGoalCard from '@/components/goals/ActiveGoalCard';
 import GoalWizard from '@/components/goals/GoalWizard';
 import PendingInvitesBanner from '@/components/goals/PendingInvitesBanner';
 import SupportingGoalsList from '@/components/goals/SupportingGoalsList';
+import PastGoalsList from '@/components/goals/PastGoalsList';
 
 // ─── Demo fixtures ─────────────────────────────────────────────────────────────
 const DEMO_PROFILE: UserProfile = {
@@ -119,6 +117,9 @@ export default function GoalsClient() {
 
   // isPro is derived directly from Firestore (not Zustand) to survive hard refreshes
   const [isPro, setIsPro] = useState<boolean | null>(null);
+  const [totalGoalsCount, setTotalGoalsCount] = useState(0);
+  const [pastGoals, setPastGoals] = useState<GoalDocument[]>([]);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // Profile / stats / history
   const [profileData, setProfileData] = useState<UserProfile | null>(null);
@@ -254,18 +255,24 @@ export default function GoalsClient() {
     setLoadingGoal(true);
     try {
       const snap = await getDocs(
-        query(collection(db, 'users', user.uid, 'goals'), where('status', '==', 'active'), limit(1))
+        query(collection(db, 'users', user.uid, 'goals'), orderBy('createdAt', 'desc'))
       );
-      if (!snap.empty) {
-        const goalData = { id: snap.docs[0].id, ...snap.docs[0].data() } as GoalDocument;
-        setActiveGoal(goalData);
-        await loadPartners(goalData);
+      setTotalGoalsCount(snap.size);
+
+      const allGoals = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as GoalDocument);
+      const active = allGoals.find((g) => g.status === 'active') || null;
+      const past = allGoals.filter((g) => g.status !== 'active');
+
+      setActiveGoal(active);
+      setPastGoals(past);
+
+      if (active) {
+        await loadPartners(active);
       } else {
-        setActiveGoal(null);
         setPartners([]);
       }
     } catch (err) {
-      console.error('[GoalsClient] Failed to load active goal:', err);
+      console.error('[GoalsClient] Failed to load goals:', err);
     } finally {
       setLoadingGoal(false);
     }
@@ -451,6 +458,7 @@ Return ONLY a valid JSON object with keys:
         achievedAt: null,
         invitedUsers: ['alpha_coder', 'beta_builder'],
       });
+      setTotalGoalsCount((prev) => prev + 1);
       setPartners([
         { githubLogin: 'alpha_coder', avatarUrl: '', currentScore: 82 },
         { githubLogin: 'beta_builder', avatarUrl: '', currentScore: 77 },
@@ -491,6 +499,12 @@ Return ONLY a valid JSON object with keys:
     if (!confirm('Are you sure you want to mark this goal as abandoned? This cannot be undone.'))
       return;
     if (isDemoMode) {
+      if (activeGoal) {
+        setPastGoals((prev) => [
+          { ...activeGoal, status: 'abandoned', updatedAt: new Date() },
+          ...prev,
+        ]);
+      }
       setActiveGoal(null);
       setPartners([]);
       return;
@@ -510,6 +524,12 @@ Return ONLY a valid JSON object with keys:
   const handleChangeGoal = async () => {
     if (!confirm('Replacing this goal will mark the current one as abandoned. Continue?')) return;
     if (isDemoMode) {
+      if (activeGoal) {
+        setPastGoals((prev) => [
+          { ...activeGoal, status: 'abandoned', updatedAt: new Date() },
+          ...prev,
+        ]);
+      }
       setActiveGoal(null);
       setPartners([]);
       setIsCreatingGoal(true);
@@ -605,11 +625,14 @@ Return ONLY a valid JSON object with keys:
     );
   }
 
-  if (!isDemoMode && isPro === false) {
+  if (!isDemoMode && isPro === false && totalGoalsCount >= 1 && activeGoal === null) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--bg-page)' }}>
         <Navbar />
-        <FreeGate />
+        <FreeGate
+          title="Goal limit reached"
+          message="You have set your 1 free goal. Upgrade to Pro to set unlimited goals, track progress, and invite accountability partners."
+        />
       </div>
     );
   }
@@ -657,6 +680,8 @@ Return ONLY a valid JSON object with keys:
             generatingPlan={generatingPlan}
             actionPlan={actionPlan}
             savingGoal={savingGoal}
+            isPro={isDemoMode ? true : !!isPro}
+            onUpgradeClick={() => setShowUpgradeModal(true)}
             onCancel={() => (activeGoal ? setIsCreatingGoal(false) : router.push('/dashboard'))}
             onNext={handleProceedToStep2}
             onBack={() => setStep(1)}
@@ -672,6 +697,8 @@ Return ONLY a valid JSON object with keys:
               currentScore={currentScore}
               estimatedWeeksText={getEstimatedWeeksText()}
               progressPercent={progressPercent}
+              isPro={isDemoMode ? true : !!isPro}
+              onUpgradeClick={() => setShowUpgradeModal(true)}
               onChangeGoal={handleChangeGoal}
               onAbandonGoal={handleAbandonGoal}
             />
@@ -688,6 +715,9 @@ Return ONLY a valid JSON object with keys:
         {!loadingGoal && !isCreatingGoal && (
           <SupportingGoalsList goals={invitedGoals} loading={loadingInvitedGoals} />
         )}
+
+        {/* Goal History */}
+        {!loadingGoal && !isCreatingGoal && <PastGoalsList goals={pastGoals} />}
       </main>
 
       {isInviteModalOpen && (
@@ -703,6 +733,42 @@ Return ONLY a valid JSON object with keys:
           error={inviteError}
           success={inviteSuccess}
         />
+      )}
+
+      {/* Upgrade Modal */}
+      {showUpgradeModal && (
+        <div className="animate-fadeIn fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-[#0a0a0a]/90 p-8 text-center shadow-2xl backdrop-blur-md">
+            <button
+              onClick={() => setShowUpgradeModal(false)}
+              className="absolute top-4 right-4 text-white/45 transition-colors hover:text-white"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-purple-500/20 bg-purple-500/10 text-purple-400">
+              <Lock className="h-6 w-6" />
+            </div>
+            <h2 className="mb-2 font-mono text-xl font-bold text-white">Upgrade to Pro</h2>
+            <p className="mb-6 text-sm leading-relaxed text-white/60">
+              Unlock unlimited goals, invite accountability partners, and get premium trajectory
+              estimates.
+            </p>
+            <div className="space-y-3">
+              <a
+                href="/settings/account"
+                className="block w-full rounded-full bg-[#1D9E75] py-2.5 text-center font-mono text-sm font-bold text-white transition-all hover:scale-105 active:scale-95"
+              >
+                Get Pro
+              </a>
+              <button
+                onClick={() => setShowUpgradeModal(false)}
+                className="w-full rounded-full border border-white/10 bg-white/5 py-2.5 font-mono text-sm font-semibold text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
