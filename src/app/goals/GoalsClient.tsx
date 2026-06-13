@@ -181,7 +181,6 @@ export default function GoalsClient() {
           return;
         }
         if (!user) return;
-
         const profileSnap = await getDoc(doc(db, 'users', user.uid, 'profile', 'data'));
         if (profileSnap.exists()) {
           const profile = profileSnap.data() as UserProfile;
@@ -254,12 +253,12 @@ export default function GoalsClient() {
     if (!user?.uid) return;
     setLoadingGoal(true);
     try {
-      const snap = await getDocs(
+      const goalsSnap = await getDocs(
         query(collection(db, 'users', user.uid, 'goals'), orderBy('createdAt', 'desc'))
       );
-      setTotalGoalsCount(snap.size);
+      setTotalGoalsCount(goalsSnap.size);
 
-      const allGoals = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as GoalDocument);
+      const allGoals = goalsSnap.docs.map((d) => ({ id: d.id, ...d.data() }) as GoalDocument);
       const active = allGoals.find((g) => g.status === 'active') || null;
       const past = allGoals.filter((g) => g.status !== 'active');
 
