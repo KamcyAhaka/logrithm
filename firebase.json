@@ -39,7 +39,14 @@
       "predeploy": ["cd functions && bun run build"]
     }
   ],
-  "firestore": {
-    "rules": "firestore.rules"
-  }
+  "firestore": [
+    {
+      "database": "(default)",
+      "rules": "firestore.rules"
+    },
+    {
+      "database": "dev-db",
+      "rules": "firestore.rules"
+    }
+  ]
 }
