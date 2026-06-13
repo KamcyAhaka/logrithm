@@ -1,4 +1,5 @@
-import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { HttpsError } from 'firebase-functions/v2/https';
+import { onCall } from '../lib/firebase';
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 import type { GitHubActivity } from '../types/github';
 import { db } from '../lib/firebase';

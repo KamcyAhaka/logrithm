@@ -1,5 +1,4 @@
-import { onCall, HttpsError } from 'firebase-functions/v2/https';
-import { initializeApp, getApps } from 'firebase-admin/app';
+import { HttpsError } from 'firebase-functions/v2/https';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getSecret } from '../secrets/getSecret';
 import type { GitHubActivity, InsightObject, PrivacySettingsDocument } from '../types/github';
@@ -11,7 +10,7 @@ import {
   updateAnalysisStatus,
 } from '../lib/firestoreService';
 import type { RepoDocument } from '../types/github';
-import { db } from '../lib/firebase'; // Added to resolve db.doc TS error
+import { onCall, db } from '../lib/firebase'; // Added to resolve db.doc TS error
 import { getRepoLimit, assertCanRefresh, getUserPlan } from '../lib/planService';
 import { calculateActivityScore } from '../lib/scoreCalculator';
 import { upsertLeaderboardEntry } from '../lib/leaderboardService';
@@ -47,11 +46,6 @@ const DUMMY_INSIGHTS: InsightObject = {
     'cross-platform',
   ],
 };
-
-// Init admin SDK if not already initialised
-if (getApps().length === 0) {
-  initializeApp();
-}
 
 // ---------------------------------------------------------------------------
 // Gemini prompt builder
