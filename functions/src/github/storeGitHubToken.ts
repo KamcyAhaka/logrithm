@@ -1,12 +1,9 @@
-import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { HttpsError } from 'firebase-functions/v2/https';
+import { onCall, db } from '../lib/firebase';
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
-import { getApps, initializeApp } from 'firebase-admin/app';
-import { getFirestore, FieldValue } from 'firebase-admin/firestore';
-
-if (getApps().length === 0) initializeApp();
+import { FieldValue } from 'firebase-admin/firestore';
 
 const secretClient = new SecretManagerServiceClient();
-const db = getFirestore();
 
 const PROJECT_ID = process.env.GCLOUD_PROJECT ?? 'logrithm-ai';
 
