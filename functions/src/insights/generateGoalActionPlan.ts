@@ -1,11 +1,7 @@
-import { onCall, HttpsError } from 'firebase-functions/v2/https';
-import { initializeApp, getApps } from 'firebase-admin/app';
+import { HttpsError } from 'firebase-functions/v2/https';
+import { onCall } from '../lib/firebase';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getSecret } from '../secrets/getSecret';
-
-if (getApps().length === 0) {
-  initializeApp();
-}
 
 const DUMMY_ACTION_PLAN = {
   dimensionGaps: [

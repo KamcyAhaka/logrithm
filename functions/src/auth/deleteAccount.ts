@@ -1,6 +1,6 @@
-import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { HttpsError } from 'firebase-functions/v2/https';
+import { onCall, db } from '../lib/firebase';
 import { getAuth } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 import { computeAnonymousId } from '../lib/leaderboardService';
 
@@ -16,7 +16,6 @@ export const deleteAccount = onCall(
     }
 
     const uid = request.auth.uid;
-    const db = getFirestore();
     const auth = getAuth();
 
     try {
