@@ -17,7 +17,7 @@ export async function getAdminDb(): Promise<Firestore | null> {
   if (adminDb) return adminDb;
 
   try {
-    const { initializeApp, getApps } = await import('firebase-admin/app');
+    const { initializeApp, getApps, getApp } = await import('firebase-admin/app');
     const { getFirestore } = await import('firebase-admin/firestore');
 
     if (getApps().length === 0) {
@@ -30,7 +30,8 @@ export async function getAdminDb(): Promise<Firestore | null> {
       });
     }
 
-    adminDb = getFirestore();
+    const app = getApp();
+    adminDb = getFirestore(app, process.env.NODE_ENV === 'development' ? 'dev-db' : '(default)');
     return adminDb;
   } catch (err) {
     // Graceful degradation: if credentials aren't available, return null.
