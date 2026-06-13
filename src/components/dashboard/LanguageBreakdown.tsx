@@ -30,6 +30,7 @@ export default function LanguageBreakdown({ repositories }: LanguageBreakdownPro
     }, {});
 
   const data = Object.entries(langMap)
+    .filter(([, { count }]) => count > 0)
     .sort(([, a], [, b]) => b.count - a.count)
     .slice(0, 6)
     .map(([name, { count, color }], i) => ({
