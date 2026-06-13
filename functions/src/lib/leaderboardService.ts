@@ -1,9 +1,8 @@
-import { getFirestore, FieldValue } from 'firebase-admin/firestore';
+import { FieldValue } from 'firebase-admin/firestore';
 import { createHmac } from 'crypto';
 import { getSecret } from '../secrets/getSecret';
 import type { ScoreBreakdown } from './scoreCalculator';
-
-const db = getFirestore();
+import { db } from './firebase';
 
 let cachedSalt: string | null = null;
 
