@@ -172,26 +172,28 @@ export default function ComparisonPanel({
                   <span className="text-xs text-white/60">percentile</span>
                 </div>
                 <p className="mt-1 text-xs text-white/40">
-                  You score higher than {percentile}% of developers in this cohort ({name}).
+                  You score higher than {percentile}% of developers in this group ({name}).
                 </p>
               </div>
 
-              {/* Cohort Size & Mean Grid */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-lg border border-white/5 bg-white/5 p-3">
-                  <span className="text-[10px] text-white/40 uppercase">Cohort Size</span>
-                  <div className="text-xl font-bold text-white/80">{stats.totalUsers}</div>
+              {/* Stats Grid */}
+              {stats.totalUsers >= 10 && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-lg border border-white/5 bg-white/5 p-3">
+                    <span className="text-[10px] text-white/40 uppercase">Compared Profiles</span>
+                    <div className="text-xl font-bold text-white/80">{stats.totalUsers}</div>
+                  </div>
+                  <div className="rounded-lg border border-white/5 bg-white/5 p-3">
+                    <span className="text-[10px] text-white/40 uppercase">Average Score</span>
+                    <div className="text-xl font-bold text-white/80">{stats.mean}</div>
+                  </div>
                 </div>
-                <div className="rounded-lg border border-white/5 bg-white/5 p-3">
-                  <span className="text-[10px] text-white/40 uppercase">Cohort Mean</span>
-                  <div className="text-xl font-bold text-white/80">{stats.mean}</div>
-                </div>
-              </div>
+              )}
 
               {/* Distribution visualizer */}
               <div className="flex flex-col justify-center space-y-4 rounded-lg border border-white/5 bg-white/5 p-4">
                 <span className="text-xs font-medium text-white/60">
-                  Distribution Cohort Spread ({name})
+                  Score Distribution ({name})
                 </span>
                 <div className="relative py-4">
                   {/* The bar track */}
