@@ -183,8 +183,8 @@ export default function FeatureHighlightsSection() {
               </h3>
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.95rem' }}>
                 Compare your score against developers globally, by language, or by country. Know
-                your percentile rank and how you stack up against your cohort. Real-world
-                positioning that provides genuine context.
+                your percentile rank and how you stack up against others. Real-world positioning
+                that provides genuine context.
               </p>
             </div>
 
