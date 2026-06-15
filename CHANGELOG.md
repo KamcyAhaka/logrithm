@@ -1,3 +1,23 @@
+# [1.7.0](https://github.com/KamcyAhaka/logrithm/compare/v1.6.0...v1.7.0) (2026-06-15)
+
+
+### Bug Fixes
+
+* **dashboard:** hide languages with 0 commits in breakdown chart and legend ([05c06d4](https://github.com/KamcyAhaka/logrithm/commit/05c06d4f373a23a610f7b2f837cce01f075b8fd3))
+* **firebase:** route admin db connections to dev-db in local development ([8f8039d](https://github.com/KamcyAhaka/logrithm/commit/8f8039d577960eab5e8c757c53b1bae32dcca5d7))
+* **functions:** update plan and leaderboard services to use dynamic db proxy ([f608a7e](https://github.com/KamcyAhaka/logrithm/commit/f608a7e1e51c2c209c5c3073b2d88a27ef261a1f))
+* **insights:** replace cohort terminology with user-friendly terms and add stats threshold guard ([5d4ca04](https://github.com/KamcyAhaka/logrithm/commit/5d4ca044a0989cfb55778fafbe870e58824002ee))
+
+
+### Features
+
+* **backend:** add accountability partner flow, action plan generation, and configure security rules ([06bef24](https://github.com/KamcyAhaka/logrithm/commit/06bef24e71751987879e942e109ab7c2c744f237))
+* **backend:** relax invite constraints and configure collectionGroup indexes ([0b2862c](https://github.com/KamcyAhaka/logrithm/commit/0b2862c6dc250d3bc249062f7b0662b392d06282))
+* **frontend:** implement goals dashboard, wizard, progress tracking & partner invites ([eb9d8f0](https://github.com/KamcyAhaka/logrithm/commit/eb9d8f0fb38d898a83fa64110fdb2bd48bef28b0))
+* **frontend:** implement tiered goal limits, upgrade modal, and past goals list ([e7bf92b](https://github.com/KamcyAhaka/logrithm/commit/e7bf92b8946f5513b073f788b620900122f7154a))
+* **functions:** implement dynamic dev-db proxy routing using AsyncLocalStorage ([5f758d8](https://github.com/KamcyAhaka/logrithm/commit/5f758d8e601d97d4d160766859925233af4932bf))
+* **types:** support isProOnly presets and goal documents ([a8f0f5f](https://github.com/KamcyAhaka/logrithm/commit/a8f0f5f88d903f2182dcfe8a4f8a0f8f226dc462))
+
 # [1.6.0](https://github.com/KamcyAhaka/logrithm/compare/v1.5.0...v1.6.0) (2026-06-15)
 
 
