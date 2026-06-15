@@ -1,3 +1,23 @@
+# [1.1.0-beta.8](https://github.com/KamcyAhaka/logrithm/compare/v1.1.0-beta.7...v1.1.0-beta.8) (2026-06-15)
+
+
+### Bug Fixes
+
+* **dashboard:** hide languages with 0 commits in breakdown chart and legend ([c961f75](https://github.com/KamcyAhaka/logrithm/commit/c961f75f16b1946217994d4d272f84d98452014f))
+* **firebase:** route admin db connections to dev-db in local development ([aa8319d](https://github.com/KamcyAhaka/logrithm/commit/aa8319d9e32965f6a1060395e7a8e0bfe495f1a3))
+* **functions:** update plan and leaderboard services to use dynamic db proxy ([70b3bc1](https://github.com/KamcyAhaka/logrithm/commit/70b3bc1ba65672ae7eddaf597f1d2039e4ebc9fc))
+* **insights:** replace cohort terminology with user-friendly terms and add stats threshold guard ([a9d1158](https://github.com/KamcyAhaka/logrithm/commit/a9d11584565e07378b97f47c2195d6a97cb8efa9))
+
+
+### Features
+
+* **backend:** add accountability partner flow, action plan generation, and configure security rules ([eb697f0](https://github.com/KamcyAhaka/logrithm/commit/eb697f0d6ad8c2ea65175ca10334d15ce5fc4bae))
+* **backend:** relax invite constraints and configure collectionGroup indexes ([1d96842](https://github.com/KamcyAhaka/logrithm/commit/1d968426cc546617a726bdd278a10080a55faa56))
+* **frontend:** implement goals dashboard, wizard, progress tracking & partner invites ([50f0674](https://github.com/KamcyAhaka/logrithm/commit/50f0674b1930c7c9509cfdbbbd6f199cd1eb3436))
+* **frontend:** implement tiered goal limits, upgrade modal, and past goals list ([5b4d674](https://github.com/KamcyAhaka/logrithm/commit/5b4d6746ecf0bf4615800c187a942375169a255a))
+* **functions:** implement dynamic dev-db proxy routing using AsyncLocalStorage ([a085f0e](https://github.com/KamcyAhaka/logrithm/commit/a085f0e455c9c95afc6b36c06caf7e17a02bacc5))
+* **types:** support isProOnly presets and goal documents ([c41fd5d](https://github.com/KamcyAhaka/logrithm/commit/c41fd5d84d7c4127106f3684a8f77902c89132d9))
+
 # [1.1.0-beta.7](https://github.com/KamcyAhaka/logrithm/compare/v1.1.0-beta.6...v1.1.0-beta.7) (2026-06-14)
 
 
