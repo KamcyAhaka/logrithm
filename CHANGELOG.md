@@ -1,3 +1,15 @@
+# [1.6.0](https://github.com/KamcyAhaka/logrithm/compare/v1.5.0...v1.6.0) (2026-06-15)
+
+
+### Bug Fixes
+
+* enable dynamic GitHub secret resolution from Firestore user document paths ([ddb0299](https://github.com/KamcyAhaka/logrithm/commit/ddb02995c4b54a5005980438753c55e33643c262))
+
+
+### Features
+
+* clear dashboard store state upon user logout in useAuth hook ([c3634c7](https://github.com/KamcyAhaka/logrithm/commit/c3634c75231bd8ae0d2e5f50495f427772069f0b))
+
 # [1.5.0](https://github.com/KamcyAhaka/logrithm/compare/v1.4.0...v1.5.0) (2026-06-10)
 
 
