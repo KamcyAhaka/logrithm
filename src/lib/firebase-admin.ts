@@ -36,12 +36,31 @@ export async function getAdminDb(): Promise<Firestore | null> {
         const keyPath = path.join(process.cwd(), 'firebase-key.json');
 
         // Automatically fallback to local key file if available
-        if (!process.env.GOOGLE_APPLICATION_CREDENTIALS && fs.existsSync(keyPath)) {
+        if (fs.existsSync(keyPath)) {
           const { cert } = await import('firebase-admin/app');
           initializeApp({
             credential: cert(keyPath),
             projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'logrithm-ai',
           });
+        } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+          const credPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+          const absoluteCredPath = path.isAbsolute(credPath)
+            ? credPath
+            : path.resolve(process.cwd(), credPath);
+
+          if (fs.existsSync(absoluteCredPath)) {
+            const { cert } = await import('firebase-admin/app');
+            initializeApp({
+              credential: cert(absoluteCredPath),
+              projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'logrithm-ai',
+            });
+          } else {
+            const { applicationDefault } = await import('firebase-admin/app');
+            initializeApp({
+              credential: applicationDefault(),
+              projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'logrithm-ai',
+            });
+          }
         } else {
           const { applicationDefault } = await import('firebase-admin/app');
           initializeApp({
