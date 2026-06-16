@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Switch } from '@/components/ui/switch';
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -42,6 +43,9 @@ export default function AccountSettingsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [confirmText, setConfirmText] = useState('');
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isBetaUser, setIsBetaUser] = useState(false);
+  const [savingBeta, setSavingBeta] = useState(false);
+  const [betaError, setBetaError] = useState<string | null>(null);
   const { checkoutLoading, checkoutError, handleGetPro } = useCheckout();
 
   useEffect(() => {
@@ -60,6 +64,7 @@ export default function AccountSettingsPage() {
           const data = snap.data();
           setGithubLogin(data.githubLogin || null);
           setPlan(data.plan || 'free');
+          setIsBetaUser(!!data.isBetaUser);
 
           const activated = data.proActivatedAt || null;
           setProActivatedAt(activated);
@@ -121,6 +126,25 @@ export default function AccountSettingsPage() {
       setRefundError(msg);
     } finally {
       setSubmittingRefund(false);
+    }
+  };
+
+  const handleToggleBetaUser = async (checked: boolean) => {
+    if (!user) return;
+    setSavingBeta(true);
+    setBetaError(null);
+    try {
+      const { setDoc } = await import('firebase/firestore');
+      const profileRef = doc(db, `users/${user.uid}/profile/data`);
+      await setDoc(profileRef, { isBetaUser: checked }, { merge: true });
+      setIsBetaUser(checked);
+    } catch (err: unknown) {
+      console.error('[AccountSettings] Failed to toggle beta user state:', err);
+      const message =
+        err instanceof Error ? err.message : 'Failed to update setting. Please try again.';
+      setBetaError(message);
+    } finally {
+      setSavingBeta(false);
     }
   };
 
@@ -246,6 +270,29 @@ export default function AccountSettingsPage() {
           </div>
         )}
 
+        <Separator className="mt-8 mb-8 bg-white/10" />
+      </section>
+
+      {/* Beta Program Section */}
+      <section>
+        <h2 className="mb-4 text-lg font-medium text-white">Beta Testing Program</h2>
+        <div className="flex items-start justify-between gap-4 rounded-xl border border-white/10 bg-white/5 p-5">
+          <div className="min-w-0 flex-1">
+            <label className="text-sm font-medium text-white">
+              Opt-in to Beta platform testing
+            </label>
+            <p className="mt-1 text-sm text-white/40">
+              When enabled, each time you sign in, you will be automatically redirected to the beta
+              platform (https://beta.logrithm.dev) instead of the main site.
+            </p>
+            {betaError && <p className="mt-2 font-mono text-xs text-red-500">{betaError}</p>}
+          </div>
+          <Switch
+            checked={isBetaUser}
+            onCheckedChange={handleToggleBetaUser}
+            disabled={savingBeta}
+          />
+        </div>
         <Separator className="mt-8 mb-8 bg-white/10" />
       </section>
 
