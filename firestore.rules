@@ -82,6 +82,11 @@ service cloud.firestore {
       allow write: if false; // admin SDK only
     }
 
+    // Refunded users tracking — server writes and reads only (for fraud prevention)
+    match /refunded_users/{githubLogin} {
+      allow read, write: if false; // admin SDK only
+    }
+
     // ── Default deny ────────────────────────────────────────────────────────
     // Deny everything else. Never add a rule that allows public writes.
     match /{document=**} {
