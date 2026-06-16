@@ -1,3 +1,24 @@
+# [1.8.0](https://github.com/KamcyAhaka/logrithm/compare/v1.7.0...v1.8.0) (2026-06-16)
+
+
+### Bug Fixes
+
+* lazily init LemonSqueezy SDK to prevent build-time crashes [skip ci] ([0f6fec3](https://github.com/KamcyAhaka/logrithm/commit/0f6fec36405144dac3f357b937f9f00a33b8e91b))
+
+
+### Features
+
+* add pro success polling page and accessible upgrade modal component ([1b4d1e6](https://github.com/KamcyAhaka/logrithm/commit/1b4d1e6c3017f2dda0814b85b85f6828156d6531))
+* add user pro types and lemonsqueezy client initialization ([55e922f](https://github.com/KamcyAhaka/logrithm/commit/55e922f66fce47016697aad57b164a196c8dbc9e))
+* **api:** implement transaction-based self-service refund request API endpoint ([7d677ab](https://github.com/KamcyAhaka/logrithm/commit/7d677ab22ee3b1230e1eb7c161a055091ff55b08))
+* **billing:** add issueRefund function wrapper to lemonsqueezy helper ([321f328](https://github.com/KamcyAhaka/logrithm/commit/321f328e96346262e840958874a58010a1dcf5d3))
+* **ci:** implement manual alpha releases with prod deployment guards ([43e7523](https://github.com/KamcyAhaka/logrithm/commit/43e75233e5f92ce5e1a760adbfe21bcb13a5cdc9))
+* extract reusable useCheckout hook to centralize checkout logic ([4a32816](https://github.com/KamcyAhaka/logrithm/commit/4a32816bb260c68605c9896471623590d7206e4a))
+* **functions:** add self-healing plan validation check on user activity fetch ([1b0e4dd](https://github.com/KamcyAhaka/logrithm/commit/1b0e4dd8337c9943bfef926a143c5a08962cf558))
+* implement checkout session API, webhook receiver, and firestore rules ([8d861f0](https://github.com/KamcyAhaka/logrithm/commit/8d861f076185b2a7698786db91b3dbfd7649a0a2))
+* **rules:** restrict client access to refunded_users collection in firestore rules ([a1ebfdb](https://github.com/KamcyAhaka/logrithm/commit/a1ebfdb912cf2acb1b6ff51c62bd3be45e9e8b35))
+* **settings:** add self-service Request Refund button and details to account settings ([b9d4d66](https://github.com/KamcyAhaka/logrithm/commit/b9d4d66cdc1ca6c1f603d4f0abf8871fa25a841f))
+
 # [1.7.0](https://github.com/KamcyAhaka/logrithm/compare/v1.6.0...v1.7.0) (2026-06-15)
 
 
