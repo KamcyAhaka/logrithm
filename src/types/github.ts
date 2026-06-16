@@ -90,6 +90,11 @@ export interface UserProfile {
   lastAnalyzedAt?: string;
   analysisStatus?: string;
   updatedAt?: string;
+  // LemonSqueezy Pro fields
+  isPro?: boolean;
+  proActivatedAt?: Timestamp | FieldValue | string;
+  lemonSqueezyOrderId?: string;
+  lemonSqueezyCustomerId?: string;
 }
 
 // Phase 2 data model shapes — scaffolded now, written by scheduler later
