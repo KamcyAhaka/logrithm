@@ -2,12 +2,12 @@
 
 import Image from 'next/image';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useCheckout } from '@/hooks/useCheckout';
 import { auth, db, functions } from '@/lib/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, Timestamp } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { signOut } from 'firebase/auth';
 import { Loader2 } from 'lucide-react';
@@ -33,6 +33,11 @@ export default function AccountSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [githubLogin, setGithubLogin] = useState<string | null>(null);
   const [plan, setPlan] = useState<'free' | 'pro'>('free');
+  const [proActivatedAt, setProActivatedAt] = useState<Timestamp | string | Date | null>(null);
+  const [canRefund, setCanRefund] = useState(false);
+  const [submittingRefund, setSubmittingRefund] = useState(false);
+  const [refundError, setRefundError] = useState<string | null>(null);
+  const [refundSuccess, setRefundSuccess] = useState(false);
 
   const [isDeleting, setIsDeleting] = useState(false);
   const [confirmText, setConfirmText] = useState('');
@@ -55,6 +60,21 @@ export default function AccountSettingsPage() {
           const data = snap.data();
           setGithubLogin(data.githubLogin || null);
           setPlan(data.plan || 'free');
+
+          const activated = data.proActivatedAt || null;
+          setProActivatedAt(activated);
+
+          const activatedDate = activated?.toDate
+            ? activated.toDate()
+            : activated
+              ? new Date(activated)
+              : null;
+
+          if (activatedDate) {
+            setCanRefund(Date.now() - activatedDate.getTime() <= 7 * 24 * 60 * 60 * 1000);
+          } else {
+            setCanRefund(false);
+          }
         }
       } catch (err) {
         console.error('Failed to load profile:', err);
@@ -64,6 +84,45 @@ export default function AccountSettingsPage() {
     }
     fetchData();
   }, [user]);
+
+  const activatedDate = useMemo(() => {
+    if (!proActivatedAt) return null;
+    if (proActivatedAt instanceof Timestamp) {
+      return proActivatedAt.toDate();
+    }
+    return new Date(proActivatedAt as string | Date);
+  }, [proActivatedAt]);
+
+  const handleRequestRefund = async () => {
+    if (!user) return;
+    setSubmittingRefund(true);
+    setRefundError(null);
+    setRefundSuccess(false);
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch('/api/refund', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to process refund.');
+      }
+      setRefundSuccess(true);
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 3000);
+    } catch (err: unknown) {
+      console.error('[AccountSettings] Refund request failed:', err);
+      const msg = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+      setRefundError(msg);
+    } finally {
+      setSubmittingRefund(false);
+    }
+  };
 
   const handleDeleteAccount = async (e?: React.MouseEvent) => {
     if (e) e.preventDefault();
@@ -116,7 +175,19 @@ export default function AccountSettingsPage() {
               Free
             </Badge>
           ) : (
-            <Badge className="bg-[#1D9E75] font-mono text-white hover:bg-[#1D9E75]/90">Pro</Badge>
+            <div className="flex items-center gap-3">
+              <Badge className="bg-[#1D9E75] font-mono text-white hover:bg-[#1D9E75]/90">Pro</Badge>
+              {activatedDate && (
+                <span className="text-xs text-white/40">
+                  Pro user since{' '}
+                  {activatedDate.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </span>
+              )}
+            </div>
           )}
         </div>
 
@@ -137,9 +208,42 @@ export default function AccountSettingsPage() {
             </Button>
           </div>
         ) : (
-          <p className="text-sm text-white/40">
-            You are currently on the Pro plan. All premium features are active.
-          </p>
+          <div className="space-y-4">
+            <p className="text-sm text-white/40">
+              You are currently on the Pro plan. All premium features are active.
+            </p>
+            {canRefund ? (
+              <div className="mt-4 space-y-3 rounded-xl border border-red-950 bg-red-950/10 p-5">
+                <p className="text-xs leading-relaxed text-white/50">
+                  If you are not satisfied with Logrithm Pro, you can request a full refund within
+                  your 7-day window. Refunds are limited to once per GitHub account ever.
+                </p>
+                {refundError && <p className="font-mono text-xs text-red-500">{refundError}</p>}
+                {refundSuccess ? (
+                  <p className="font-mono text-xs text-green-500">
+                    Refund requested successfully! Your account will be downgraded shortly and we
+                    are redirecting you...
+                  </p>
+                ) : (
+                  <Button
+                    variant="outline"
+                    className="border-red-900 font-mono text-red-500 hover:bg-red-950 hover:text-red-400"
+                    onClick={handleRequestRefund}
+                    disabled={submittingRefund}
+                  >
+                    {submittingRefund && (
+                      <Loader2 className="mr-2 inline-block h-4 w-4 animate-spin" />
+                    )}
+                    Request Refund
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <p className="mt-2 text-xs leading-relaxed text-white/30">
+                Your 7-day refund window has expired. You are no longer eligible for a refund.
+              </p>
+            )}
+          </div>
         )}
 
         <Separator className="mt-8 mb-8 bg-white/10" />
