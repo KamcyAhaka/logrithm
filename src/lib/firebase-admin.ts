@@ -17,17 +17,39 @@ export async function getAdminDb(): Promise<Firestore | null> {
   if (adminDb) return adminDb;
 
   try {
-    const { initializeApp, getApps, getApp } = await import('firebase-admin/app');
+    const { getApps, getApp } = await import('firebase-admin/app');
     const { getFirestore } = await import('firebase-admin/firestore');
 
     if (getApps().length === 0) {
-      const { applicationDefault } = await import('firebase-admin/app');
-      // In Cloud Run, applicationDefault() uses attached service account automatically.
-      // Locally, you MUST set GOOGLE_APPLICATION_CREDENTIALS to a service account key path.
-      initializeApp({
-        credential: applicationDefault(),
-        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'logrithm-ai',
-      });
+      const { initializeApp } = await import('firebase-admin/app');
+
+      if (process.env.NEXT_PUBLIC_USE_EMULATOR === 'true') {
+        // Configure admin SDK to connect to local Firestore and Auth emulators
+        process.env.FIRESTORE_EMULATOR_HOST = 'localhost:8080';
+        process.env.FIREBASE_AUTH_EMULATOR_HOST = 'localhost:9099';
+        initializeApp({
+          projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'logrithm-ai',
+        });
+      } else {
+        const fs = await import('fs');
+        const path = await import('path');
+        const keyPath = path.join(process.cwd(), 'firebase-key.json');
+
+        // Automatically fallback to local key file if available
+        if (!process.env.GOOGLE_APPLICATION_CREDENTIALS && fs.existsSync(keyPath)) {
+          const { cert } = await import('firebase-admin/app');
+          initializeApp({
+            credential: cert(keyPath),
+            projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'logrithm-ai',
+          });
+        } else {
+          const { applicationDefault } = await import('firebase-admin/app');
+          initializeApp({
+            credential: applicationDefault(),
+            projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'logrithm-ai',
+          });
+        }
+      }
     }
 
     const app = getApp();
@@ -37,6 +59,27 @@ export async function getAdminDb(): Promise<Firestore | null> {
     // Graceful degradation: if credentials aren't available, return null.
     // This keeps `bun run dev` working with zero config.
     console.warn('[firebase-admin] Could not initialise admin SDK:', err);
+    return null;
+  }
+}
+
+/**
+ * Verifies the Firebase ID token passed in the Authorization header.
+ * Returns the decoded token if valid, otherwise null.
+ */
+export async function verifyAuthToken(req: Request) {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return null;
+  }
+  const token = authHeader.split('Bearer ')[1];
+  try {
+    await getAdminDb(); // Ensure admin SDK is initialised
+    const { getAuth } = await import('firebase-admin/auth');
+    const decodedToken = await getAuth().verifyIdToken(token);
+    return decodedToken;
+  } catch (error) {
+    console.error('[firebase-admin] Error verifying auth token:', error);
     return null;
   }
 }
