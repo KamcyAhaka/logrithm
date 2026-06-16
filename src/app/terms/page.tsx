@@ -177,6 +177,28 @@ export default function TermsPage() {
               in behavior deemed harmful to other users or the service&apos;s operations.
             </p>
           </section>
+
+          <section style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <h2
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '1.25rem',
+                color: 'var(--text-primary)',
+                fontWeight: 600,
+                borderBottom: '1px solid var(--border-subtle)',
+                paddingBottom: '0.5rem',
+              }}
+            >
+              6. Billing and Refunds
+            </h2>
+            <p>
+              Logrithm offers a paid Pro plan for a one-time purchase. We offer a full 7-day refund
+              window from the date of purchase. Refunds are strictly limited to one refund request
+              per GitHub account ever. If you request a refund and it is processed, you will be
+              ineligible for any future refunds from Logrithm, regardless of subsequent purchases,
+              account deletions, or re-registrations.
+            </p>
+          </section>
         </div>
       </main>
     </div>
