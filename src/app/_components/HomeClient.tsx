@@ -28,10 +28,60 @@ export default function HomeClient() {
   const [authChecking, setAuthChecking] = useState(true);
   const [agreed, setAgreed] = useState(false);
 
+  const checkBetaRedirectAndNavigate = async (user: User, defaultPath: string) => {
+    try {
+      const isBetaPlatform =
+        window.location.hostname === 'beta.logrithm.dev' ||
+        window.location.hostname === '127.0.0.1';
+
+      if (isBetaPlatform) {
+        router.replace(defaultPath);
+        return;
+      }
+      const profileRef = doc(db, 'users', user.uid, 'profile', 'data');
+      const profileSnap = await getDoc(profileRef);
+
+      if (profileSnap.exists()) {
+        const profileData = profileSnap.data();
+        if (profileData.isBetaUser === true) {
+          const token = await user.getIdToken();
+          const res = await fetch('/api/auth/sso-code', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (res.ok) {
+            const { code } = await res.json();
+
+            // In local development, route to 127.0.0.1 to simulate cross-origin behavior
+            const isLocal =
+              window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const betaBaseUrl = isLocal
+              ? `${window.location.protocol}//127.0.0.1:${window.location.port}`
+              : 'https://beta.logrithm.dev';
+
+            window.location.href = `${betaBaseUrl}/auth/sso?code=${encodeURIComponent(code)}&redirectTo=${encodeURIComponent(defaultPath)}`;
+            return;
+          }
+        }
+      }
+    } catch (err) {
+      console.error('[AuthRedirect] Error checking beta redirect:', err);
+    }
+    router.replace(defaultPath);
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       setAuthChecking(false);
+      // Only redirect to /dashboard for existing sessions — no beta redirect.
+      // The beta cross-domain redirect is only triggered on a fresh login
+      // (inside handleGitHubLogin) so that visiting localhost:3000 while
+      // already signed in works normally without looping to 127.0.0.1.
       if (user) {
         router.replace('/dashboard');
       }
@@ -96,7 +146,7 @@ export default function HomeClient() {
       await user.getIdToken(true);
       await storeGitHubToken(token);
 
-      router.push('/dashboard');
+      await checkBetaRedirectAndNavigate(user, '/dashboard');
     } catch (err: unknown) {
       console.error('[HomeClient] Auth error:', err);
       const code = (err as { code?: string })?.code;
