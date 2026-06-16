@@ -95,6 +95,7 @@ export interface UserProfile {
   proActivatedAt?: Timestamp | FieldValue | string;
   lemonSqueezyOrderId?: string;
   lemonSqueezyCustomerId?: string;
+  isBetaUser?: boolean;
 }
 
 // Phase 2 data model shapes — scaffolded now, written by scheduler later
