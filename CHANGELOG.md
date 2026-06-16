@@ -1,3 +1,18 @@
+# [1.1.0-beta.9](https://github.com/KamcyAhaka/logrithm/compare/v1.1.0-beta.8...v1.1.0-beta.9) (2026-06-16)
+
+
+### Features
+
+* add pro success polling page and accessible upgrade modal component ([d342538](https://github.com/KamcyAhaka/logrithm/commit/d342538b161dccd798ac56292ef47b7f500ddb1f))
+* add user pro types and lemonsqueezy client initialization ([7f8a68a](https://github.com/KamcyAhaka/logrithm/commit/7f8a68a10c5810dd3480784a048e980c17ff384a))
+* **api:** implement transaction-based self-service refund request API endpoint ([8fe3046](https://github.com/KamcyAhaka/logrithm/commit/8fe3046b1e7133476d65be1ecf6efd1210f77aee))
+* **billing:** add issueRefund function wrapper to lemonsqueezy helper ([584197c](https://github.com/KamcyAhaka/logrithm/commit/584197c1afac14ac7d8fb635d49bf067bbc826cf))
+* extract reusable useCheckout hook to centralize checkout logic ([3079cb8](https://github.com/KamcyAhaka/logrithm/commit/3079cb8c7d36d1950a3a737f5d76c16e0883c22d))
+* **functions:** add self-healing plan validation check on user activity fetch ([85270e5](https://github.com/KamcyAhaka/logrithm/commit/85270e58914caa15d5989a8860adb2476604a100))
+* implement checkout session API, webhook receiver, and firestore rules ([02f9f9d](https://github.com/KamcyAhaka/logrithm/commit/02f9f9daaef84b64573c3fea8bcf6a3954d85be7))
+* **rules:** restrict client access to refunded_users collection in firestore rules ([780dfd7](https://github.com/KamcyAhaka/logrithm/commit/780dfd722bca6de2e0212963c007aba3d9981ee9))
+* **settings:** add self-service Request Refund button and details to account settings ([4b65dd2](https://github.com/KamcyAhaka/logrithm/commit/4b65dd222fef07e8245aa50aaca9c8ecfa0d6032))
+
 # [1.1.0-beta.8](https://github.com/KamcyAhaka/logrithm/compare/v1.1.0-beta.7...v1.1.0-beta.8) (2026-06-15)
 
 
