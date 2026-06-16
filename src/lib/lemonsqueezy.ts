@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { lemonSqueezySetup, createCheckout } from '@lemonsqueezy/lemonsqueezy.js';
+import { lemonSqueezySetup, createCheckout, issueOrderRefund } from '@lemonsqueezy/lemonsqueezy.js';
 
 const apiKey = process.env.LEMONSQUEEZY_API_KEY as string;
 const storeId = process.env.LEMONSQUEEZY_STORE_ID as string;
@@ -54,4 +54,15 @@ export async function createCheckoutUrl(userEmail: string, userId: string): Prom
   }
 
   return url;
+}
+
+/**
+ * Issues a full refund of an order in LemonSqueezy.
+ */
+export async function issueRefund(orderId: string, amount: number): Promise<void> {
+  const { error } = await issueOrderRefund(orderId, amount);
+  if (error) {
+    console.error('[lemonsqueezy] issueOrderRefund SDK Error:', error);
+    throw new Error(error.message);
+  }
 }
