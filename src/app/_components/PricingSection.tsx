@@ -1,9 +1,21 @@
 'use client';
 
-import { Check, Sparkles } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Check, Sparkles, Loader2 } from 'lucide-react';
 import FadeInSection from './FadeInSection';
+import { useCheckout } from '@/hooks/useCheckout';
 
 export default function PricingSection() {
+  const router = useRouter();
+  const { checkoutLoading, checkoutError, handleGetPro } = useCheckout(() => {
+    // Redirect to login flow by scrolling to terms & login checkbox
+    const el = document.getElementById('terms-checkbox-hero');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      router.push('/');
+    }
+  });
   return (
     <section
       id="pricing"
@@ -246,6 +258,20 @@ export default function PricingSection() {
                 </ul>
               </div>
 
+              {checkoutError && (
+                <div
+                  style={{
+                    color: '#ef4444',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.75rem',
+                    textAlign: 'center',
+                    marginBottom: '0.75rem',
+                  }}
+                >
+                  {checkoutError}
+                </div>
+              )}
+
               <button
                 className="btn btn-primary"
                 style={{
@@ -254,13 +280,14 @@ export default function PricingSection() {
                   borderRadius: '9999px',
                   background: '#1d9e75',
                   boxShadow: '0 8px 25px rgba(29, 158, 117, 0.25)',
-                  cursor: 'pointer',
+                  cursor: checkoutLoading ? 'not-allowed' : 'pointer',
+                  opacity: checkoutLoading ? 0.8 : 1,
                 }}
-                onClick={() => {
-                  alert('Pro features will be fully unlocked in Phase 2 launch. Stay tuned!');
-                }}
+                onClick={handleGetPro}
+                disabled={checkoutLoading}
               >
-                Get Pro
+                {checkoutLoading && <Loader2 className="mr-2 inline-block h-4 w-4 animate-spin" />}
+                {checkoutLoading ? 'Redirecting to checkout...' : 'Get Pro'}
               </button>
             </div>
           </FadeInSection>

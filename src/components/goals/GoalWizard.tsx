@@ -13,6 +13,7 @@ interface GoalWizardProps {
   userInsights: InsightObject | null;
   generatingPlan: boolean;
   actionPlan: GoalActionPlanResult | null;
+  planError: string | null;
   savingGoal: boolean;
   isPro: boolean;
   onUpgradeClick: () => void;
@@ -30,6 +31,7 @@ export default function GoalWizard({
   userInsights,
   generatingPlan,
   actionPlan,
+  planError,
   savingGoal,
   isPro,
   onUpgradeClick,
@@ -149,7 +151,13 @@ export default function GoalWizard({
             </div>
           )}
 
-          {!generatingPlan && actionPlan && (
+          {!generatingPlan && planError && (
+            <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-4 text-center font-mono text-xs leading-relaxed text-red-500/90">
+              ⚠️ {planError}
+            </div>
+          )}
+
+          {!generatingPlan && !planError && actionPlan && (
             <div className="space-y-6">
               {/* Summary paragraph */}
               <div className="rounded-2xl border border-white/5 bg-black/20 p-5 text-sm leading-relaxed text-white/70">
@@ -242,7 +250,7 @@ export default function GoalWizard({
               Back
             </button>
             <button
-              disabled={savingGoal || generatingPlan || !actionPlan}
+              disabled={savingGoal || generatingPlan || !actionPlan || !!planError}
               onClick={onConfirm}
               type="button"
               className="flex items-center gap-1.5 rounded-full bg-[#1D9E75] px-5 py-2 font-mono text-xs font-bold text-white transition-all hover:scale-105 active:scale-95 disabled:pointer-events-none disabled:opacity-50"

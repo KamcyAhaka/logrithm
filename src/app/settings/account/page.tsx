@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useCheckout } from '@/hooks/useCheckout';
 import { auth, db, functions } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
@@ -36,6 +37,7 @@ export default function AccountSettingsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [confirmText, setConfirmText] = useState('');
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const { checkoutLoading, checkoutError, handleGetPro } = useCheckout();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -82,6 +84,8 @@ export default function AccountSettingsPage() {
     }
   };
 
+  // handleGetPro is managed via the useCheckout hook
+
   if (authLoading || loading) {
     return (
       <div className="animate-pulse space-y-8">
@@ -115,9 +119,28 @@ export default function AccountSettingsPage() {
             <Badge className="bg-[#1D9E75] font-mono text-white hover:bg-[#1D9E75]/90">Pro</Badge>
           )}
         </div>
-        <p className="text-sm text-white/40">
-          Logrithm Pro is coming soon. You&apos;ll be notified when it launches.
-        </p>
+
+        {plan === 'free' ? (
+          <div className="space-y-4">
+            <p className="text-sm text-white/40">
+              Upgrade to Pro to set unlimited goals, track progress, invite partners, and rank your
+              activity.
+            </p>
+            {checkoutError && <p className="font-mono text-xs text-red-500">{checkoutError}</p>}
+            <Button
+              className="bg-[#1D9E75] font-mono text-white transition-all hover:scale-105 hover:bg-[#1D9E75]/90 active:scale-95"
+              onClick={handleGetPro}
+              disabled={checkoutLoading}
+            >
+              {checkoutLoading && <Loader2 className="mr-2 inline-block h-4 w-4 animate-spin" />}
+              {checkoutLoading ? 'Redirecting to checkout...' : 'Get Pro'}
+            </Button>
+          </div>
+        ) : (
+          <p className="text-sm text-white/40">
+            You are currently on the Pro plan. All premium features are active.
+          </p>
+        )}
 
         <Separator className="mt-8 mb-8 bg-white/10" />
       </section>
