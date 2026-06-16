@@ -130,6 +130,11 @@ export default function RefundPage() {
               If you request a refund within 7 days of your purchase transaction, we will reverse
               the charge and deactivate your Pro account status.
             </p>
+            <p style={{ color: 'var(--text-secondary)' }}>
+              <strong>Limit:</strong> Refunds are strictly limited to{' '}
+              <strong>once per GitHub account ever</strong>. If you purchase Logrithm Pro in the
+              future, you will not be eligible to request another refund.
+            </p>
           </section>
 
           <section style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -146,8 +151,10 @@ export default function RefundPage() {
               3. Refund Request Submission
             </h2>
             <p>
-              To request a refund, please send an email with your GitHub username and purchase
-              receipt details to:
+              You can request a refund directly within the platform by navigating to your{' '}
+              <strong>Settings &gt; Account</strong> portal and clicking the &ldquo;Request
+              Refund&rdquo; button. Alternatively, you can send an email with your GitHub username
+              and purchase receipt details to:
             </p>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: 'var(--green)' }}>
               <strong>support@logrithm.dev</strong>
@@ -170,11 +177,13 @@ export default function RefundPage() {
                 paddingBottom: '0.5rem',
               }}
             >
-              4. Ineligibility after 7 Days
+              4. Once-Ever Limitation & Ineligibility
             </h2>
             <p>
               Refunds will not be issued for any request received after 7 days have elapsed from the
-              date of purchase. By purchasing Logrithm Pro, you agree to this billing policy.
+              date of purchase. Additionally, you are ineligible for a refund if you have previously
+              requested and processed a refund on any account associated with your GitHub profile.
+              This policy persists and is tracked across account deletions and re-registrations.
             </p>
           </section>
 
