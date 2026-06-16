@@ -29,6 +29,21 @@
           }
         }
       ]
+    },
+    {
+      "site": "logrithm-ai-alpha",
+      "public": "public",
+      "cleanUrls": true,
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "rewrites": [
+        {
+          "source": "**",
+          "run": {
+            "serviceId": "logrithm-alpha",
+            "region": "us-central1"
+          }
+        }
+      ]
     }
   ],
   "functions": [
