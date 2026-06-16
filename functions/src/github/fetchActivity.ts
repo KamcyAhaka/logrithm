@@ -5,6 +5,7 @@ import type { GitHubActivity } from '../types/github';
 import { db } from '../lib/firebase';
 import { upsertRepo, saveSnapshot } from '../lib/firestoreService';
 import { buildSnapshot } from '../lib/snapshotBuilder';
+import { FieldValue } from 'firebase-admin/firestore';
 
 const secretClient = new SecretManagerServiceClient();
 const PROJECT_ID = process.env.GCLOUD_PROJECT ?? 'logrithm-ai';
@@ -258,6 +259,64 @@ export const fetchActivityInternal = async (uid: string): Promise<GitHubActivity
   } catch (err) {
     // Non-fatal — generateInsights falls back to activity.repositories if Firestore is empty
     console.warn('[fetchGitHubActivity] Could not upsert repos:', err);
+  }
+
+  // Self-Healing Plan Check:
+  // If the user's synchronous local database write failed AND the LemonSqueezy webhook
+  // failed to deliver, we check if the user is blacklisted in refunded_users. If they are,
+  // but their profile still shows Pro, we automatically heal the database.
+  try {
+    const profileSnap = await db.doc(`users/${uid}/profile/data`).get();
+    const profileData = profileSnap.exists ? profileSnap.data() || {} : {};
+    if (profileData.plan === 'pro') {
+      const loginLowercase = viewer.login.toLowerCase();
+      const refundedSnap = await db.doc(`refunded_users/${loginLowercase}`).get();
+      if (refundedSnap.exists) {
+        await db.doc(`users/${uid}/profile/data`).set(
+          {
+            plan: 'free',
+            isPro: false,
+            proDeactivatedAt: FieldValue.serverTimestamp(),
+          },
+          { merge: true }
+        );
+
+        const orderId = refundedSnap.data()?.orderId;
+        if (orderId) {
+          const paymentsSnap = await db
+            .collection(`users/${uid}/payments`)
+            .where('orderId', '==', String(orderId))
+            .get();
+
+          if (!paymentsSnap.empty) {
+            for (const doc of paymentsSnap.docs) {
+              await doc.ref.set(
+                {
+                  status: 'refunded',
+                  updatedAt: FieldValue.serverTimestamp(),
+                },
+                { merge: true }
+              );
+            }
+          } else {
+            await db.doc(`users/${uid}/payments/${orderId}`).set(
+              {
+                status: 'refunded',
+                updatedAt: FieldValue.serverTimestamp(),
+              },
+              { merge: true }
+            );
+          }
+        }
+
+        console.warn(
+          `[Self-Healing] Detected and healed inconsistent refunded state for user ${uid} (${viewer.login})`
+        );
+      }
+    }
+  } catch (healError) {
+    // Non-fatal — never block activity fetching due to healing check failures
+    console.error('[Self-Healing] Failed to perform self-healing plan check:', healError);
   }
 
   const activity: GitHubActivity = {
