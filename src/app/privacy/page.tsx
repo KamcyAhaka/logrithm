@@ -166,6 +166,11 @@ export default function PrivacyPage() {
               <strong> Settings &gt; Account </strong> tab and clicking &ldquo;Delete
               Account&rdquo;.
             </p>
+            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+              Note: To prevent billing abuse and enforce our one-refund-ever policy, a persistent,
+              secure record tracking refunded GitHub usernames is retained outside the user profile
+              directory and excluded from user account deletion requests.
+            </p>
           </section>
 
           <section style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
