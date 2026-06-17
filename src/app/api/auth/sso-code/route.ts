@@ -22,11 +22,13 @@ export async function POST(req: Request) {
     // Generate a secure random 32-character hex code
     const code = crypto.randomBytes(16).toString('hex');
 
-    // Store the code in Firestore with the associated user ID and timestamp
+    // Store the code in Firestore with the associated user ID, creation time, and TTL expiration
     const ssoCodeRef = adminDb.doc(`sso_codes/${code}`);
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes from now
     await ssoCodeRef.set({
       uid,
       createdAt: FieldValue.serverTimestamp(),
+      expiresAt,
     });
 
     return NextResponse.json({ code });
