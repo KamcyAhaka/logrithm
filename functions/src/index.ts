@@ -6,6 +6,7 @@ export { fetchGitHubActivity } from './github/fetchActivity';
 export { generateInsights } from './insights/generateInsights';
 export { deleteAccount } from './auth/deleteAccount';
 export { generateGoalActionPlan } from './insights/generateGoalActionPlan';
+export { createGoal } from './insights/createGoal';
 export {
   inviteAccountabilityPartner,
   getAccountabilityPartners,

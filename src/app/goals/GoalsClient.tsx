@@ -46,6 +46,7 @@ export default function GoalsClient() {
     generatingPlan,
     planError,
     savingGoal,
+    goalError,
     isInviteModalOpen,
     setIsInviteModalOpen,
     inviting,
@@ -148,6 +149,7 @@ export default function GoalsClient() {
             actionPlan={actionPlan}
             planError={planError}
             savingGoal={savingGoal}
+            goalError={goalError}
             isPro={isDemoMode ? true : !!isPro}
             onUpgradeClick={() => setShowUpgradeModal(true)}
             onCancel={() => (activeGoal ? setIsCreatingGoal(false) : router.push('/dashboard'))}
