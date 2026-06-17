@@ -15,6 +15,7 @@ interface GoalWizardProps {
   actionPlan: GoalActionPlanResult | null;
   planError: string | null;
   savingGoal: boolean;
+  goalError: string | null;
   isPro: boolean;
   onUpgradeClick: () => void;
   onCancel: () => void;
@@ -33,6 +34,7 @@ export default function GoalWizard({
   actionPlan,
   planError,
   savingGoal,
+  goalError,
   isPro,
   onUpgradeClick,
   onCancel,
@@ -154,6 +156,12 @@ export default function GoalWizard({
           {!generatingPlan && planError && (
             <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-4 text-center font-mono text-xs leading-relaxed text-red-500/90">
               ⚠️ {planError}
+            </div>
+          )}
+
+          {goalError && (
+            <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-4 text-center font-mono text-xs leading-relaxed text-red-500/90">
+              ⚠️ {goalError}
             </div>
           )}
 
