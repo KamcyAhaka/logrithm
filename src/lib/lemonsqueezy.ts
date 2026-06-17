@@ -33,9 +33,22 @@ function initLemonSqueezy() {
  * Creates a LemonSqueezy checkout session for a one-time upgrade to Pro.
  * Returns the checkout URL on success.
  */
-export async function createCheckoutUrl(userEmail: string, userId: string): Promise<string> {
+export async function createCheckoutUrl(
+  userEmail: string,
+  userId: string
+): Promise<{ url: string; checkoutId: string }> {
   const { storeId, variantId } = initLemonSqueezy();
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  let baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+
+  if (!baseUrl) {
+    if (process.env.NODE_ENV !== 'development') {
+      throw new Error('NEXT_PUBLIC_APP_URL is required in non-development environments.');
+    }
+    baseUrl = 'http://localhost:3000';
+  }
+
+  // Normalize by removing trailing slashes
+  baseUrl = baseUrl.replace(/\/+$/, '');
 
   const { data, error } = await createCheckout(storeId, variantId, {
     productOptions: {
@@ -58,11 +71,13 @@ export async function createCheckoutUrl(userEmail: string, userId: string): Prom
   }
 
   const url = data?.data?.attributes?.url;
-  if (!url) {
+  const checkoutId = data?.data?.id;
+
+  if (!url || !checkoutId) {
     throw new Error('Failed to retrieve checkout URL from LemonSqueezy');
   }
 
-  return url;
+  return { url, checkoutId: String(checkoutId) };
 }
 
 /**
