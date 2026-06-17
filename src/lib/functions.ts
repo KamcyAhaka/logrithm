@@ -165,3 +165,29 @@ export async function getInvitedGoals(): Promise<GetInvitedGoalsResult> {
   const result = await fn();
   return result.data;
 }
+
+export interface CreateGoalParams {
+  targetScore: number;
+  targetLabel: string;
+  scoreAtCreation: number;
+  dimensionGapsAtCreation: Array<{
+    dimension: string;
+    current: string;
+    required: string;
+    gap: string;
+  }>;
+  weeklyActions: string[];
+  timeframeWeeks: number;
+  geminiSummary: string;
+}
+
+export async function createGoal(
+  params: CreateGoalParams
+): Promise<{ success: boolean; goalId: string }> {
+  const fn = httpsCallable<CreateGoalParams, { success: boolean; goalId: string }>(
+    functions,
+    'createGoal'
+  );
+  const result = await fn(params);
+  return result.data;
+}
