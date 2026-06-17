@@ -44,6 +44,7 @@ export default function UpgradeModal({
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-white/45 transition-colors hover:text-white"
+          aria-label="Close modal"
         >
           <X className="h-5 w-5" />
         </button>
