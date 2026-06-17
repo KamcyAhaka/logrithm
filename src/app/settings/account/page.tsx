@@ -7,7 +7,16 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useCheckout } from '@/hooks/useCheckout';
 import { auth, db, functions } from '@/lib/firebase';
-import { doc, getDoc, Timestamp } from 'firebase/firestore';
+import {
+  doc,
+  getDoc,
+  Timestamp,
+  collection,
+  query,
+  where,
+  getDocs,
+  DocumentData,
+} from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { signOut } from 'firebase/auth';
 import { Loader2 } from 'lucide-react';
@@ -66,16 +75,43 @@ export default function AccountSettingsPage() {
           setPlan(data.plan || 'free');
           setIsBetaUser(!!data.isBetaUser);
 
-          const activated = data.proActivatedAt || null;
-          setProActivatedAt(activated);
+          let latestPaidCreatedAt: Timestamp | string | Date | null = null;
+          if (data.plan === 'pro') {
+            const paymentsRef = collection(db, `users/${user.uid}/payments`);
+            const q = query(paymentsRef, where('status', '==', 'paid'));
+            const paymentsSnap = await getDocs(q);
 
-          const activatedDate = activated?.toDate
-            ? activated.toDate()
-            : activated
-              ? new Date(activated)
-              : null;
+            if (!paymentsSnap.empty) {
+              let latestDoc = paymentsSnap.docs[0];
+              const getTimestamp = (docData: DocumentData) => {
+                const createdAt = docData.createdAt;
+                if (!createdAt) return 0;
+                if (createdAt && typeof createdAt.toDate === 'function') {
+                  return createdAt.toDate().getTime();
+                }
+                const parsed = new Date(createdAt).getTime();
+                return isNaN(parsed) ? 0 : parsed;
+              };
 
-          if (activatedDate) {
+              for (const paymentDoc of paymentsSnap.docs) {
+                if (getTimestamp(paymentDoc.data()) > getTimestamp(latestDoc.data())) {
+                  latestDoc = paymentDoc;
+                }
+              }
+              latestPaidCreatedAt = latestDoc.data().createdAt || null;
+            }
+          }
+
+          setProActivatedAt(latestPaidCreatedAt);
+
+          const activatedDate =
+            latestPaidCreatedAt && latestPaidCreatedAt instanceof Timestamp
+              ? latestPaidCreatedAt.toDate()
+              : latestPaidCreatedAt
+                ? new Date(latestPaidCreatedAt as string | Date)
+                : null;
+
+          if (activatedDate && !isNaN(activatedDate.getTime())) {
             setCanRefund(Date.now() - activatedDate.getTime() <= 7 * 24 * 60 * 60 * 1000);
           } else {
             setCanRefund(false);
@@ -95,7 +131,8 @@ export default function AccountSettingsPage() {
     if (proActivatedAt instanceof Timestamp) {
       return proActivatedAt.toDate();
     }
-    return new Date(proActivatedAt as string | Date);
+    const d = new Date(proActivatedAt as string | Date);
+    return isNaN(d.getTime()) ? null : d;
   }, [proActivatedAt]);
 
   const handleRequestRefund = async () => {
