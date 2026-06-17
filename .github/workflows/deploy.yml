@@ -28,8 +28,36 @@ jobs:
 
       # 1.5 Set dynamic environment variables based on branch
       - name: Set environment variables
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          ENVIRONMENT_INPUT: ${{ github.event.inputs.environment }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
         run: |
-          if [ "${{ github.ref_name }}" = "beta" ]; then
+          ENV_TARGET=""
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            ENV_TARGET="$ENVIRONMENT_INPUT"
+          elif [ "$GITHUB_REF_NAME" = "beta" ]; then
+            ENV_TARGET="beta"
+          elif [ "$GITHUB_REF_NAME" = "main" ]; then
+            ENV_TARGET="production"
+          else
+            ENV_TARGET="alpha"
+          fi
+          
+          echo "Selected Environment: $ENV_TARGET"
+          
+          # Guard: Prevent manual/accidental deployment to production from non-release branches
+          if [ "$ENV_TARGET" = "production" ]; then
+            if [ "$GITHUB_REF_NAME" != "main" ] && [ "$GITHUB_REF_NAME" != "beta" ]; then
+              echo "Error: Deployment to production environment is restricted to 'main' and 'beta' branches only (current branch: $GITHUB_REF_NAME)."
+              exit 1
+            fi
+          fi
+          
+          if [ "$ENV_TARGET" = "alpha" ]; then
+            echo "SERVICE=logrithm-alpha" >> $GITHUB_ENV
+            echo "SITE=logrithm-ai-alpha" >> $GITHUB_ENV
+          elif [ "$ENV_TARGET" = "beta" ]; then
             echo "SERVICE=logrithm-beta" >> $GITHUB_ENV
             echo "SITE=logrithm-ai-beta" >> $GITHUB_ENV
           else
