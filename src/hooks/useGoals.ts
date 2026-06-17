@@ -26,6 +26,7 @@ import {
   getPendingInvites,
   respondToAccountabilityInvite,
   getInvitedGoals,
+  createGoal,
   type GoalActionPlanResult,
   type PendingInvite,
   type InvitedGoal,
@@ -134,6 +135,7 @@ export function useGoals() {
   const [generatingPlan, setGeneratingPlan] = useState(false);
   const [planError, setPlanError] = useState<string | null>(null);
   const [savingGoal, setSavingGoal] = useState(false);
+  const [goalError, setGoalError] = useState<string | null>(null);
 
   // Invite modal
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
@@ -392,6 +394,7 @@ export function useGoals() {
     setGeneratingPlan(true);
     setActionPlan(null);
     setPlanError(null);
+    setGoalError(null);
 
     const breakdown = userInsights?.scoreBreakdown || {
       volume: 0,
@@ -474,9 +477,9 @@ Return ONLY a valid JSON object with keys:
     }
     if (!user?.uid) return;
     setSavingGoal(true);
+    setGoalError(null);
     try {
-      await addDoc(collection(db, 'users', user.uid, 'goals'), {
-        userId: user.uid,
+      await createGoal({
         targetScore: selectedTarget.score,
         targetLabel: selectedTarget.label,
         scoreAtCreation: currentScore,
@@ -484,17 +487,14 @@ Return ONLY a valid JSON object with keys:
         weeklyActions: actionPlan.weeklyActions,
         timeframeWeeks: actionPlan.timeframeWeeks,
         geminiSummary: actionPlan.summary,
-        status: 'active',
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        achievedAt: null,
-        invitedUsers: [],
       });
       setIsCreatingGoal(false);
       setStep(1);
       await loadActiveGoal();
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('[GoalsClient] Goal activation failed:', err);
+      const msg = err instanceof Error ? err.message : String(err);
+      setGoalError(msg || 'Failed to activate goal. Please try again.');
     } finally {
       setSavingGoal(false);
     }
@@ -632,6 +632,7 @@ Return ONLY a valid JSON object with keys:
     generatingPlan,
     planError,
     savingGoal,
+    goalError,
     isInviteModalOpen,
     setIsInviteModalOpen,
     inviting,
