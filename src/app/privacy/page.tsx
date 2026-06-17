@@ -167,9 +167,14 @@ export default function PrivacyPage() {
               Account&rdquo;.
             </p>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-              Note: To prevent billing abuse and enforce our one-refund-ever policy, a persistent,
-              secure record tracking refunded GitHub usernames is retained outside the user profile
-              directory and excluded from user account deletion requests.
+              Note: To prevent billing abuse and enforce our one-refund-ever policy, a persistent
+              record tracking refunded GitHub usernames is retained outside the user profile
+              directory for a maximum of seven (7) years from the date of the refund. Under
+              compliance frameworks such as GDPR Article 17(3)(e), this data is excluded from
+              account deletion requests as it is strictly processed for the prevention of fraud and
+              billing abuse, and the establishment, exercise, or defense of legal claims. Users
+              retain the right to query, verify, or dispute the existence of these records by
+              contacting support.
             </p>
           </section>
 
