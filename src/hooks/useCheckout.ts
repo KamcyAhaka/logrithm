@@ -33,7 +33,16 @@ export function useCheckout(onUnauthenticated?: () => void) {
       });
 
       if (!res.ok) {
-        throw new Error('Checkout API failed');
+        let errorMsg = 'Checkout API failed';
+        try {
+          const errData = await res.json();
+          if (errData && errData.error) {
+            errorMsg = errData.error;
+          }
+        } catch {
+          // ignore parsing error
+        }
+        throw new Error(errorMsg);
       }
 
       const data = await res.json();
@@ -44,7 +53,8 @@ export function useCheckout(onUnauthenticated?: () => void) {
       }
     } catch (err) {
       console.error('[useCheckout] Checkout error:', err);
-      setCheckoutError('Something went wrong. Please try again.');
+      const errMsg = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+      setCheckoutError(errMsg);
       setTimeout(() => setCheckoutError(null), 5000);
     } finally {
       setCheckoutLoading(false);
