@@ -80,12 +80,31 @@ export async function POST(req: NextRequest) {
         throw new Error('Firestore admin SDK is not initialised');
       }
 
+      // Validate checkout reservation
+      const checkoutId = attributes.checkout_id || body.data?.attributes?.checkout_id;
+      if (!checkoutId) {
+        console.error(`[Webhook] Missing checkout_id for event ${eventName}`);
+        return NextResponse.json({ error: 'Missing checkout_id' }, { status: 400 });
+      }
+
+      const reservationRef = adminDb.doc(`users/${userId}/checkout_reservations/${checkoutId}`);
+      const reservationSnap = await reservationRef.get();
+      if (!reservationSnap.exists) {
+        console.error(
+          `[Webhook] Legitimate checkout reservation not found for user ${userId} and checkout ${checkoutId}`
+        );
+        return NextResponse.json({ error: 'Invalid checkout session' }, { status: 400 });
+      }
+
       const profileRef = adminDb.doc(`users/${userId}/profile/data`);
       const paymentRef = adminDb.doc(`users/${userId}/payments/${orderId}`);
 
       if (eventName === 'order_created') {
+        const batch = adminDb.batch();
+
         // Upgrade to Pro in user profile
-        await profileRef.set(
+        batch.set(
+          profileRef,
           {
             plan: 'pro',
             isPro: true,
@@ -97,7 +116,8 @@ export async function POST(req: NextRequest) {
         );
 
         // Record payment data
-        await paymentRef.set(
+        batch.set(
+          paymentRef,
           {
             orderId: String(orderId),
             customerId: String(customerId),
@@ -114,10 +134,31 @@ export async function POST(req: NextRequest) {
           { merge: true }
         );
 
-        console.log(`[Webhook] User ${userId} upgraded to Pro. Order ${orderId}`);
+        // Complete the reservation
+        batch.set(
+          reservationRef,
+          {
+            orderId: String(orderId),
+            customerId: String(customerId),
+            status: 'completed',
+            completedAt: FieldValue.serverTimestamp(),
+          },
+          { merge: true }
+        );
+
+        await batch.commit();
+        console.log(`[Webhook] User ${userId} upgraded to Pro atomically. Order ${orderId}`);
       } else if (eventName === 'order_refunded') {
+        // Fetch user profile to get GitHub login for ledger writing
+        const profileSnap = await profileRef.get();
+        const profileData = profileSnap.data() || {};
+        const githubLogin = profileData.githubLogin;
+
+        const batch = adminDb.batch();
+
         // Downgrade to Free plan in user profile
-        await profileRef.set(
+        batch.set(
+          profileRef,
           {
             plan: 'free',
             isPro: false,
@@ -127,7 +168,8 @@ export async function POST(req: NextRequest) {
         );
 
         // Record payment update as refunded
-        await paymentRef.set(
+        batch.set(
+          paymentRef,
           {
             orderId: String(orderId),
             customerId: String(customerId),
@@ -144,7 +186,35 @@ export async function POST(req: NextRequest) {
           { merge: true }
         );
 
-        console.log(`[Webhook] User ${userId} refunded/downgraded. Order ${orderId}`);
+        // Mark reservation as refunded
+        batch.set(
+          reservationRef,
+          {
+            status: 'refunded',
+            refundedAt: FieldValue.serverTimestamp(),
+          },
+          { merge: true }
+        );
+
+        // Write refund record to refunded_users collection using githubLoginLowercase
+        if (githubLogin) {
+          const githubLoginLowercase = githubLogin.toLowerCase();
+          const refundedRef = adminDb.doc(`refunded_users/${githubLoginLowercase}`);
+          batch.set(
+            refundedRef,
+            {
+              refunded: true,
+              refundedAt: FieldValue.serverTimestamp(),
+              orderId: String(orderId),
+              userId: userId,
+              reason: 'Webhook refund',
+            },
+            { merge: true }
+          );
+        }
+
+        await batch.commit();
+        console.log(`[Webhook] User ${userId} refunded/downgraded atomically. Order ${orderId}`);
       }
 
       return NextResponse.json({ success: true }, { status: 200 });
