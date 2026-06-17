@@ -89,15 +89,28 @@ export async function POST(req: NextRequest) {
         const pOrderId = paymentData.orderId;
         const pAmount = paymentData.amount;
 
-        if (!pOrderId || !pAmount) {
+        if (!pOrderId || typeof pAmount !== 'number' || !Number.isFinite(pAmount) || pAmount <= 0) {
           throw new Error('INVALID_PAYMENT');
         }
 
         // 4. Verify 7-day refund window limit
-        const createdAt = paymentData.createdAt?.toDate
-          ? paymentData.createdAt.toDate()
-          : new Date(paymentData.createdAt || Date.now());
-        const diffMs = Date.now() - createdAt.getTime();
+        let createdAtDate: Date;
+        if (paymentData.createdAt && typeof paymentData.createdAt.toDate === 'function') {
+          createdAtDate = paymentData.createdAt.toDate();
+        } else if (paymentData.createdAt) {
+          createdAtDate = new Date(paymentData.createdAt);
+        } else {
+          throw new Error('INVALID_PAYMENT');
+        }
+
+        if (isNaN(createdAtDate.getTime())) {
+          throw new Error('INVALID_PAYMENT');
+        }
+
+        const diffMs = Date.now() - createdAtDate.getTime();
+        if (isNaN(diffMs)) {
+          throw new Error('INVALID_PAYMENT');
+        }
         const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
 
         if (diffMs > sevenDaysMs) {
@@ -148,11 +161,24 @@ export async function POST(req: NextRequest) {
     try {
       await issueRefund(orderId, amount);
       console.log(
-        `[Refund API] Successfully processed refund in LemonSqueezy for ${githubLoginLowercase} (UID: ${uid}, Order: ${orderId})`
+        `[Refund API] Successfully processed refund in LemonSqueezy for Order: ${orderId}`
       );
     } catch (lsError: unknown) {
-      // Revert reservation ONLY if the SDK call itself failed
-      await refundedRef.delete();
+      // Mark the reservation as failed, do NOT delete it.
+      // This prevents the eligibility check from passing on retry.
+      try {
+        await refundedRef.set(
+          {
+            status: 'failed',
+            failedAt: FieldValue.serverTimestamp(),
+            failureReason:
+              lsError instanceof Error ? lsError.message : 'Unknown error during refund call',
+          },
+          { merge: true }
+        );
+      } catch (dbErr) {
+        console.error('[Refund API] Failed to update refundedRef status to failed:', dbErr);
+      }
       console.error('[Refund API] LemonSqueezy refund failed:', lsError);
       const msg = lsError instanceof Error ? lsError.message : 'Refund processing failed.';
       return NextResponse.json({ error: msg }, { status: 500 });
@@ -182,7 +208,7 @@ export async function POST(req: NextRequest) {
       );
 
       console.log(
-        `[Refund API] Synchronous plan downgrade and payment refund status updated for user ${githubLoginLowercase}`
+        `[Refund API] Synchronous plan downgrade and payment refund status updated for Order: ${orderId}`
       );
       return NextResponse.json({ success: true });
     } catch (dbError) {
