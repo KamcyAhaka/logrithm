@@ -22,11 +22,14 @@ export default function ProSuccessPage() {
     }
 
     const docRef = doc(db, 'users', user.uid, 'profile', 'data');
+    let isCleanedUp = false;
+    let isChecking = false;
 
     // Helper to check if isPro is set in Firestore
     const checkStatus = async () => {
       try {
         const snap = await getDoc(docRef);
+        if (isCleanedUp) return false;
         if (snap.exists()) {
           const data = snap.data();
           if (data.isPro === true || data.plan === 'pro') {
@@ -43,12 +46,27 @@ export default function ProSuccessPage() {
     let interval: NodeJS.Timeout | undefined = undefined;
 
     checkStatus().then((isPro) => {
+      if (isCleanedUp) return;
       if (isPro) return;
 
       let elapsed = 0;
       interval = setInterval(async () => {
+        if (isCleanedUp) {
+          if (interval) clearInterval(interval);
+          return;
+        }
+        if (isChecking) return;
+        isChecking = true;
+
         elapsed += 3;
         const success = await checkStatus();
+        isChecking = false;
+
+        if (isCleanedUp) {
+          if (interval) clearInterval(interval);
+          return;
+        }
+
         if (success) {
           if (interval) clearInterval(interval);
         } else if (elapsed >= 30) {
@@ -59,6 +77,7 @@ export default function ProSuccessPage() {
     });
 
     return () => {
+      isCleanedUp = true;
       if (interval !== undefined) clearInterval(interval);
     };
   }, [user, authLoading, router]);
