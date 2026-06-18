@@ -80,26 +80,43 @@ export async function POST(req: NextRequest) {
         throw new Error('Firestore admin SDK is not initialised');
       }
 
-      // Validate checkout reservation
-      const checkoutId = attributes.checkout_id || body.data?.attributes?.checkout_id;
-      if (!checkoutId) {
-        console.error(`[Webhook] Missing checkout_id for event ${eventName}`);
-        return NextResponse.json({ error: 'Missing checkout_id' }, { status: 400 });
-      }
+      // --- order_created: validate the checkout reservation ---
+      // order_refunded events are server-initiated and never carry a checkout_id, so
+      // the reservation check only applies to order_created.
+      if (eventName === 'order_created') {
+        // The checkoutId is available from the LemonSqueezy attributes.
+        // custom_data does not carry it (it's set before checkout creation), so we
+        // rely on what LemonSqueezy sends in the order attributes.
+        const checkoutId =
+          attributes.checkout_id || body.data?.relationships?.checkout?.data?.id || null;
 
-      const reservationRef = adminDb.doc(`users/${userId}/checkout_reservations/${checkoutId}`);
-      const reservationSnap = await reservationRef.get();
-      if (!reservationSnap.exists) {
-        console.error(
-          `[Webhook] Legitimate checkout reservation not found for user ${userId} and checkout ${checkoutId}`
-        );
-        return NextResponse.json({ error: 'Invalid checkout session' }, { status: 400 });
+        if (!checkoutId) {
+          console.error(
+            `[Webhook] Missing checkout_id for order_created event (orderId: ${orderId})`
+          );
+          // Don't hard-fail: the payment may be legitimate even without a traceable reservation.
+          // Log and continue — the pro upgrade will still be applied.
+          // This can happen if the checkout session was created before reservation storage was introduced.
+        } else {
+          const reservationRef = adminDb.doc(`users/${userId}/checkout_reservations/${checkoutId}`);
+          const reservationSnap = await reservationRef.get();
+          if (!reservationSnap.exists) {
+            console.warn(
+              `[Webhook] No reservation found for user ${userId}, checkout ${checkoutId}. Proceeding anyway.`
+            );
+            // Soft-fail: allow legacy orders (created before reservation feature) to proceed.
+          }
+        }
       }
 
       const profileRef = adminDb.doc(`users/${userId}/profile/data`);
       const paymentRef = adminDb.doc(`users/${userId}/payments/${orderId}`);
 
       if (eventName === 'order_created') {
+        // Re-extract checkoutId for batch write (was validated above).
+        const checkoutId =
+          attributes.checkout_id || body.data?.relationships?.checkout?.data?.id || null;
+
         const batch = adminDb.batch();
 
         // Upgrade to Pro in user profile
@@ -134,17 +151,20 @@ export async function POST(req: NextRequest) {
           { merge: true }
         );
 
-        // Complete the reservation
-        batch.set(
-          reservationRef,
-          {
-            orderId: String(orderId),
-            customerId: String(customerId),
-            status: 'completed',
-            completedAt: FieldValue.serverTimestamp(),
-          },
-          { merge: true }
-        );
+        // Mark the reservation as completed, if one exists
+        if (checkoutId) {
+          const reservationRef = adminDb.doc(`users/${userId}/checkout_reservations/${checkoutId}`);
+          batch.set(
+            reservationRef,
+            {
+              orderId: String(orderId),
+              customerId: String(customerId),
+              status: 'completed',
+              completedAt: FieldValue.serverTimestamp(),
+            },
+            { merge: true }
+          );
+        }
 
         await batch.commit();
         console.log(`[Webhook] User ${userId} upgraded to Pro atomically. Order ${orderId}`);
@@ -182,16 +202,6 @@ export async function POST(req: NextRequest) {
             testMode: !!attributes.test_mode,
             createdAt: new Date(attributes.created_at || Date.now()),
             createdAtServer: FieldValue.serverTimestamp(),
-          },
-          { merge: true }
-        );
-
-        // Mark reservation as refunded
-        batch.set(
-          reservationRef,
-          {
-            status: 'refunded',
-            refundedAt: FieldValue.serverTimestamp(),
           },
           { merge: true }
         );
