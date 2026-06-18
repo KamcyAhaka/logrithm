@@ -1,3 +1,23 @@
+# [1.9.0](https://github.com/KamcyAhaka/logrithm/compare/v1.8.0...v1.9.0) (2026-06-18)
+
+
+### Bug Fixes
+
+* **checkout:** secure db initialization, handle write errors, and deduplicate checkoutId ([3c2d3af](https://github.com/KamcyAhaka/logrithm/commit/3c2d3afd714c7497c617cc254f442a2597247f79))
+* **goals:** prevent concurrent active goal creation using sentinel lock pattern ([3e6d521](https://github.com/KamcyAhaka/logrithm/commit/3e6d521cd6f80f246766079831948be4d2e3c8c7))
+* **webhook:** remove checkout_id requirement on refunds and soft-fail on orders ([97c9340](https://github.com/KamcyAhaka/logrithm/commit/97c934021fea4a6edc4b162cfec2c86d2d4a63e9))
+
+
+### Features
+
+* allow dynamic checkout origin with security validation for redirect URLs ([3ca1523](https://github.com/KamcyAhaka/logrithm/commit/3ca1523036ccf1e0e0d91908c1ee9ee27b2b2f40))
+* **auth:** add beta opt-in types and Firestore security rules ([dff9969](https://github.com/KamcyAhaka/logrithm/commit/dff9969fc510aaa4d72bcdd4759e91c111c5644b))
+* **auth:** add expiresAt field for native firestore TTL deletion ([96e0e03](https://github.com/KamcyAhaka/logrithm/commit/96e0e03cc0e4e4c7a312291d9f3aae8f93c27378))
+* **auth:** add sso client resolver and configure allowedDevOrigins and interface binding ([d2711e5](https://github.com/KamcyAhaka/logrithm/commit/d2711e514879c88f782c68e3af89cc3a430ac6a5))
+* **auth:** implement sso-code generation and validation exchange APIs ([3a54940](https://github.com/KamcyAhaka/logrithm/commit/3a549400f288f53c1b7c1e4490bef0f20ad5a607))
+* enforce single active goal invariant via createGoal cloud function ([bb1914c](https://github.com/KamcyAhaka/logrithm/commit/bb1914cd337f55fc85436d72b4272e0acc7924d3))
+* **settings:** implement beta program opt-in Switch UI and Home login redirect ([f16dfb2](https://github.com/KamcyAhaka/logrithm/commit/f16dfb2d1dcf4ee6174e0fd6e6b2c01d9b164edc))
+
 # [1.8.0](https://github.com/KamcyAhaka/logrithm/compare/v1.7.0...v1.8.0) (2026-06-16)
 
 
