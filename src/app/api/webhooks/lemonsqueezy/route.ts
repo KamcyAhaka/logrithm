@@ -80,12 +80,48 @@ export async function POST(req: NextRequest) {
         throw new Error('Firestore admin SDK is not initialised');
       }
 
+      // --- order_created: validate the checkout reservation ---
+      // order_refunded events are server-initiated and never carry a checkout_id, so
+      // the reservation check only applies to order_created.
+      if (eventName === 'order_created') {
+        // The checkoutId is available from the LemonSqueezy attributes.
+        // custom_data does not carry it (it's set before checkout creation), so we
+        // rely on what LemonSqueezy sends in the order attributes.
+        const checkoutId =
+          attributes.checkout_id || body.data?.relationships?.checkout?.data?.id || null;
+
+        if (!checkoutId) {
+          console.error(
+            `[Webhook] Missing checkout_id for order_created event (orderId: ${orderId})`
+          );
+          // Don't hard-fail: the payment may be legitimate even without a traceable reservation.
+          // Log and continue — the pro upgrade will still be applied.
+          // This can happen if the checkout session was created before reservation storage was introduced.
+        } else {
+          const reservationRef = adminDb.doc(`users/${userId}/checkout_reservations/${checkoutId}`);
+          const reservationSnap = await reservationRef.get();
+          if (!reservationSnap.exists) {
+            console.warn(
+              `[Webhook] No reservation found for user ${userId}, checkout ${checkoutId}. Proceeding anyway.`
+            );
+            // Soft-fail: allow legacy orders (created before reservation feature) to proceed.
+          }
+        }
+      }
+
       const profileRef = adminDb.doc(`users/${userId}/profile/data`);
       const paymentRef = adminDb.doc(`users/${userId}/payments/${orderId}`);
 
       if (eventName === 'order_created') {
+        // Re-extract checkoutId for batch write (was validated above).
+        const checkoutId =
+          attributes.checkout_id || body.data?.relationships?.checkout?.data?.id || null;
+
+        const batch = adminDb.batch();
+
         // Upgrade to Pro in user profile
-        await profileRef.set(
+        batch.set(
+          profileRef,
           {
             plan: 'pro',
             isPro: true,
@@ -97,7 +133,8 @@ export async function POST(req: NextRequest) {
         );
 
         // Record payment data
-        await paymentRef.set(
+        batch.set(
+          paymentRef,
           {
             orderId: String(orderId),
             customerId: String(customerId),
@@ -114,10 +151,34 @@ export async function POST(req: NextRequest) {
           { merge: true }
         );
 
-        console.log(`[Webhook] User ${userId} upgraded to Pro. Order ${orderId}`);
+        // Mark the reservation as completed, if one exists
+        if (checkoutId) {
+          const reservationRef = adminDb.doc(`users/${userId}/checkout_reservations/${checkoutId}`);
+          batch.set(
+            reservationRef,
+            {
+              orderId: String(orderId),
+              customerId: String(customerId),
+              status: 'completed',
+              completedAt: FieldValue.serverTimestamp(),
+            },
+            { merge: true }
+          );
+        }
+
+        await batch.commit();
+        console.log(`[Webhook] User ${userId} upgraded to Pro atomically. Order ${orderId}`);
       } else if (eventName === 'order_refunded') {
+        // Fetch user profile to get GitHub login for ledger writing
+        const profileSnap = await profileRef.get();
+        const profileData = profileSnap.data() || {};
+        const githubLogin = profileData.githubLogin;
+
+        const batch = adminDb.batch();
+
         // Downgrade to Free plan in user profile
-        await profileRef.set(
+        batch.set(
+          profileRef,
           {
             plan: 'free',
             isPro: false,
@@ -127,7 +188,8 @@ export async function POST(req: NextRequest) {
         );
 
         // Record payment update as refunded
-        await paymentRef.set(
+        batch.set(
+          paymentRef,
           {
             orderId: String(orderId),
             customerId: String(customerId),
@@ -144,7 +206,25 @@ export async function POST(req: NextRequest) {
           { merge: true }
         );
 
-        console.log(`[Webhook] User ${userId} refunded/downgraded. Order ${orderId}`);
+        // Write refund record to refunded_users collection using githubLoginLowercase
+        if (githubLogin) {
+          const githubLoginLowercase = githubLogin.toLowerCase();
+          const refundedRef = adminDb.doc(`refunded_users/${githubLoginLowercase}`);
+          batch.set(
+            refundedRef,
+            {
+              refunded: true,
+              refundedAt: FieldValue.serverTimestamp(),
+              orderId: String(orderId),
+              userId: userId,
+              reason: 'Webhook refund',
+            },
+            { merge: true }
+          );
+        }
+
+        await batch.commit();
+        console.log(`[Webhook] User ${userId} refunded/downgraded atomically. Order ${orderId}`);
       }
 
       return NextResponse.json({ success: true }, { status: 200 });
