@@ -1,3 +1,10 @@
+# [1.1.0-beta.11](https://github.com/KamcyAhaka/logrithm/compare/v1.1.0-beta.10...v1.1.0-beta.11) (2026-06-18)
+
+
+### Bug Fixes
+
+* **webhook:** remove checkout_id requirement on refunds and soft-fail on orders ([d58f08b](https://github.com/KamcyAhaka/logrithm/commit/d58f08b2ac78dd24985a464544ac5de0d5b432d2))
+
 # [1.1.0-beta.10](https://github.com/KamcyAhaka/logrithm/compare/v1.1.0-beta.9...v1.1.0-beta.10) (2026-06-17)
 
 
