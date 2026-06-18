@@ -38,7 +38,7 @@ export default function SSOPage() {
       redirectTo = '/dashboard';
     }
 
-    console.log('[SSO Page] useEffect mounted. Code:', code, 'RedirectTo:', redirectTo);
+    // console.log('[SSO Page] useEffect mounted. Code:', code, 'RedirectTo:', redirectTo);
 
     async function ssoSignIn() {
       if (!code) {

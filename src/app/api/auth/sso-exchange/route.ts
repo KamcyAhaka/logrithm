@@ -37,10 +37,13 @@ export async function POST(req: Request) {
             'toDate' in val &&
             typeof (val as { toDate: unknown }).toDate === 'function'
           ) {
-            const toDateFn = (val as { toDate: () => unknown }).toDate;
-            const dateObj = toDateFn();
-            if (dateObj instanceof Date) {
-              return dateObj.getTime();
+            if (
+              typeof val === 'object' &&
+              val !== null &&
+              'toDate' in val &&
+              typeof (val as { toDate: unknown }).toDate === 'function'
+            ) {
+              return (val as { toDate: () => Date }).toDate().getTime();
             }
           }
           const parsed = new Date(val as string | number | Date).getTime();
