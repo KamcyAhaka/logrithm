@@ -1,3 +1,25 @@
+# [1.1.0-beta.10](https://github.com/KamcyAhaka/logrithm/compare/v1.1.0-beta.9...v1.1.0-beta.10) (2026-06-17)
+
+
+### Bug Fixes
+
+* **auth:** update firebase admin initialization to prioritize local credentials key ([a14171d](https://github.com/KamcyAhaka/logrithm/commit/a14171d196b3d31f02a942c38380b3eff087f61b))
+* fetch and verify actual payment date for settings refund window ([51dee84](https://github.com/KamcyAhaka/logrithm/commit/51dee84f833e8c3ff2abfd96d1b478f88eacb709))
+* prevent intervals overlap and state updates post-unmount on success page ([e3bb90f](https://github.com/KamcyAhaka/logrithm/commit/e3bb90f554321b33dd83d2a7a9c461e5b585bce1))
+* strengthen refund api validations and preserve failed reservations ([d8af88f](https://github.com/KamcyAhaka/logrithm/commit/d8af88f8c671bb43a615b5cdd9729a29579c1af4))
+* validate webhook checkout reservations and write atomically ([8fafb38](https://github.com/KamcyAhaka/logrithm/commit/8fafb3863dee7e92a2e19e16568b1fdf1734e3b6))
+
+
+### Features
+
+* **auth:** add beta opt-in types and Firestore security rules ([dc2a309](https://github.com/KamcyAhaka/logrithm/commit/dc2a3095ec2d0bdb4d2e5b8575e4227b334754a7))
+* **auth:** add expiresAt field for native firestore TTL deletion ([d65ed4c](https://github.com/KamcyAhaka/logrithm/commit/d65ed4ca34a84eac935f923d64ca83df882013b7))
+* **auth:** add sso client resolver and configure allowedDevOrigins and interface binding ([3555be1](https://github.com/KamcyAhaka/logrithm/commit/3555be1b224085d9bdf04e031f309fc96f953c3e))
+* **auth:** implement sso-code generation and validation exchange APIs ([7c2951d](https://github.com/KamcyAhaka/logrithm/commit/7c2951d5276fb10049cd54168626a8139d64a326))
+* enforce single active goal invariant via createGoal cloud function ([e388fb6](https://github.com/KamcyAhaka/logrithm/commit/e388fb6e905da2df13ff6e00826f7e6e8b98b293))
+* gate checkout for pro users and store checkout reservations ([8336c82](https://github.com/KamcyAhaka/logrithm/commit/8336c82b48346683cc2c429652b20e8edb3215fe))
+* **settings:** implement beta program opt-in Switch UI and Home login redirect ([047acfc](https://github.com/KamcyAhaka/logrithm/commit/047acfca339012c5f5444c66ab0eb924180028d8))
+
 # [1.1.0-beta.9](https://github.com/KamcyAhaka/logrithm/compare/v1.1.0-beta.8...v1.1.0-beta.9) (2026-06-16)
 
 
