@@ -23,14 +23,16 @@ export async function POST(req: NextRequest) {
     }
 
     const adminDb = await getAdminDb();
-    if (adminDb) {
-      const profileRef = adminDb.doc(`users/${userId}/profile/data`);
-      const profileSnap = await profileRef.get();
-      if (profileSnap.exists) {
-        const profileData = profileSnap.data();
-        if (profileData && (profileData.plan === 'pro' || profileData.isPro === true)) {
-          return NextResponse.json({ error: 'You are already a Pro subscriber.' }, { status: 409 });
-        }
+    if (!adminDb) {
+      return NextResponse.json({ error: 'Database not initialized' }, { status: 500 });
+    }
+
+    const profileRef = adminDb.doc(`users/${userId}/profile/data`);
+    const profileSnap = await profileRef.get();
+    if (profileSnap.exists) {
+      const profileData = profileSnap.data();
+      if (profileData && (profileData.plan === 'pro' || profileData.isPro === true)) {
+        return NextResponse.json({ error: 'You are already a Pro subscriber.' }, { status: 409 });
       }
     }
 
@@ -60,7 +62,7 @@ export async function POST(req: NextRequest) {
 
     const { url, checkoutId } = await createCheckoutUrl(userEmail, userId, origin);
 
-    if (adminDb) {
+    try {
       const reservationRef = adminDb.doc(`users/${userId}/checkout_reservations/${checkoutId}`);
       await reservationRef.set({
         checkoutId,
@@ -69,6 +71,15 @@ export async function POST(req: NextRequest) {
         status: 'initiated',
         createdAt: FieldValue.serverTimestamp(),
       });
+    } catch (writeError) {
+      console.error(
+        '[Checkout API] Failed to record checkout reservation in Firestore:',
+        writeError
+      );
+      return NextResponse.json(
+        { error: 'Failed to initiate checkout. Please try again.' },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({ url });
