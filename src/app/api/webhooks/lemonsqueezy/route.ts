@@ -83,12 +83,12 @@ export async function POST(req: NextRequest) {
       // --- order_created: validate the checkout reservation ---
       // order_refunded events are server-initiated and never carry a checkout_id, so
       // the reservation check only applies to order_created.
+      let checkoutId: string | null = null;
       if (eventName === 'order_created') {
         // The checkoutId is available from the LemonSqueezy attributes.
         // custom_data does not carry it (it's set before checkout creation), so we
         // rely on what LemonSqueezy sends in the order attributes.
-        const checkoutId =
-          attributes.checkout_id || body.data?.relationships?.checkout?.data?.id || null;
+        checkoutId = attributes.checkout_id || body.data?.relationships?.checkout?.data?.id || null;
 
         if (!checkoutId) {
           console.error(
@@ -113,10 +113,6 @@ export async function POST(req: NextRequest) {
       const paymentRef = adminDb.doc(`users/${userId}/payments/${orderId}`);
 
       if (eventName === 'order_created') {
-        // Re-extract checkoutId for batch write (was validated above).
-        const checkoutId =
-          attributes.checkout_id || body.data?.relationships?.checkout?.data?.id || null;
-
         const batch = adminDb.batch();
 
         // Upgrade to Pro in user profile

@@ -75,7 +75,7 @@ export async function createCheckoutUrl(
   const checkoutId = data?.data?.id;
 
   if (!url || !checkoutId) {
-    throw new Error('Failed to retrieve checkout URL from LemonSqueezy');
+    throw new Error('Failed to retrieve checkout URL or checkout ID from LemonSqueezy');
   }
 
   return { url, checkoutId: String(checkoutId) };
