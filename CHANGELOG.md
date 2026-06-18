@@ -1,3 +1,10 @@
+# [1.1.0-beta.12](https://github.com/KamcyAhaka/logrithm/compare/v1.1.0-beta.11...v1.1.0-beta.12) (2026-06-18)
+
+
+### Features
+
+* allow dynamic checkout origin with security validation for redirect URLs ([60ff832](https://github.com/KamcyAhaka/logrithm/commit/60ff8321f43cb2f53f2db672e6761c5d236c6d61))
+
 # [1.1.0-beta.11](https://github.com/KamcyAhaka/logrithm/compare/v1.1.0-beta.10...v1.1.0-beta.11) (2026-06-18)
 
 
