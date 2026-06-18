@@ -35,10 +35,11 @@ function initLemonSqueezy() {
  */
 export async function createCheckoutUrl(
   userEmail: string,
-  userId: string
+  userId: string,
+  origin?: string
 ): Promise<{ url: string; checkoutId: string }> {
   const { storeId, variantId } = initLemonSqueezy();
-  let baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+  let baseUrl = origin || process.env.NEXT_PUBLIC_APP_URL;
 
   if (!baseUrl) {
     if (process.env.NODE_ENV !== 'development') {

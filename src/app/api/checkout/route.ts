@@ -34,7 +34,30 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const { url, checkoutId } = await createCheckoutUrl(userEmail, userId);
+    let origin = req.headers.get('origin') || req.nextUrl.origin;
+
+    // Validate the origin to prevent open redirect vulnerabilities
+    const isAllowedOrigin = (url: string) => {
+      try {
+        const parsed = new URL(url);
+        const hostname = parsed.hostname;
+        return (
+          hostname === 'localhost' ||
+          hostname === '127.0.0.1' ||
+          hostname === 'logrithm.dev' ||
+          hostname.endsWith('.logrithm.dev')
+        );
+      } catch {
+        return false;
+      }
+    };
+
+    if (!isAllowedOrigin(origin)) {
+      console.warn(`[Checkout API] Blocked suspicious origin: ${origin}. Falling back to default.`);
+      origin = process.env.NEXT_PUBLIC_APP_URL || 'https://logrithm.dev';
+    }
+
+    const { url, checkoutId } = await createCheckoutUrl(userEmail, userId, origin);
 
     if (adminDb) {
       const reservationRef = adminDb.doc(`users/${userId}/checkout_reservations/${checkoutId}`);
