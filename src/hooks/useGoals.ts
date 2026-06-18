@@ -15,6 +15,7 @@ import {
   doc,
   addDoc,
   updateDoc,
+  setDoc,
   serverTimestamp,
   orderBy,
   limit,
@@ -520,6 +521,14 @@ Return ONLY a valid JSON object with keys:
         status: 'abandoned',
         updatedAt: serverTimestamp(),
       });
+      await setDoc(
+        doc(db, 'users', user.uid, 'goals_active', 'lock'),
+        {
+          status: 'abandoned',
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
       await loadActiveGoal();
     } catch (err) {
       console.error('[GoalsClient] Goal abandonment failed:', err);
@@ -546,6 +555,14 @@ Return ONLY a valid JSON object with keys:
         status: 'abandoned',
         updatedAt: serverTimestamp(),
       });
+      await setDoc(
+        doc(db, 'users', user.uid, 'goals_active', 'lock'),
+        {
+          status: 'abandoned',
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
       setActiveGoal(null);
       setPartners([]);
       setIsCreatingGoal(true);

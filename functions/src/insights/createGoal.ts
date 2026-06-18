@@ -47,12 +47,25 @@ export const createGoal = onCall({ region: 'us-central1' }, async (request) => {
     throw new HttpsError('invalid-argument', 'targetLabel must be a non-empty string.');
   }
 
-  if (
-    dimensionGapsAtCreation !== undefined &&
-    dimensionGapsAtCreation !== null &&
-    !Array.isArray(dimensionGapsAtCreation)
-  ) {
-    throw new HttpsError('invalid-argument', 'dimensionGapsAtCreation must be an array.');
+  if (dimensionGapsAtCreation !== undefined && dimensionGapsAtCreation !== null) {
+    if (!Array.isArray(dimensionGapsAtCreation)) {
+      throw new HttpsError('invalid-argument', 'dimensionGapsAtCreation must be an array.');
+    }
+    for (const item of dimensionGapsAtCreation) {
+      if (
+        typeof item !== 'object' ||
+        item === null ||
+        typeof item.dimension !== 'string' ||
+        typeof item.current !== 'string' ||
+        typeof item.required !== 'string' ||
+        typeof item.gap !== 'string'
+      ) {
+        throw new HttpsError(
+          'invalid-argument',
+          'Each item in dimensionGapsAtCreation must be an object with string properties: dimension, current, required, and gap.'
+        );
+      }
+    }
   }
 
   // Business Logic Validation
@@ -69,11 +82,36 @@ export const createGoal = onCall({ region: 'us-central1' }, async (request) => {
 
   try {
     const result = await db.runTransaction(async (transaction) => {
-      // Query active goals inside the transaction
-      const activeGoalsQuery = userGoalsRef.where('status', '==', 'active').limit(1);
-      const activeGoalsSnap = await transaction.get(activeGoalsQuery);
+      let hasActiveGoal = false;
 
-      if (!activeGoalsSnap.empty) {
+      // Read active goal sentinel inside the transaction to obtain a lock
+      const activeGoalSentinelRef = db.doc(`users/${uid}/goals_active/lock`);
+      const sentinelSnap = await transaction.get(activeGoalSentinelRef);
+
+      if (sentinelSnap.exists) {
+        const sentinelData = sentinelSnap.data();
+        if (sentinelData?.status === 'active') {
+          if (sentinelData?.activeGoalId) {
+            const activeGoalRef = userGoalsRef.doc(sentinelData.activeGoalId);
+            const activeGoalSnap = await transaction.get(activeGoalRef);
+            if (activeGoalSnap.exists && activeGoalSnap.data()?.status === 'active') {
+              hasActiveGoal = true;
+            }
+          } else {
+            hasActiveGoal = true;
+          }
+        }
+      } else {
+        // Fallback for legacy users where the sentinel doc does not exist yet:
+        // Query active goals inside the transaction
+        const activeGoalsQuery = userGoalsRef.where('status', '==', 'active').limit(1);
+        const activeGoalsSnap = await transaction.get(activeGoalsQuery);
+        if (!activeGoalsSnap.empty) {
+          hasActiveGoal = true;
+        }
+      }
+
+      if (hasActiveGoal) {
         throw new HttpsError('failed-precondition', 'You already have an active goal.');
       }
 
@@ -85,10 +123,15 @@ export const createGoal = onCall({ region: 'us-central1' }, async (request) => {
         targetScore,
         targetLabel,
         scoreAtCreation,
-        dimensionGapsAtCreation: dimensionGapsAtCreation || [],
-        weeklyActions: weeklyActions || [],
-        timeframeWeeks: timeframeWeeks || 0,
-        geminiSummary: geminiSummary || '',
+        dimensionGapsAtCreation: Array.isArray(dimensionGapsAtCreation)
+          ? dimensionGapsAtCreation
+          : [],
+        weeklyActions: Array.isArray(weeklyActions) ? weeklyActions : [],
+        timeframeWeeks:
+          typeof timeframeWeeks === 'number' && Number.isFinite(timeframeWeeks)
+            ? timeframeWeeks
+            : 0,
+        geminiSummary: typeof geminiSummary === 'string' ? geminiSummary : '',
         status: 'active',
         createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
@@ -98,6 +141,11 @@ export const createGoal = onCall({ region: 'us-central1' }, async (request) => {
       };
 
       transaction.set(newGoalRef, newGoalData);
+      transaction.set(activeGoalSentinelRef, {
+        status: 'active',
+        activeGoalId: newGoalRef.id,
+        updatedAt: FieldValue.serverTimestamp(),
+      });
       return { success: true, goalId: newGoalRef.id };
     });
 

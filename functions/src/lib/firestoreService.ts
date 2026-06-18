@@ -172,6 +172,14 @@ export const saveInsightHistory = async (
           achievedAt: timestamp,
           updatedAt: timestamp,
         });
+        batch.set(
+          db.doc(`users/${uid}/goals_active/lock`),
+          {
+            status: 'achieved',
+            updatedAt: timestamp,
+          },
+          { merge: true }
+        );
       }
     }
   } catch (err) {
