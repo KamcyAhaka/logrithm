@@ -24,6 +24,9 @@ export async function POST(req: Request) {
 
     // Store the code in Firestore with the associated user ID, creation time, and TTL expiration
     const ssoCodeRef = adminDb.doc(`sso_codes/${code}`);
+    // NOTE: expiresAt is set to 5 minutes to support Firestore TTL (Time To Live) policy
+    // for automatic background document cleanup. The actual security validity window for
+    // code exchange is enforced at 30 seconds inside sso-exchange/route.ts.
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes from now
     await ssoCodeRef.set({
       uid,

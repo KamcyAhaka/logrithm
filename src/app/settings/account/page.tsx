@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useCheckout } from '@/hooks/useCheckout';
 import { auth, db, functions } from '@/lib/firebase';
-import { doc, getDoc, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { signOut } from 'firebase/auth';
 import { Loader2 } from 'lucide-react';
@@ -134,7 +134,6 @@ export default function AccountSettingsPage() {
     setSavingBeta(true);
     setBetaError(null);
     try {
-      const { setDoc } = await import('firebase/firestore');
       const profileRef = doc(db, `users/${user.uid}/profile/data`);
       await setDoc(profileRef, { isBetaUser: checked }, { merge: true });
       setIsBetaUser(checked);
