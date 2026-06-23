@@ -8,6 +8,7 @@ import {
   getAdditionalUserInfo,
   onAuthStateChanged,
   User,
+  signOut,
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
@@ -105,6 +106,13 @@ export default function HomeClient() {
       router.replace('/dashboard');
     } catch (err: unknown) {
       console.error('[HomeClient] Auth error:', err);
+      if (auth.currentUser) {
+        try {
+          await signOut(auth);
+        } catch (signOutErr) {
+          console.error('[HomeClient] Error signing out after post-auth failure:', signOutErr);
+        }
+      }
       const code = (err as { code?: string })?.code;
       if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
         setError(null);
