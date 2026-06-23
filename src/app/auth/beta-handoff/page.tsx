@@ -20,17 +20,14 @@ export default function BetaHandoffPage() {
     let redirectTo = '/dashboard';
     try {
       const trimmed = rawRedirectTo.trim();
-      // Must start with '/' and not be protocol-relative ('//' or '/\')
+      // Must start with '/' and not be protocol-relative ('//' or '/\') or followed by any whitespace
       if (
         trimmed.startsWith('/') &&
         !trimmed.startsWith('//') &&
         !trimmed.startsWith('/\\') &&
-        !trimmed.startsWith('/ ')
+        !/^\/\s/.test(trimmed)
       ) {
-        const parsed = new URL(trimmed, 'http://localhost');
-        if (parsed.hostname === 'localhost' && parsed.protocol === 'http:') {
-          redirectTo = trimmed;
-        }
+        redirectTo = trimmed;
       }
     } catch {
       redirectTo = '/dashboard';
