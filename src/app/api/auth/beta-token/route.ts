@@ -1,8 +1,35 @@
 import { NextResponse } from 'next/server';
 import { getAdminDb, verifyAuthToken } from '@/lib/firebase-admin';
+import { getAuth } from 'firebase-admin/auth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const MAX_REQUESTS = 5; // 5 requests per minute
+
+function isRateLimited(uid: string): boolean {
+  const now = Date.now();
+  const limit = rateLimitMap.get(uid);
+
+  if (!limit) {
+    rateLimitMap.set(uid, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return false;
+  }
+
+  if (now > limit.resetTime) {
+    rateLimitMap.set(uid, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return false;
+  }
+
+  if (limit.count >= MAX_REQUESTS) {
+    return true;
+  }
+
+  limit.count++;
+  return false;
+}
 
 export async function POST(req: Request) {
   try {
@@ -12,6 +39,13 @@ export async function POST(req: Request) {
     }
 
     const uid = decodedToken.uid;
+
+    if (isRateLimited(uid)) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        { status: 429 }
+      );
+    }
     const adminDb = await getAdminDb();
     if (!adminDb) {
       return NextResponse.json({ error: 'Firestore admin SDK not initialized' }, { status: 500 });
@@ -33,13 +67,11 @@ export async function POST(req: Request) {
     }
 
     // Generate Firebase Custom Token using the Admin SDK
-    const { getAuth } = await import('firebase-admin/auth');
     const customToken = await getAuth().createCustomToken(uid);
 
     return NextResponse.json({ customToken });
   } catch (error: unknown) {
     console.error('[Beta Token API] Error generating beta handoff token:', error);
-    const message = error instanceof Error ? error.message : 'Internal Server Error';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
