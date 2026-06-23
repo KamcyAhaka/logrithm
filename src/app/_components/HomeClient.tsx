@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   GithubAuthProvider,
@@ -27,52 +27,7 @@ export default function HomeClient() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [authChecking, setAuthChecking] = useState(true);
   const [agreed, setAgreed] = useState(false);
-
-  const checkBetaRedirectAndNavigate = async (user: User, defaultPath: string) => {
-    try {
-      const isBetaPlatform =
-        window.location.hostname === 'beta.logrithm.dev' ||
-        window.location.hostname === '127.0.0.1';
-
-      if (isBetaPlatform) {
-        router.replace(defaultPath);
-        return;
-      }
-      const profileRef = doc(db, 'users', user.uid, 'profile', 'data');
-      const profileSnap = await getDoc(profileRef);
-
-      if (profileSnap.exists()) {
-        const profileData = profileSnap.data();
-        if (profileData.isBetaUser === true) {
-          const token = await user.getIdToken();
-          const res = await fetch('/api/auth/sso-code', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-          });
-
-          if (res.ok) {
-            const { code } = await res.json();
-
-            // In local development, route to 127.0.0.1 to simulate cross-origin behavior
-            const isLocal =
-              window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-            const betaBaseUrl = isLocal
-              ? `${window.location.protocol}//127.0.0.1:${window.location.port}`
-              : 'https://beta.logrithm.dev';
-
-            window.location.href = `${betaBaseUrl}/auth/sso?code=${encodeURIComponent(code)}&redirectTo=${encodeURIComponent(defaultPath)}`;
-            return;
-          }
-        }
-      }
-    } catch (err) {
-      console.error('[AuthRedirect] Error checking beta redirect:', err);
-    }
-    router.replace(defaultPath);
-  };
+  const isLoggingInRef = useRef(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -82,7 +37,7 @@ export default function HomeClient() {
       // The beta cross-domain redirect is only triggered on a fresh login
       // (inside handleGitHubLogin) so that visiting localhost:3000 while
       // already signed in works normally without looping to 127.0.0.1.
-      if (user) {
+      if (user && !isLoggingInRef.current) {
         router.replace('/dashboard');
       }
     });
@@ -90,6 +45,7 @@ export default function HomeClient() {
   }, [router]);
 
   const handleGitHubLogin = async () => {
+    isLoggingInRef.current = true;
     setLoading(true);
     setError(null);
 
@@ -146,7 +102,7 @@ export default function HomeClient() {
       await user.getIdToken(true);
       await storeGitHubToken(token);
 
-      await checkBetaRedirectAndNavigate(user, '/dashboard');
+      router.replace('/dashboard');
     } catch (err: unknown) {
       console.error('[HomeClient] Auth error:', err);
       const code = (err as { code?: string })?.code;
@@ -159,6 +115,7 @@ export default function HomeClient() {
       }
     } finally {
       setLoading(false);
+      isLoggingInRef.current = false;
     }
   };
 

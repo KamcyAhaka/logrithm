@@ -46,6 +46,15 @@ export default function AccountSettingsPage() {
   const [isBetaUser, setIsBetaUser] = useState(false);
   const [savingBeta, setSavingBeta] = useState(false);
   const [betaError, setBetaError] = useState<string | null>(null);
+  const [switchingBeta, setSwitchingBeta] = useState(false);
+
+  const isBetaPlatform = useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    return (
+      window.location.hostname === 'beta.logrithm.dev' || window.location.hostname === '127.0.0.1'
+    );
+  }, []);
+
   const { checkoutLoading, checkoutError, handleGetPro } = useCheckout();
 
   useEffect(() => {
@@ -64,7 +73,7 @@ export default function AccountSettingsPage() {
           const data = snap.data();
           setGithubLogin(data.githubLogin || null);
           setPlan(data.plan || 'free');
-          setIsBetaUser(!!data.isBetaUser);
+          setIsBetaUser(!!data.isBetaUser || !!data.isBetaTester);
 
           const activated = data.proActivatedAt || null;
           setProActivatedAt(activated);
@@ -144,6 +153,43 @@ export default function AccountSettingsPage() {
       setBetaError(message);
     } finally {
       setSavingBeta(false);
+    }
+  };
+
+  const handleSwitchToBeta = async () => {
+    if (!user) return;
+    setSwitchingBeta(true);
+    setBetaError(null);
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch('/api/auth/beta-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Failed to generate beta access token.');
+      }
+
+      const { customToken } = await res.json();
+
+      const isLocal =
+        window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const betaBaseUrl = isLocal
+        ? `${window.location.protocol}//127.0.0.1:${window.location.port}`
+        : 'https://beta.logrithm.dev';
+
+      window.location.href = `${betaBaseUrl}/auth/beta-handoff?token=${encodeURIComponent(customToken)}&redirectTo=/dashboard`;
+    } catch (err: unknown) {
+      console.error('[AccountSettings] Switch to beta failed:', err);
+      const message =
+        err instanceof Error ? err.message : 'Failed to redirect to beta. Please try again.';
+      setBetaError(message);
+      setSwitchingBeta(false);
     }
   };
 
@@ -292,6 +338,28 @@ export default function AccountSettingsPage() {
             disabled={savingBeta}
           />
         </div>
+
+        {isBetaUser && !isBetaPlatform && (
+          <div className="mt-4 flex items-center justify-between gap-4 rounded-xl border border-[#1D9E75]/20 bg-[#1D9E75]/5 p-5">
+            <div className="min-w-0 flex-1">
+              <label className="text-sm font-medium text-white">
+                Beta Platform Access is Active
+              </label>
+              <p className="mt-1 text-sm text-white/40">
+                You can manually switch to the Beta platform right now without logging out.
+              </p>
+            </div>
+            <Button
+              className="bg-[#1D9E75] font-mono text-white transition-all hover:scale-105 hover:bg-[#1D9E75]/90 active:scale-95"
+              onClick={handleSwitchToBeta}
+              disabled={switchingBeta}
+            >
+              {switchingBeta && <Loader2 className="mr-2 inline-block h-4 w-4 animate-spin" />}
+              Switch to Beta Platform
+            </Button>
+          </div>
+        )}
+
         <Separator className="mt-8 mb-8 bg-white/10" />
       </section>
 
