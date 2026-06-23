@@ -179,8 +179,9 @@ export default function AccountSettingsPage() {
 
       const isLocal =
         window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const port = window.location.port || '3000'; // Default to 3000 for local dev
       const betaBaseUrl = isLocal
-        ? `${window.location.protocol}//127.0.0.1:${window.location.port}`
+        ? `${window.location.protocol}//127.0.0.1:${port}`
         : 'https://beta.logrithm.dev';
 
       window.location.href = `${betaBaseUrl}/auth/beta-handoff?token=${encodeURIComponent(customToken)}&redirectTo=/dashboard`;
