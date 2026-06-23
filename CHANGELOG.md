@@ -1,3 +1,12 @@
+# [1.1.0-beta.13](https://github.com/KamcyAhaka/logrithm/compare/v1.1.0-beta.12...v1.1.0-beta.13) (2026-06-23)
+
+
+### Features
+
+* **auth:** implement secure custom token handoff endpoints ([a022b96](https://github.com/KamcyAhaka/logrithm/commit/a022b9690351a3c3153218419100c8a92505f83f))
+* **settings:** add manual switch to beta platform button ([88c62cd](https://github.com/KamcyAhaka/logrithm/commit/88c62cdef145b04124aae25190e0e82cd0f0ded3))
+* **ui:** add beta badge indicator to navbar ([59178c4](https://github.com/KamcyAhaka/logrithm/commit/59178c4e3c4e29241b85e3db070434717a68e555))
+
 # [1.1.0-beta.12](https://github.com/KamcyAhaka/logrithm/compare/v1.1.0-beta.11...v1.1.0-beta.12) (2026-06-18)
 
 
