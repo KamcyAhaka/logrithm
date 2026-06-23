@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { GitBranch } from 'lucide-react';
 import NavbarAuth from './NavbarAuth';
+import BetaBadge from './BetaBadge';
 
 // Wordmark: "log" normal · "r" green · "ithm" normal — consistent with login page
 export default function Navbar() {
@@ -32,24 +33,27 @@ export default function Navbar() {
           padding: '0 2rem',
         }}
       >
-        {/* Wordmark */}
-        <Link
-          href="/"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            textDecoration: 'none',
-          }}
-        >
-          <Image
-            src="/logrithm-logo-white.png"
-            alt="logrithm logo"
-            width={110}
-            height={30}
-            style={{ objectFit: 'contain' }}
-            priority
-          />
-        </Link>
+        {/* Wordmark & Beta Badge */}
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <Link
+            href="/"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              textDecoration: 'none',
+            }}
+          >
+            <Image
+              src="/logrithm-logo-white.png"
+              alt="logrithm logo"
+              width={110}
+              height={30}
+              style={{ objectFit: 'contain' }}
+              priority
+            />
+          </Link>
+          <BetaBadge />
+        </div>
 
         {/* Nav links + auth */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
