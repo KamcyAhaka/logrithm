@@ -1,3 +1,19 @@
+# [1.10.0](https://github.com/KamcyAhaka/logrithm/compare/v1.9.0...v1.10.0) (2026-06-23)
+
+
+### Bug Fixes
+
+* **auth:** sign out user on post-authentication failure ([b03e99a](https://github.com/KamcyAhaka/logrithm/commit/b03e99ae4056d978b58d0bb7e4b13cfef11c15d1))
+* **settings:** fallback to port 3000 in local dev switch to beta ([6965eb0](https://github.com/KamcyAhaka/logrithm/commit/6965eb0f8f8848861335102d0554698e2ec65dc2))
+
+
+### Features
+
+* **auth:** add rate limiting and optimize getAuth imports in beta-token route ([ee17389](https://github.com/KamcyAhaka/logrithm/commit/ee17389d50bfc636cea098911373c61393655bfb))
+* **auth:** implement secure custom token handoff endpoints ([c53e114](https://github.com/KamcyAhaka/logrithm/commit/c53e114e86efc3e24296a95e4d13aa736cbf1554))
+* **settings:** add manual switch to beta platform button ([7ba9e0c](https://github.com/KamcyAhaka/logrithm/commit/7ba9e0cfa65b57f58bffba70b1c0e6635b462d19))
+* **ui:** add beta badge indicator to navbar ([e5715f3](https://github.com/KamcyAhaka/logrithm/commit/e5715f3631275e12de78701261e03c759360b2f5))
+
 # [1.9.0](https://github.com/KamcyAhaka/logrithm/compare/v1.8.0...v1.9.0) (2026-06-18)
 
 
