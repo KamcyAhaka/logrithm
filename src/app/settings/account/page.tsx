@@ -6,6 +6,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useCheckout } from '@/hooks/useCheckout';
+import { isProUpgradeDisabled } from '@/lib/planGating';
 import { auth, db, functions } from '@/lib/firebase';
 import {
   doc,
@@ -304,15 +305,26 @@ export default function AccountSettingsPage() {
               Upgrade to Pro to set unlimited goals, track progress, invite partners, and rank your
               activity.
             </p>
-            {checkoutError && <p className="font-mono text-xs text-red-500">{checkoutError}</p>}
-            <Button
-              className="bg-[#1D9E75] font-mono text-white transition-all hover:scale-105 hover:bg-[#1D9E75]/90 active:scale-95"
-              onClick={handleGetPro}
-              disabled={checkoutLoading}
-            >
-              {checkoutLoading && <Loader2 className="mr-2 inline-block h-4 w-4 animate-spin" />}
-              {checkoutLoading ? 'Redirecting to checkout...' : 'Get Pro'}
-            </Button>
+            {isProUpgradeDisabled() ? (
+              <div className="inline-flex items-center gap-2 rounded-lg border border-purple-500/20 bg-purple-500/5 px-4 py-3 text-sm text-purple-400">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-purple-400" />
+                <span className="font-mono font-semibold">Pro upgrades are coming soon</span>
+              </div>
+            ) : (
+              <>
+                {checkoutError && <p className="font-mono text-xs text-red-500">{checkoutError}</p>}
+                <Button
+                  className="bg-[#1D9E75] font-mono text-white transition-all hover:scale-105 hover:bg-[#1D9E75]/90 active:scale-95"
+                  onClick={handleGetPro}
+                  disabled={checkoutLoading}
+                >
+                  {checkoutLoading && (
+                    <Loader2 className="mr-2 inline-block h-4 w-4 animate-spin" />
+                  )}
+                  {checkoutLoading ? 'Redirecting to checkout...' : 'Get Pro'}
+                </Button>
+              </>
+            )}
           </div>
         ) : (
           <div className="space-y-4">
