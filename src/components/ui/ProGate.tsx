@@ -1,7 +1,7 @@
 'use client';
 
 import { usePlan } from '@/hooks/usePlan';
-import type { PlanFeatureKey } from '@/lib/planGating';
+import { isProUpgradeDisabled, type PlanFeatureKey } from '@/lib/planGating';
 
 interface ProGateProps {
   /** The feature key this gate is protecting (for the upgrade prompt label) */
@@ -38,16 +38,22 @@ interface UpgradePromptProps {
 }
 
 function UpgradePrompt({ feature }: UpgradePromptProps) {
+  const disabled = isProUpgradeDisabled();
+
   return (
     <div
       className="rounded-lg border px-4 py-3 text-sm"
       style={{
-        borderColor: 'var(--green)',
-        background: 'rgba(29,158,117,0.05)',
+        borderColor: disabled ? 'rgba(168,85,247,0.3)' : 'var(--green)',
+        background: disabled ? 'rgba(168,85,247,0.05)' : 'rgba(29,158,117,0.05)',
       }}
     >
       <div className="flex items-start gap-3">
-        <span style={{ color: 'var(--green)', fontSize: '1rem', lineHeight: 1 }}>🔒</span>
+        <span
+          style={{ color: disabled ? '#A855F7' : 'var(--green)', fontSize: '1rem', lineHeight: 1 }}
+        >
+          🔒
+        </span>
         <div>
           <p
             className="font-medium"
@@ -58,13 +64,20 @@ function UpgradePrompt({ feature }: UpgradePromptProps) {
           <p className="mt-0.5" style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
             Unlock unlimited analysis, all insight cards, and more.
           </p>
-          <a
-            href="/settings/account"
-            className="mt-2 inline-block text-xs font-medium"
-            style={{ color: 'var(--green)', fontFamily: 'var(--font-mono)' }}
-          >
-            Upgrade to Pro →
-          </a>
+          {disabled ? (
+            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-purple-500/20 bg-purple-500/5 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-purple-400">
+              <span className="h-1 w-1 animate-pulse rounded-full bg-purple-400" />
+              Pro Coming Soon
+            </div>
+          ) : (
+            <a
+              href="/settings/account"
+              className="mt-2 inline-block text-xs font-medium"
+              style={{ color: 'var(--green)', fontFamily: 'var(--font-mono)' }}
+            >
+              Upgrade to Pro →
+            </a>
+          )}
         </div>
       </div>
     </div>
