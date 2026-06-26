@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { usePlan } from '@/hooks/usePlan';
+import { isProUpgradeDisabled } from '@/lib/planGating';
 import { Lock, Globe, Code, MapPin, TrendingUp } from 'lucide-react';
 import type { ComparisonStats } from '@/hooks/useComparisonStats';
 
@@ -133,7 +134,9 @@ export default function ComparisonPanel({
         {isTabLocked ? (
           /* Gated Tab Overlay */
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center rounded-lg border border-white/5 bg-[#0a0a0a]/80 p-6 text-center backdrop-blur-md">
-            <Lock className="mb-2 h-6 w-6 text-[#1D9E75]" />
+            <Lock
+              className={`mb-2 h-6 w-6 ${isProUpgradeDisabled() ? 'text-purple-400' : 'text-[#1D9E75]'}`}
+            />
             <h4 className="font-mono text-sm font-semibold text-white">
               {label} Comparisons are Pro Features
             </h4>
@@ -141,12 +144,19 @@ export default function ComparisonPanel({
               Filter comparisons by country and languages to see segment-specific leaderboards and
               averages.
             </p>
-            <a
-              href="/settings/account"
-              className="mt-4 rounded-md bg-[#1D9E75] px-4 py-2 font-mono text-xs font-bold text-white transition-colors hover:bg-[#1D9E75]/95"
-            >
-              Upgrade to Pro
-            </a>
+            {isProUpgradeDisabled() ? (
+              <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-purple-500/20 bg-purple-500/5 px-3 py-1.5 font-mono text-[11px] font-semibold text-purple-400">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-purple-400" />
+                Pro Coming Soon
+              </div>
+            ) : (
+              <a
+                href="/settings/account"
+                className="mt-4 rounded-md bg-[#1D9E75] px-4 py-2 font-mono text-xs font-bold text-white transition-colors hover:bg-[#1D9E75]/95"
+              >
+                Upgrade to Pro
+              </a>
+            )}
           </div>
         ) : null}
 
