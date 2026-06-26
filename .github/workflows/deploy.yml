@@ -26,10 +26,11 @@ jobs:
   deploy:
     name: Build & Deploy
     runs-on: ubuntu-latest
-    # Skip the semantic-release bump commits — they contain [skip ci] in the message.
-    # Those commits have no code changes and would race with the deploy already in
-    # progress for the real push, causing Firebase Hosting to return HTTP 400.
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    # Skip runs triggered by the semantic-release bot. Its bump commits have no code
+    # changes and would race with the real deploy, causing Firebase Hosting HTTP 400.
+    # Checking github.actor is safer than matching commit message text, which can
+    # contain '[skip ci]' in the body (e.g. in explanatory commit messages).
+    if: github.actor != 'semantic-release-bot'
 
     steps:
       # 1. Checkout
