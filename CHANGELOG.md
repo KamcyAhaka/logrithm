@@ -1,3 +1,10 @@
+# [1.1.0-beta.17](https://github.com/KamcyAhaka/logrithm/compare/v1.1.0-beta.16...v1.1.0-beta.17) (2026-06-26)
+
+
+### Bug Fixes
+
+* **ci:** use GITHUB_RUN_ID for fingerprint and add concurrency group ([b9f7194](https://github.com/KamcyAhaka/logrithm/commit/b9f7194695b684e68268d60257f528514683e9dd))
+
 # [1.1.0-beta.16](https://github.com/KamcyAhaka/logrithm/compare/v1.1.0-beta.15...v1.1.0-beta.16) (2026-06-26)
 
 
