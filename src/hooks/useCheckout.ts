@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { isProUpgradeDisabled } from '@/lib/planGating';
 
 export function useCheckout(onUnauthenticated?: () => void) {
   const { user } = useAuth();
@@ -11,6 +12,11 @@ export function useCheckout(onUnauthenticated?: () => void) {
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   const handleGetPro = async () => {
+    if (isProUpgradeDisabled()) {
+      setCheckoutError('Pro upgrades are coming soon.');
+      setTimeout(() => setCheckoutError(null), 5000);
+      return;
+    }
     setCheckoutLoading(true);
     setCheckoutError(null);
     try {
