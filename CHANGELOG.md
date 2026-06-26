@@ -1,3 +1,27 @@
+# [1.11.0](https://github.com/KamcyAhaka/logrithm/compare/v1.10.0...v1.11.0) (2026-06-26)
+
+
+### Bug Fixes
+
+* **ci:** add --force to firebase hosting deploy step ([6b0cde1](https://github.com/KamcyAhaka/logrithm/commit/6b0cde1a68714b4f0d9e4eefdb47e3ee8e71f7fb))
+* **ci:** check github.actor instead of commit message to skip bot deploys ([c9ae676](https://github.com/KamcyAhaka/logrithm/commit/c9ae6761ccde85f4246aca8d302d6a6657e4dc85))
+* **ci:** skip deploy on semantic-release bump commits to prevent Hosting 400 ([f2b7780](https://github.com/KamcyAhaka/logrithm/commit/f2b7780b67052c920c731ea5b3c08e289f0c82b7))
+* **ci:** skip deployment on semantic-release commits by checking commit prefix ([c5ba3c0](https://github.com/KamcyAhaka/logrithm/commit/c5ba3c0567be45383ef2cd565d16ce11d993a3d3))
+* **ci:** stamp public/ with deploy fingerprint to avoid Firebase Hosting 400 ([cf645c3](https://github.com/KamcyAhaka/logrithm/commit/cf645c3450ecfd9056df2863ebffb5cf170d0043))
+* **ci:** use GITHUB_RUN_ID for fingerprint and add concurrency group ([ba4d675](https://github.com/KamcyAhaka/logrithm/commit/ba4d675d1afe249cd66cf0a7fc6cd7aa1a30a0d0))
+
+
+### Features
+
+* **api:** block checkout endpoint when Pro upgrade is disabled ([4cf13d7](https://github.com/KamcyAhaka/logrithm/commit/4cf13d786c12467bc1d8964fa9b911bfc092fe33))
+* **dashboard:** replace upgrade CTAs with 'Pro Coming Soon' in insight panels ([6bf41bc](https://github.com/KamcyAhaka/logrithm/commit/6bf41bcc21341cd7f4fc6631b88ae680066cc8e7))
+* **functions:** emit 'coming soon' message from assertCanRefresh ([4f98a7e](https://github.com/KamcyAhaka/logrithm/commit/4f98a7e8f59c9ec308bdf5fbbfc396a54daeb839))
+* **gating:** add isProUpgradeDisabled() to planGating ([f0db738](https://github.com/KamcyAhaka/logrithm/commit/f0db7387454bf23c92e509fc42f4eb3e1707a060))
+* **hooks:** adjust rate-limit error message in useInsights ([8e9b5b8](https://github.com/KamcyAhaka/logrithm/commit/8e9b5b81ba560c15760ffe335f191293bd64ff0f))
+* **hooks:** short-circuit useCheckout when Pro upgrade is disabled ([fa15cce](https://github.com/KamcyAhaka/logrithm/commit/fa15cce8829fe93aeae04616ef32dc4af65eff47))
+* **settings:** hide 'Get Pro' button on account page when upgrade is disabled ([2f3e001](https://github.com/KamcyAhaka/logrithm/commit/2f3e0019546005d6427829c1043fd9c27c2b211f))
+* **ui:** show 'Pro Coming Soon' in ProGate, FreeGate, and UpgradeModal ([a459760](https://github.com/KamcyAhaka/logrithm/commit/a459760f0eca787fb98bca01d8a4ac7a1c71d9cd))
+
 # [1.10.0](https://github.com/KamcyAhaka/logrithm/compare/v1.9.0...v1.10.0) (2026-06-23)
 
 
