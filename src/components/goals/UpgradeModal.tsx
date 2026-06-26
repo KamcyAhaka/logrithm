@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { Lock, Loader2, X } from 'lucide-react';
+import { isProUpgradeDisabled } from '@/lib/planGating';
 
 interface UpgradeModalProps {
   isOpen: boolean;
@@ -33,6 +34,8 @@ export default function UpgradeModal({
 
   if (!isOpen) return null;
 
+  const disabled = isProUpgradeDisabled();
+
   return (
     <div className="animate-fadeIn fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
       <div
@@ -52,11 +55,18 @@ export default function UpgradeModal({
           <Lock className="h-6 w-6" />
         </div>
         <h2 id="upgrade-modal-title" className="mb-2 font-mono text-xl font-bold text-white">
-          Upgrade to Pro
+          {disabled ? 'Pro Upgrade' : 'Upgrade to Pro'}
         </h2>
+        {disabled && (
+          <div className="mx-auto mb-4 inline-flex items-center gap-1.5 rounded-full border border-purple-500/30 bg-purple-500/15 px-3 py-1 font-mono text-xs font-semibold text-purple-400">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-purple-400" />
+            Coming Soon
+          </div>
+        )}
         <p className="mb-6 text-sm leading-relaxed text-white/60">
-          Unlock unlimited goals, invite accountability partners, and get premium trajectory
-          estimates.
+          {disabled
+            ? 'Unlock unlimited goals, invite accountability partners, and get premium trajectory estimates. Pro features are currently in active development.'
+            : 'Unlock unlimited goals, invite accountability partners, and get premium trajectory estimates.'}
         </p>
 
         {checkoutError && (
@@ -64,20 +74,31 @@ export default function UpgradeModal({
         )}
 
         <div className="space-y-3">
-          <button
-            onClick={onGetPro}
-            disabled={checkoutLoading}
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-[#1D9E75] py-2.5 font-mono text-sm font-bold text-white transition-all hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-85"
-          >
-            {checkoutLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-            {checkoutLoading ? 'Redirecting to checkout...' : 'Get Pro'}
-          </button>
-          <button
-            onClick={onClose}
-            className="w-full rounded-full border border-white/10 bg-white/5 py-2.5 font-mono text-sm font-semibold text-white/60 transition-colors hover:bg-white/10 hover:text-white"
-          >
-            Cancel
-          </button>
+          {disabled ? (
+            <button
+              onClick={onClose}
+              className="w-full rounded-full border border-white/10 bg-white/5 py-2.5 font-mono text-sm font-semibold text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+            >
+              Close
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={onGetPro}
+                disabled={checkoutLoading}
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-[#1D9E75] py-2.5 font-mono text-sm font-bold text-white transition-all hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-85"
+              >
+                {checkoutLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                {checkoutLoading ? 'Redirecting to checkout...' : 'Get Pro'}
+              </button>
+              <button
+                onClick={onClose}
+                className="w-full rounded-full border border-white/10 bg-white/5 py-2.5 font-mono text-sm font-semibold text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+              >
+                Cancel
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

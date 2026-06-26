@@ -2,6 +2,7 @@
 
 import { Lock, Loader2 } from 'lucide-react';
 import { useCheckout } from '@/hooks/useCheckout';
+import { isProUpgradeDisabled } from '@/lib/planGating';
 
 interface FreeGateProps {
   title?: string;
@@ -13,6 +14,7 @@ export default function FreeGate({
   message = 'Upgrade to Pro to set goals, track progress, and invite accountability partners',
 }: FreeGateProps) {
   const { checkoutLoading, checkoutError, handleGetPro } = useCheckout();
+  const disabled = isProUpgradeDisabled();
 
   return (
     <main className="mx-auto flex max-w-7xl flex-col items-center justify-center px-6 py-20">
@@ -21,20 +23,32 @@ export default function FreeGate({
           <Lock className="h-6 w-6" />
         </div>
         <h2 className="mb-2 font-mono text-xl font-bold text-white">{title}</h2>
-        <p className="mb-6 text-sm leading-relaxed text-white/40">{message}</p>
+        <p className="mb-6 text-sm leading-relaxed text-white/40">
+          {disabled
+            ? 'Access to advanced goal-setting features, progress tracking, and accountability partners is coming soon on Logrithm Pro.'
+            : message}
+        </p>
 
-        {checkoutError && (
-          <p className="mb-3 text-center font-mono text-xs text-red-500">{checkoutError}</p>
+        {disabled ? (
+          <div className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-purple-500/20 bg-purple-500/5 py-2.5 font-mono text-xs font-semibold text-purple-400">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-purple-400" />
+            Pro Upgrade Coming Soon
+          </div>
+        ) : (
+          <>
+            {checkoutError && (
+              <p className="mb-3 text-center font-mono text-xs text-red-500">{checkoutError}</p>
+            )}
+            <button
+              onClick={handleGetPro}
+              disabled={checkoutLoading}
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-[#1D9E75] py-2.5 font-mono text-sm font-bold text-white transition-all hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-85"
+            >
+              {checkoutLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+              {checkoutLoading ? 'Redirecting to checkout...' : 'Get Pro'}
+            </button>
+          </>
         )}
-
-        <button
-          onClick={handleGetPro}
-          disabled={checkoutLoading}
-          className="flex w-full items-center justify-center gap-2 rounded-full bg-[#1D9E75] py-2.5 font-mono text-sm font-bold text-white transition-all hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-85"
-        >
-          {checkoutLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-          {checkoutLoading ? 'Redirecting to checkout...' : 'Get Pro'}
-        </button>
       </div>
     </main>
   );
