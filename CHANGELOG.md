@@ -1,3 +1,17 @@
+# [1.1.0-beta.14](https://github.com/KamcyAhaka/logrithm/compare/v1.1.0-beta.13...v1.1.0-beta.14) (2026-06-26)
+
+
+### Features
+
+* **api:** block checkout endpoint when Pro upgrade is disabled ([761ba74](https://github.com/KamcyAhaka/logrithm/commit/761ba7445d24d421dd16f0ae469dd1aee64728ae))
+* **dashboard:** replace upgrade CTAs with 'Pro Coming Soon' in insight panels ([c54fde8](https://github.com/KamcyAhaka/logrithm/commit/c54fde84748cd14c6a2325b5624c8ed63b7a7b11))
+* **functions:** emit 'coming soon' message from assertCanRefresh ([2cff412](https://github.com/KamcyAhaka/logrithm/commit/2cff412e211dc8223675b0560209fa45fb2fedd7))
+* **gating:** add isProUpgradeDisabled() to planGating ([22c6551](https://github.com/KamcyAhaka/logrithm/commit/22c6551e8e4f84586d947d169cc1c11d58f038cd))
+* **hooks:** adjust rate-limit error message in useInsights ([6c9337c](https://github.com/KamcyAhaka/logrithm/commit/6c9337cd16b377fa9bba896519df764bd0dc2997))
+* **hooks:** short-circuit useCheckout when Pro upgrade is disabled ([47061ff](https://github.com/KamcyAhaka/logrithm/commit/47061ff6e18abf140c8abae879361973b9c6c959))
+* **settings:** hide 'Get Pro' button on account page when upgrade is disabled ([26fab1a](https://github.com/KamcyAhaka/logrithm/commit/26fab1a572cc328c37456de5001eb3d3918b1bf3))
+* **ui:** show 'Pro Coming Soon' in ProGate, FreeGate, and UpgradeModal ([d920953](https://github.com/KamcyAhaka/logrithm/commit/d9209532d49c061bdaa6b59109ef4fc74b0fb9e3))
+
 # [1.1.0-beta.13](https://github.com/KamcyAhaka/logrithm/compare/v1.1.0-beta.12...v1.1.0-beta.13) (2026-06-23)
 
 
