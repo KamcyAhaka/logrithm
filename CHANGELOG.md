@@ -1,3 +1,10 @@
+# [1.1.0-beta.16](https://github.com/KamcyAhaka/logrithm/compare/v1.1.0-beta.15...v1.1.0-beta.16) (2026-06-26)
+
+
+### Bug Fixes
+
+* **ci:** stamp public/ with deploy fingerprint to avoid Firebase Hosting 400 ([b625168](https://github.com/KamcyAhaka/logrithm/commit/b6251684e89fed83bd4e398267e573914365db29))
+
 # [1.1.0-beta.15](https://github.com/KamcyAhaka/logrithm/compare/v1.1.0-beta.14...v1.1.0-beta.15) (2026-06-26)
 
 
