@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { isProUpgradeDisabled } from '@/lib/planGating';
 import {
   Terminal,
   Zap,
@@ -185,14 +186,21 @@ export default function InsightPanel({
           >
             {error}
           </p>
-          {error.includes('Upgrade to Pro') ? (
-            <Link
-              href="/settings/account"
-              className="btn btn-primary"
-              style={{ marginTop: '0.5rem', background: 'var(--green)', border: 'none' }}
-            >
-              Upgrade to Pro →
-            </Link>
+          {error.includes('Upgrade to Pro') || error.includes('Pro upgrades') ? (
+            isProUpgradeDisabled() ? (
+              <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-purple-500/20 bg-purple-500/5 px-3 py-1.5 font-mono text-[11px] font-semibold text-purple-400">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-purple-400" />
+                Pro Coming Soon
+              </div>
+            ) : (
+              <Link
+                href="/settings/account"
+                className="btn btn-primary"
+                style={{ marginTop: '0.5rem', background: 'var(--green)', border: 'none' }}
+              >
+                Upgrade to Pro →
+              </Link>
+            )
           ) : (
             <button className="btn btn-secondary" onClick={onRun} style={{ marginTop: '0.5rem' }}>
               Try again
