@@ -15,6 +15,11 @@ on:
           - beta
           - production
 
+# Only one deploy per branch at a time; cancel stale runs if a newer push arrives.
+concurrency:
+  group: deploy-${{ github.ref_name }}
+  cancel-in-progress: true
+
 env:
   PROJECT_ID: logrithm-ai
   REGION: us-central1
@@ -148,12 +153,16 @@ jobs:
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
-      # 14. Stamp public/ with deploy metadata so Firebase sees a new content hash
-      #     Firebase Hosting returns 400 if the version hash matches the active
-      #     release — injecting this file guarantees a different hash every run.
+      # 14. Stamp public/ with deploy metadata so Firebase sees a new content hash.
+      #     Firebase Hosting returns 400 when the version hash matches the active
+      #     release. GITHUB_RUN_ID is unique per workflow run (not per commit),
+      #     so this is safe even on re-runs of the same SHA.
       - name: Write deploy fingerprint
         run: |
-          echo '{"sha":"${{ github.sha }}","ref":"${{ github.ref_name }}","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' > public/deploy.json
+          printf '{"runId":"%s","attempt":"%s","sha":"%s","ref":"%s"}' \
+            "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" \
+            "${{ github.sha }}" "${{ github.ref_name }}" \
+            > public/deploy.json
 
       # 15. Deploy Hosting
       - name: Deploy Hosting
