@@ -71,9 +71,12 @@ export async function assertCanRefresh(uid: string): Promise<void> {
   const count = snap.data().count;
 
   if (count >= FREE_LIMITS.refreshesPerDay) {
+    const isProUpgradeDisabled = process.env.FUNCTIONS_EMULATOR !== 'true';
     throw new HttpsError(
       'resource-exhausted',
-      'Daily analysis limit reached. Upgrade to Pro for unlimited refreshes.'
+      isProUpgradeDisabled
+        ? 'Daily analysis limit reached. Pro upgrades coming soon.'
+        : 'Daily analysis limit reached. Upgrade to Pro for unlimited refreshes.'
     );
   }
 }
