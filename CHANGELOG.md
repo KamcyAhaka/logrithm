@@ -1,3 +1,10 @@
+# [1.1.0-beta.15](https://github.com/KamcyAhaka/logrithm/compare/v1.1.0-beta.14...v1.1.0-beta.15) (2026-06-26)
+
+
+### Bug Fixes
+
+* **ci:** add --force to firebase hosting deploy step ([40900c9](https://github.com/KamcyAhaka/logrithm/commit/40900c9c3b8b3e56991c9058a876525d0e3226f3))
+
 # [1.1.0-beta.14](https://github.com/KamcyAhaka/logrithm/compare/v1.1.0-beta.13...v1.1.0-beta.14) (2026-06-26)
 
 
