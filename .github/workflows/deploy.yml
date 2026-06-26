@@ -10,10 +10,11 @@ on:
         required: false
         default: ''
 
-# Only one deploy per branch at a time; cancel stale runs if a newer push arrives.
+# Only one deploy per branch at a time. cancel-in-progress is false so a
+# real deploy is never interrupted by a follow-up semantic-release commit push.
 concurrency:
   group: deploy-${{ github.ref_name }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   PROJECT_ID: logrithm-ai
@@ -25,6 +26,10 @@ jobs:
   deploy:
     name: Build & Deploy
     runs-on: ubuntu-latest
+    # Skip the semantic-release bump commits — they contain [skip ci] in the message.
+    # Those commits have no code changes and would race with the deploy already in
+    # progress for the real push, causing Firebase Hosting to return HTTP 400.
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
 
     steps:
       # 1. Checkout
