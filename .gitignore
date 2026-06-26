@@ -49,3 +49,6 @@ next-env.d.ts
 
 # firebase functions build output
 functions/lib/
+
+# CI-generated deploy fingerprint — never commit, generated fresh each CI run
+public/deploy.json
