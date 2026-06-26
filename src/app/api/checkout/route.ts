@@ -2,11 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthToken, getAdminDb } from '@/lib/firebase-admin';
 import { createCheckoutUrl } from '@/lib/lemonsqueezy';
 import { FieldValue } from 'firebase-admin/firestore';
+import { isProUpgradeDisabled } from '@/lib/planGating';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
+    if (isProUpgradeDisabled()) {
+      return NextResponse.json({ error: 'Pro upgrades are coming soon.' }, { status: 403 });
+    }
+
     const decodedToken = await verifyAuthToken(req);
     if (!decodedToken || !decodedToken.uid) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
