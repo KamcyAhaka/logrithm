@@ -150,6 +150,6 @@ jobs:
 
       # 14. Deploy Hosting
       - name: Deploy Hosting
-        run: firebase deploy --only hosting:${{ env.SITE }} --non-interactive
+        run: firebase deploy --only hosting:${{ env.SITE }} --non-interactive --force
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
