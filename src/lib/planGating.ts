@@ -80,3 +80,24 @@ export function canUseCardType(plan: Plan, cardType: ShareCardType): boolean {
 export function canUseProfileStyle(plan: Plan, style: 'card' | 'full'): boolean {
   return (getPlanLimits(plan).profileStyles as string[]).includes(style);
 }
+
+/**
+ * Detects if the current environment is a hosted beta or production environment
+ * where Pro upgrades are disabled.
+ * Local development or alpha environments keep upgrades enabled.
+ */
+export function isProUpgradeDisabled(): boolean {
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    const isLocal = hostname === 'localhost' || hostname === '127.0.0.1';
+    const isAlpha = hostname.includes('alpha');
+    return !isLocal && !isAlpha;
+  }
+
+  const service = process.env.K_SERVICE || '';
+  if (service) {
+    return service === 'logrithm' || service === 'logrithm-beta';
+  }
+
+  return process.env.NODE_ENV === 'production';
+}
