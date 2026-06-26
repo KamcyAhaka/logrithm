@@ -7,6 +7,7 @@ import { DUMMY_INSIGHTS } from '@/lib/demoData';
 import { generateInsights as callGenerateInsights } from '@/lib/functions';
 import type { GitHubActivity, InsightObject } from '@/types/github';
 import { useDashboardStore } from '@/store/useDashboardStore';
+import { isProUpgradeDisabled } from '@/lib/planGating';
 
 interface UseInsightsReturn {
   insights: InsightObject | null;
@@ -79,7 +80,11 @@ export function useInsights(isDemoMode: boolean, uid?: string): UseInsightsRetur
           errorCode === 'functions/resource-exhausted' ||
           errorMsg.toLowerCase().includes('limit reached')
         ) {
-          setError('Daily analysis limit reached. Upgrade to Pro for unlimited refreshes.');
+          if (isProUpgradeDisabled()) {
+            setError('Daily analysis limit reached. Pro upgrades coming soon.');
+          } else {
+            setError('Daily analysis limit reached. Upgrade to Pro for unlimited refreshes.');
+          }
         } else {
           setError(errorMsg || 'The log is empty. Try again.');
         }
