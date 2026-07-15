@@ -45,7 +45,8 @@ export default function DashboardClient() {
     loading: insightsLoading,
     error: insightsError,
     run: runInsights,
-  } = useInsights(isDemoMode, user?.uid);
+    clearError: clearInsightsError,
+  } = useInsights(isDemoMode, user?.uid, activity);
 
   const { globalStats, countryStats, languageStats } = useComparisonStats(
     countryCode,
@@ -220,6 +221,7 @@ export default function DashboardClient() {
                   const uid = isDemoMode ? 'demo' : (user?.uid ?? 'anon');
                   runInsights(activity, uid);
                 }}
+                onClearError={clearInsightsError}
                 login={login}
                 countryCode={countryCode}
                 globalStats={globalStats}
