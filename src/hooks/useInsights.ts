@@ -13,46 +13,22 @@ interface UseInsightsReturn {
   insights: InsightObject | null;
   loading: boolean;
   error: string | null;
-  run: (activity: GitHubActivity, uid: string) => Promise<void>;
+  run: (activity: GitHubActivity, uid: string, forceRefresh?: boolean) => Promise<void>;
+  clearError: () => void;
 }
 
-export function useInsights(isDemoMode: boolean, uid?: string): UseInsightsReturn {
+export function useInsights(
+  isDemoMode: boolean,
+  uid?: string,
+  activity?: GitHubActivity | null
+): UseInsightsReturn {
   const { insights, setInsights } = useDashboardStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasInitialFetched, setHasInitialFetched] = useState(false);
 
-  // Fetch from Firestore on mount
-  useEffect(() => {
-    if (isDemoMode) {
-      // In demo mode, we wait for the user to click "Run" to show the dummy insights
-      return;
-    }
-    // If we already have insights in the store, skip initial fetch
-    if (!uid || hasInitialFetched || insights) return;
-
-    const fetchInitial = async () => {
-      setLoading(true);
-      try {
-        const docRef = doc(db, 'users', uid, 'insights', 'latest');
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data().data as InsightObject;
-          setInsights(data);
-        }
-      } catch (err) {
-        console.error('[useInsights] Failed to fetch initial insights:', err);
-      } finally {
-        setLoading(false);
-        setHasInitialFetched(true);
-      }
-    };
-
-    fetchInitial();
-  }, [isDemoMode, uid, hasInitialFetched, insights, setInsights]);
-
   const run = useCallback(
-    async (activity: GitHubActivity, runUid: string) => {
+    async (activityData: GitHubActivity, runUid: string, forceRefresh = true) => {
       if (isDemoMode) {
         // Simulate brief loading for demo UX
         setLoading(true);
@@ -66,8 +42,11 @@ export function useInsights(isDemoMode: boolean, uid?: string): UseInsightsRetur
       setError(null);
 
       try {
-        // Force refresh to bypass Cloud Function cache
-        const result = await callGenerateInsights({ activity, uid: runUid, forceRefresh: true });
+        const result = await callGenerateInsights({
+          activity: activityData,
+          uid: runUid,
+          forceRefresh,
+        });
         setInsights(result);
       } catch (err: unknown) {
         console.error('[useInsights] Error:', err);
@@ -95,5 +74,67 @@ export function useInsights(isDemoMode: boolean, uid?: string): UseInsightsRetur
     [isDemoMode, setInsights]
   );
 
-  return { insights, loading, error, run };
+  // Fetch and check cache on mount to support automated daily updates
+  useEffect(() => {
+    if (isDemoMode) {
+      // In demo mode, we wait for the user to click "Run" to show the dummy insights
+      return;
+    }
+    // We need both uid and activity to proceed with cache check and potential auto-update
+    if (!uid || hasInitialFetched || !activity) return;
+
+    const fetchAndCheckCache = async () => {
+      setLoading(true);
+      try {
+        const docRef = doc(db, 'users', uid, 'insights', 'latest');
+        const docSnap = await getDoc(docRef);
+        let needsUpdate = true;
+
+        if (docSnap.exists()) {
+          const docData = docSnap.data();
+          const cachedData = docData.data as InsightObject;
+
+          // Check if generated today
+          let generatedAt: Date;
+          if (docData.generatedAt && typeof docData.generatedAt.toDate === 'function') {
+            generatedAt = docData.generatedAt.toDate();
+          } else {
+            generatedAt = new Date(docData.generatedAt as string);
+          }
+
+          const today = new Date();
+          const sameDay =
+            generatedAt.getFullYear() === today.getFullYear() &&
+            generatedAt.getMonth() === today.getMonth() &&
+            generatedAt.getDate() === today.getDate();
+
+          if (sameDay) {
+            setInsights(cachedData);
+            needsUpdate = false;
+          } else {
+            // Pre-populate with older insights to avoid blank layout while background fetching
+            setInsights(cachedData);
+          }
+        }
+
+        if (needsUpdate) {
+          // Trigger automated daily analysis (non-forced so it respects backend/same-day checks if any)
+          await run(activity, uid, false);
+        }
+      } catch (err) {
+        console.error('[useInsights] Failed to load/auto-update insights:', err);
+      } finally {
+        setLoading(false);
+        setHasInitialFetched(true);
+      }
+    };
+
+    fetchAndCheckCache();
+  }, [isDemoMode, uid, hasInitialFetched, activity, run, setInsights]);
+
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
+  return { insights, loading, error, run, clearError };
 }
