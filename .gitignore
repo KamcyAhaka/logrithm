@@ -33,7 +33,7 @@ firebase-debug.log
 firebase-debug.*.log
 
 # env files — never commit secrets
-.env*
+.env.local
 functions/.env.local
 
 # service account keys — never commit

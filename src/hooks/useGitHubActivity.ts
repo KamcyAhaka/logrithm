@@ -10,7 +10,7 @@ interface UseGitHubActivityReturn {
   data: GitHubActivity | null;
   loading: boolean;
   error: string | null;
-  fetch: (uid: string) => Promise<void>;
+  fetch: (uid: string, force?: boolean) => Promise<void>;
 }
 
 export function useGitHubActivity(isDemoMode: boolean): UseGitHubActivityReturn {
@@ -19,9 +19,9 @@ export function useGitHubActivity(isDemoMode: boolean): UseGitHubActivityReturn 
   const [error, setError] = useState<string | null>(null);
 
   const fetch = useCallback(
-    async (uid: string) => {
+    async (uid: string, force = false) => {
       // If we already have data in the store, don't refetch
-      if (data && !isDemoMode) {
+      if (data && !isDemoMode && !force) {
         return;
       }
 

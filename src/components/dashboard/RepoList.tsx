@@ -3,9 +3,19 @@ import { Star, GitFork } from 'lucide-react';
 
 interface RepoListProps {
   repositories: Repository[];
+  onReconnect?: () => void;
+  reconnecting?: boolean;
+  reconnectError?: string | null;
+  reconnectSuccess?: boolean;
 }
 
-export default function RepoList({ repositories }: RepoListProps) {
+export default function RepoList({
+  repositories,
+  onReconnect,
+  reconnecting,
+  reconnectError,
+  reconnectSuccess,
+}: RepoListProps) {
   return (
     <div
       className="glass-card"
@@ -157,6 +167,60 @@ export default function RepoList({ repositories }: RepoListProps) {
           </a>
         ))}
       </div>
+
+      {onReconnect && (
+        <div
+          style={{
+            marginTop: '1rem',
+            paddingTop: '0.75rem',
+            borderTop: '1px solid rgba(255,255,255,0.05)',
+            fontSize: '0.7rem',
+            color: 'var(--text-muted)',
+            fontFamily: 'var(--font-mono)',
+            lineHeight: '1.4',
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <div>
+              Missing repos from an organization?{' '}
+              <button
+                onClick={onReconnect}
+                disabled={reconnecting}
+                style={{
+                  color: 'var(--green)',
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  textDecoration: 'underline',
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  fontSize: 'inherit',
+                }}
+                className="transition hover:text-[#1D9E75]/90 disabled:opacity-50"
+              >
+                {reconnecting ? 'Connecting...' : 'Reconnect GitHub'}
+              </button>{' '}
+              to refresh access.
+            </div>
+            {reconnectError && (
+              <div
+                style={{
+                  color: 'rgba(255,100,100,0.85)',
+                  fontSize: '0.65rem',
+                  marginTop: '0.2rem',
+                }}
+              >
+                {reconnectError}
+              </div>
+            )}
+            {reconnectSuccess && (
+              <div style={{ color: 'var(--green)', fontSize: '0.65rem', marginTop: '0.2rem' }}>
+                Connected successfully! Syncing repositories...
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

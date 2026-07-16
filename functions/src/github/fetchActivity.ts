@@ -42,7 +42,7 @@ const GITHUB_GRAPHQL_QUERY = `
           }
         }
       }
-      repositories(first: 15, orderBy: { field: UPDATED_AT, direction: DESC }, ownerAffiliations: [OWNER, COLLABORATOR, ORGANIZATION_MEMBER]) {
+      repositories(first: 20, orderBy: { field: UPDATED_AT, direction: DESC }, ownerAffiliations: [OWNER, COLLABORATOR, ORGANIZATION_MEMBER]) {
         nodes {
           databaseId
           name
@@ -60,7 +60,7 @@ const GITHUB_GRAPHQL_QUERY = `
           }
         }
       }
-      repositoriesContributedTo(first: 15, orderBy: { field: UPDATED_AT, direction: DESC }, contributionTypes: [COMMIT, PULL_REQUEST, ISSUE, REPOSITORY]) {
+      repositoriesContributedTo(first: 20, orderBy: { field: UPDATED_AT, direction: DESC }, contributionTypes: [COMMIT, PULL_REQUEST, ISSUE, REPOSITORY]) {
         nodes {
           databaseId
           name
@@ -75,6 +75,23 @@ const GITHUB_GRAPHQL_QUERY = `
           primaryLanguage {
             name
             color
+          }
+        }
+      }
+      organizations(first: 20) {
+        nodes {
+          login
+          repositories(first: 30, orderBy: { field: UPDATED_AT, direction: DESC }) {
+            nodes {
+              databaseId
+              name
+              url
+              isPrivate
+              owner { login __typename }
+              stargazerCount
+              forkCount
+              primaryLanguage { name color }
+            }
           }
         }
       }
@@ -194,6 +211,26 @@ export const fetchActivityInternal = async (uid: string): Promise<GitHubActivity
             primaryLanguage: { name: string; color: string | null } | null;
           }>;
         };
+        organizations: {
+          nodes: Array<{
+            login: string;
+            repositories: {
+              nodes: Array<{
+                databaseId: number;
+                name: string;
+                url: string;
+                isPrivate: boolean;
+                owner: {
+                  login: string;
+                  __typename: string;
+                };
+                stargazerCount: number;
+                forkCount: number;
+                primaryLanguage: { name: string; color: string | null } | null;
+              }>;
+            };
+          }>;
+        };
       };
     };
     errors?: Array<{ message: string }>;
@@ -220,10 +257,15 @@ export const fetchActivityInternal = async (uid: string): Promise<GitHubActivity
     }
   }
 
+  const orgRepos = (viewer.organizations?.nodes || []).flatMap(
+    (org) => org.repositories?.nodes || []
+  );
+
   // Merge repositories and repositoriesContributedTo, then deduplicate by URL
   const allRepos = [
     ...(viewer.repositories?.nodes || []),
     ...(viewer.repositoriesContributedTo?.nodes || []),
+    ...orgRepos,
   ].filter(Boolean);
 
   const uniqueReposMap = new Map<string, (typeof allRepos)[0]>();
@@ -248,7 +290,7 @@ export const fetchActivityInternal = async (uid: string): Promise<GitHubActivity
       primaryLanguage: repo.primaryLanguage ?? null,
       commitCount: userCommitsMap.get(repo.databaseId) ?? 0,
     }))
-    .slice(0, 15);
+    .slice(0, 20);
 
   // Persist repos to Firestore for privacy filtering in generateInsights
   // Fire-and-forget with Promise.allSettled — never block or throw on upsert failures

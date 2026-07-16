@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useGitHubReconnect } from '@/hooks/useGitHubReconnect';
+import { fetchGitHubActivity } from '@/lib/functions';
 import { useAuth } from '@/hooks/useAuth';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, writeBatch } from 'firebase/firestore';
@@ -31,6 +33,14 @@ export default function RepositoriesSettingsPage() {
   const [repos, setRepos] = useState<SettingsRepo[]>([]);
   const [initialRepos, setInitialRepos] = useState<SettingsRepo[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const {
+    reconnect,
+    loading: reconnecting,
+    error: reconnectError,
+    success: reconnectSuccess,
+  } = useGitHubReconnect();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -79,8 +89,23 @@ export default function RepositoriesSettingsPage() {
         setLoading(false);
       }
     }
+
     fetchRepos();
-  }, [user]);
+  }, [user, refreshKey]);
+
+  const handleReconnect = async () => {
+    const ok = await reconnect();
+    if (ok && user) {
+      setLoading(true);
+      try {
+        await fetchGitHubActivity(user.uid);
+        setRefreshKey((prev) => prev + 1);
+      } catch (err) {
+        console.error('Failed to sync repositories after reconnect:', err);
+        setLoading(false);
+      }
+    }
+  };
 
   const isDirty = JSON.stringify(repos) !== JSON.stringify(initialRepos);
 
@@ -153,6 +178,30 @@ export default function RepositoriesSettingsPage() {
       </div>
 
       <Separator className="bg-white/10" />
+
+      {/* Reconnect Callout Banner */}
+      <div className="rounded-xl border border-white/5 bg-white/3 p-4">
+        <p className="font-mono text-xs text-white/60">
+          Missing repositories from an organization? You may need to grant Logrithm access to your
+          organizations.
+        </p>
+        <div className="mt-3 flex items-center gap-3">
+          <Button
+            onClick={handleReconnect}
+            disabled={reconnecting}
+            className="bg-[#1D9E75] font-mono text-xs text-white hover:bg-[#1D9E75]/90"
+            size="sm"
+          >
+            {reconnecting ? 'Connecting...' : 'Reconnect GitHub'}
+          </Button>
+          {reconnectError && (
+            <span className="font-mono text-xs text-red-500">{reconnectError}</span>
+          )}
+          {reconnectSuccess && (
+            <span className="font-mono text-xs text-green-500">Connected successfully!</span>
+          )}
+        </div>
+      </div>
 
       {/* Search Input */}
       <div className="relative max-w-md">

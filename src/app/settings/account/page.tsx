@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
+import { useGitHubReconnect } from '@/hooks/useGitHubReconnect';
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -57,6 +58,13 @@ export default function AccountSettingsPage() {
   }, []);
 
   const { checkoutLoading, checkoutError, handleGetPro } = useCheckout();
+
+  const {
+    reconnect,
+    loading: reconnecting,
+    error: reconnectError,
+    success: reconnectSuccess,
+  } = useGitHubReconnect();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -398,6 +406,25 @@ export default function AccountSettingsPage() {
           </div>
         </div>
         <p className="mt-3 text-sm text-white/40">Connected via GitHub OAuth</p>
+
+        <div className="mt-4 flex flex-col gap-2">
+          <p className="text-xs text-white/40">
+            Need to refresh organization repository access? Reconnect your GitHub account.
+          </p>
+          <Button
+            onClick={reconnect}
+            disabled={reconnecting}
+            variant="outline"
+            className="w-fit border-white/20 font-mono text-xs text-white hover:bg-white/5"
+            size="sm"
+          >
+            {reconnecting ? 'Connecting...' : 'Reconnect GitHub'}
+          </Button>
+          {reconnectError && <p className="font-mono text-xs text-red-500">{reconnectError}</p>}
+          {reconnectSuccess && (
+            <p className="font-mono text-xs text-green-500">Connected successfully!</p>
+          )}
+        </div>
 
         <Separator className="mt-8 mb-8 bg-white/10" />
       </section>

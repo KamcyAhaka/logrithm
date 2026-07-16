@@ -23,6 +23,7 @@ import OnboardingFlow from '@/components/dashboard/OnboardingFlow';
 import TermsModal from '@/components/dashboard/TermsModal';
 
 import { GitCommit, GitPullRequest, AlertCircle, FolderOpen } from 'lucide-react';
+import { useGitHubReconnect } from '@/hooks/useGitHubReconnect';
 
 export default function DashboardClient() {
   const isDemoMode = useDemoMode();
@@ -32,6 +33,24 @@ export default function DashboardClient() {
   const [mustAcceptTerms, setMustAcceptTerms] = useState(false);
   const [excludedRepoIds, setExcludedRepoIds] = useState<Set<string>>(new Set());
   const [countryCode, setCountryCode] = useState<string | null>(null);
+
+  const {
+    reconnect,
+    loading: reconnectLoading,
+    error: reconnectError,
+    success: reconnectSuccess,
+  } = useGitHubReconnect();
+
+  const handleReconnect = async () => {
+    const ok = await reconnect();
+    if (ok && user?.uid) {
+      try {
+        await fetchActivity(user.uid, true);
+      } catch (err) {
+        console.error('[DashboardClient] Failed to refetch activity after reconnect:', err);
+      }
+    }
+  };
 
   const {
     data: activity,
@@ -233,6 +252,10 @@ export default function DashboardClient() {
                   repositories={activity.repositories.filter(
                     (r) => !excludedRepoIds.has(String(r.repoId ?? r.name))
                   )}
+                  onReconnect={!isDemoMode ? handleReconnect : undefined}
+                  reconnecting={reconnectLoading}
+                  reconnectError={reconnectError}
+                  reconnectSuccess={reconnectSuccess}
                 />
                 {insights && (
                   <ComparisonPanel
