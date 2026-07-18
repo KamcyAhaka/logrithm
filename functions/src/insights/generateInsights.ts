@@ -45,6 +45,13 @@ const DUMMY_INSIGHTS: InsightObject = {
     'sprint cycles',
     'cross-platform',
   ],
+  scoreBreakdown: {
+    volume: 85,
+    consistency: 80,
+    collaboration: 90,
+    diversity: 75,
+    momentum: 82,
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -380,7 +387,10 @@ export const generateInsightsInternal = async (
     // Non-fatal — return insights even if persistence fails
   }
 
-  return insights;
+  return {
+    ...insights,
+    scoreBreakdown: scoreBreakdown.components,
+  };
 };
 
 import { buildSnapshot } from '../lib/snapshotBuilder';

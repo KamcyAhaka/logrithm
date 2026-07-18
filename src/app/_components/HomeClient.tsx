@@ -54,6 +54,7 @@ export default function HomeClient() {
       const provider = new GithubAuthProvider();
       provider.addScope('read:user');
       provider.addScope('repo');
+      provider.addScope('read:org');
 
       const result = await signInWithPopup(auth, provider);
       const credential = GithubAuthProvider.credentialFromResult(result);
