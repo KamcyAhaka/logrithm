@@ -1,6 +1,5 @@
 'use client';
 
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import type { Repository } from '@/types/github';
 
 interface LanguageBreakdownProps {
@@ -41,101 +40,65 @@ export default function LanguageBreakdown({ repositories }: LanguageBreakdownPro
 
   const total = data.reduce((s, d) => s + d.value, 0);
 
+  if (data.length === 0) return null;
+
   return (
     <div
-      className="glass-card"
+      className="glass-card relative overflow-hidden p-5 transition-all duration-300"
       style={{
-        padding: '1.5rem',
-        height: '100%',
-        minHeight: '280px',
-        display: 'flex',
-        flexDirection: 'column',
+        borderRadius: '1.25rem',
+        background: 'rgba(10, 14, 12, 0.65)',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
       }}
     >
-      <h3
-        style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: '0.8rem',
-          color: 'var(--text-muted)',
-          textTransform: 'uppercase',
-          letterSpacing: '0.1em',
-          marginBottom: '1rem',
-        }}
-      >
-        Languages
-      </h3>
+      <div className="flex flex-col gap-3">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <h3 className="font-mono text-xs tracking-wider text-white/50 uppercase">
+            Language Breakdown
+          </h3>
+          <span className="font-mono text-xs text-white/40">
+            {total.toLocaleString()} commits total
+          </span>
+        </div>
 
-      <div style={{ flex: 1, minHeight: 0 }}>
-        <ResponsiveContainer width="100%" height={160}>
-          <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              innerRadius={45}
-              outerRadius={70}
-              paddingAngle={3}
-              dataKey="value"
-            >
-              {data.map((entry, i) => (
-                <Cell key={`cell-${i}`} fill={entry.color} stroke="transparent" />
-              ))}
-            </Pie>
-            <Tooltip
-              contentStyle={{
-                background: '#1a1a1a',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '0.5rem',
-                fontFamily: 'JetBrains Mono',
-                fontSize: '0.75rem',
-              }}
-              formatter={(value, name) => [
-                `${value ?? 0} commits (${Math.round((((value as number) ?? 0) / total) * 100)}%)`,
-                name as string,
-              ]}
-            />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Legend */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-        {data.map((lang) => (
-          <div
-            key={lang.name}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        {/* Multi-segment Horizontal Progress Bar */}
+        <div className="flex h-3.5 w-full overflow-hidden rounded-full border border-white/10 bg-white/5 p-0.5">
+          {data.map((lang) => {
+            const pct = Math.max(2, Math.round((lang.value / total) * 100));
+            return (
               <div
+                key={lang.name}
                 style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  background: lang.color,
-                  flexShrink: 0,
+                  width: `${pct}%`,
+                  backgroundColor: lang.color,
+                  transition: 'width 0.5s ease-in-out',
                 }}
+                className="h-full first:rounded-l-full last:rounded-r-full hover:brightness-125"
+                title={`${lang.name}: ${lang.value} commits (${pct}%)`}
               />
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.75rem',
-                  color: 'var(--text-secondary)',
-                }}
-              >
-                {lang.name}
-              </span>
-            </div>
-            <span
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '0.7rem',
-                color: 'var(--text-muted)',
-              }}
-            >
-              {lang.value}
-            </span>
-          </div>
-        ))}
+            );
+          })}
+        </div>
+
+        {/* Horizontal Language Legend */}
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-1">
+          {data.map((lang) => {
+            const pct = Math.round((lang.value / total) * 100);
+            return (
+              <div key={lang.name} className="flex items-center gap-2 font-mono text-xs">
+                <span
+                  className="h-2.5 w-2.5 shrink-0 rounded-full"
+                  style={{ backgroundColor: lang.color }}
+                />
+                <span className="font-medium text-white/80">{lang.name}</span>
+                <span className="text-white/40">
+                  {lang.value} ({pct}%)
+                </span>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

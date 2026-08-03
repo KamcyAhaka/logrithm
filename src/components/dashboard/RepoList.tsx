@@ -3,6 +3,7 @@ import { Star, GitFork } from 'lucide-react';
 
 interface RepoListProps {
   repositories: Repository[];
+  maxHeight?: string;
   onReconnect?: () => void;
   reconnecting?: boolean;
   reconnectError?: string | null;
@@ -11,6 +12,7 @@ interface RepoListProps {
 
 export default function RepoList({
   repositories,
+  maxHeight = '550px',
   onReconnect,
   reconnecting,
   reconnectError,
@@ -21,7 +23,7 @@ export default function RepoList({
       className="glass-card"
       style={{
         padding: '1.5rem',
-        height: '100%',
+        maxHeight,
         minHeight: 0,
         display: 'flex',
         flexDirection: 'column',

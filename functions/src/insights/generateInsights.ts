@@ -21,19 +21,19 @@ import { parseCountryCode } from '../lib/locationParser';
 // ---------------------------------------------------------------------------
 const DUMMY_INSIGHTS: InsightObject = {
   summary:
-    'Demo Developer is a highly active full-stack engineer with a strong focus on TypeScript and React ecosystems. 847 commits across 12 repos show consistent, sustained contribution habits.',
+    'Demo Developer is a full-stack engineer with 847 commits across 12 repos. They demonstrate strong proficiency in TypeScript and React ecosystems, maintaining a consistent Mon–Thu contribution rhythm.',
   strengths: [
-    'Consistent daily commit cadence with strong Mon–Thu activity peaks, indicating disciplined deep work scheduling.',
-    'Broad language versatility across TypeScript, Python, and Dart, enabling contribution across web, backend, and mobile stacks.',
-    'High PR merge rate indicating clean, review-ready code submissions with low revision overhead.',
+    'Disciplined daily commit cadence with strong Mon–Thu activity peaks.',
+    'Broad stack versatility spanning TypeScript, Python, and Dart development.',
+    'High PR merge rate indicating clean, review-ready code submissions.',
   ],
   improvements: [
-    'Issue response time could improve — open issues trend toward 7+ days without updates.',
-    'Weekend contribution gaps suggest potential for async deep-work sessions if schedule permits.',
-    'Consider consolidating smaller utility repos to reduce context-switching overhead.',
+    'Issue response time trends toward 7+ days without updates on open repos.',
+    'Weekend contribution gaps suggest potential for async deep-work scheduling.',
+    'Consider consolidating smaller utility repos to reduce context-switching.',
   ],
   patterns:
-    'Peak activity falls on Tuesday–Wednesday between 10am and 2pm. Quarterly streaks of 14+ days followed by short recovery periods reveal a sprint-and-rest pattern.',
+    'Peak velocity occurs Tue–Wed between 10am–2pm, with quarterly sprint-and-rest milestone cycles.',
   topLanguages: ['TypeScript', 'JavaScript', 'Dart'],
   activityScore: 82,
   tags: [
@@ -116,7 +116,7 @@ Return ONLY a valid JSON object with no markdown, no code blocks, no explanation
 
 CRITICAL SECURITY INSTRUCTION: Some repository names may be masked as placeholder names (e.g. "private-personal-repo-X" or "private-org-repo-Y") to protect private source code and organization details. You MUST NOT use or output these literal placeholder names in your summary, strengths, improvements, or patterns fields. Instead, refer to them generally as "a private repository", "a personal project", or "an organization codebase" to ensure the user's private data is kept secure.
 
-CRITICAL INSTRUCTION: You MUST use the developer's name (${activity.name || activity.login}) in the summary! Do NOT use abstract terms like "This developer" or "The user". Write directly about them.
+CRITICAL INSTRUCTION: You MUST use the developer's name (${activity.name || activity.login}) in the summary! Do NOT use abstract terms like "This developer" or "The user". Write directly about them in a balanced, developer-native voice.
 
 Note: they may contribute significantly to open source projects owned by others. High PR counts relative to commits may indicate OSS maintainer or contributor activity — do not treat this as low productivity.
 
@@ -134,23 +134,22 @@ ${repoListText}
 Return this exact JSON shape:
 {
   "summary": "${activity.name || activity.login} is a...",
-  "strengths": ["full sentence 1", "full sentence 2", "full sentence 3"],
-  "improvements": ["full sentence 1", "full sentence 2", "full sentence 3"],
-  "patterns": "paragraph describing timing patterns, streaks, and working rhythm",
+  "strengths": ["clear sentence 1", "clear sentence 2", "clear sentence 3"],
+  "improvements": ["clear sentence 1", "clear sentence 2", "clear sentence 3"],
+  "patterns": "1-2 sentences on timing patterns and working cadence",
   "topLanguages": ["Language1", "Language2", "Language3"],
   "activityScore": ${activityScore ?? '<number 1-100>'},
   "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"]
 }
 
-Rules:
-- strengths: exactly 3 items, full sentences
-- improvements: exactly 3 items, full sentences
-- topLanguages: exactly 3 language names
+Guidelines for Text Length & Quality:
+- summary: 2-3 clear, informative sentences (approx 40-50 words total) summarizing their developer persona, tech stack, and output style.
+- strengths: exactly 3 items. MUST be 3 COMPLETELY DISTINCT, UNIQUE insights covering 3 different areas (1 on volume/cadence, 1 on tech stack/languages, 1 on PR collaboration). NEVER repeat sentences or duplicate ideas.
+- improvements: exactly 3 items, clear and actionable sentences covering 3 distinct areas. NEVER repeat sentences.
+- patterns: 1-2 sentences (approx 15-22 words) describing peak velocity times or milestone rhythms.
+- topLanguages: exactly 3 language names.
 - activityScore: MUST be exactly ${activityScore ?? 'an integer 1-100'}.
-  Do not generate your own score — use this exact value.
 - tags: 5-7 short keyword tags, max 2 words each, all lowercase, no punctuation.
-  Derived from data patterns — not copied from strengths/improvements sentences.
-  Examples: typescript, high output, multi-repo, pr focused, vue specialist
 `.trim();
 }
 
@@ -433,3 +432,54 @@ export const generateInsights = onCall(
     return generateInsightsInternal(uid, activity, isDemoMode, forceRefresh);
   }
 );
+
+export const generatePublicInsightsInternal = async (
+  activity: GitHubActivity
+): Promise<InsightObject> => {
+  let apiKey = process.env.GEMINI_API_KEY ?? null;
+  if (!apiKey) {
+    apiKey = await getSecret('GEMINI_API_KEY');
+  }
+
+  const scoreBreakdown = calculateActivityScore(activity, true);
+  const deterministicScore = scoreBreakdown.total;
+
+  if (!apiKey) {
+    console.warn(
+      '[generatePublicInsightsInternal] GEMINI_API_KEY not found — returning DUMMY_INSIGHTS'
+    );
+    return {
+      ...DUMMY_INSIGHTS,
+      activityScore: deterministicScore,
+      scoreBreakdown: scoreBreakdown.components,
+    };
+  }
+
+  let insights: InsightObject;
+  try {
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.5-flash',
+      generationConfig: {
+        temperature: 0.85,
+      },
+    });
+    const prompt = buildPrompt(activity, undefined, deterministicScore, undefined);
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+    insights = parseInsights(text);
+    insights.activityScore = deterministicScore;
+  } catch (err) {
+    console.error('[generatePublicInsightsInternal] Gemini call failed:', err);
+    return {
+      ...DUMMY_INSIGHTS,
+      activityScore: deterministicScore,
+      scoreBreakdown: scoreBreakdown.components,
+    };
+  }
+
+  return {
+    ...insights,
+    scoreBreakdown: scoreBreakdown.components,
+  };
+};

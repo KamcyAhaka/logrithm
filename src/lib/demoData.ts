@@ -149,19 +149,19 @@ export const DUMMY_GITHUB_DATA: GitHubActivity = {
 
 export const DUMMY_INSIGHTS: InsightObject = {
   summary:
-    'Demo Developer is a highly active full-stack engineer with a strong focus on TypeScript and React ecosystems. 847 commits across 12 repos show consistent, sustained contribution habits — with clear sprint-and-rest cycles that suggest deliberate energy management rather than burnout-driven output.',
+    'Demo Developer is a full-stack engineer with 847 commits across 12 repos. They demonstrate strong proficiency in TypeScript and React ecosystems, maintaining a consistent Mon–Thu contribution rhythm.',
   strengths: [
-    'Consistent daily commit cadence with strong Mon–Thu activity peaks, indicating disciplined deep work scheduling.',
-    'Broad language versatility across TypeScript, Python, and Dart, enabling contribution across web, backend, and mobile stacks.',
-    'High PR merge rate indicating clean, review-ready code submissions with low revision overhead.',
+    'Disciplined daily commit cadence with strong Mon–Thu activity peaks.',
+    'Broad stack versatility spanning TypeScript, Python, and Dart development.',
+    'High PR merge rate indicating clean, review-ready code submissions.',
   ],
   improvements: [
-    'Issue response time could improve — open issues trend toward 7+ days without updates, which may slow collaborator momentum.',
-    'Weekend contribution gaps suggest potential for async deep-work sessions if schedule permits.',
-    'Consider consolidating smaller utility repos to reduce context-switching overhead across 12 active repositories.',
+    'Issue response time trends toward 7+ days without updates on open repos.',
+    'Weekend contribution gaps suggest potential for async deep-work scheduling.',
+    'Consider consolidating smaller utility repos to reduce context-switching.',
   ],
   patterns:
-    'Peak activity falls on Tuesday–Wednesday between 10am and 2pm. Quarterly streaks of 14+ days followed by short recovery periods reveal a sprint-and-rest pattern — likely aligned with project milestones rather than calendar weeks.',
+    'Peak velocity occurs Tue–Wed between 10am–2pm, with quarterly sprint-and-rest milestone cycles.',
   topLanguages: ['TypeScript', 'JavaScript', 'Dart'],
   activityScore: 82,
   scoreBreakdown: {

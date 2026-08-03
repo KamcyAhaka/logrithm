@@ -19,6 +19,7 @@ import ActivityHeatmap from '@/components/dashboard/ActivityHeatmap';
 import RepoList from '@/components/dashboard/RepoList';
 import InsightPanel from '@/components/insights/InsightPanel';
 import ComparisonPanel from '@/components/insights/ComparisonPanel';
+import StrengthsAndImprovementsCard from '@/components/dashboard/StrengthsAndImprovementsCard';
 import OnboardingFlow from '@/components/dashboard/OnboardingFlow';
 import TermsModal from '@/components/dashboard/TermsModal';
 
@@ -225,13 +226,10 @@ export default function DashboardClient() {
           )}
 
           {/* ─────────────────────────────────── */}
-          {/*  InsightPanel + RepoList      */}
+          {/*  InsightPanel + Right Column Stack  */}
           {/* ─────────────────────────────────── */}
           {activity && (
-            <div
-              className="grid grid-cols-1 gap-4 lg:grid-cols-[3fr_2fr]"
-              style={{ minHeight: 500 }}
-            >
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[3fr_2fr]">
               <InsightPanel
                 insights={insights}
                 loading={insightsLoading}
@@ -246,6 +244,8 @@ export default function DashboardClient() {
                 globalStats={globalStats}
                 languageStats={languageStats}
                 countryStats={countryStats}
+                totalCommits={activity.totalCommitContributions}
+                totalRepos={activity.totalRepositoriesWithContributedCommits}
               />
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <RepoList
@@ -258,17 +258,29 @@ export default function DashboardClient() {
                   reconnectSuccess={reconnectSuccess}
                 />
                 {insights && (
-                  <ComparisonPanel
-                    activityScore={insights.activityScore}
-                    primaryLanguage={insights.topLanguages[0] ?? null}
-                    countryCode={countryCode ?? null}
-                    globalStats={globalStats}
-                    languageStats={languageStats}
-                    countryStats={countryStats}
-                  />
+                  <>
+                    <StrengthsAndImprovementsCard
+                      strengths={insights.strengths}
+                      improvements={insights.improvements}
+                    />
+                  </>
                 )}
+                <LanguageBreakdown repositories={activity.repositories} />
               </div>
             </div>
+          )}
+
+          {insights && (
+            <>
+              <ComparisonPanel
+                activityScore={insights.activityScore}
+                primaryLanguage={insights.topLanguages[0] ?? null}
+                countryCode={countryCode ?? null}
+                globalStats={globalStats}
+                languageStats={languageStats}
+                countryStats={countryStats}
+              />
+            </>
           )}
 
           {/* ─────────────────────────────────── */}
@@ -304,12 +316,11 @@ export default function DashboardClient() {
           </div>
 
           {/* ─────────────────────────────────── */}
-          {/* Commit chart + Language pie  */}
+          {/* Commit chart                 */}
           {/* ─────────────────────────────────── */}
           {activity && (
-            <div className="flex flex-col gap-4 sm:grid-cols-1 md:grid-cols-[2fr_1fr]">
+            <div className="w-full">
               <CommitChart contributionCalendar={activity.contributionCalendar} />
-              <LanguageBreakdown repositories={activity.repositories} />
             </div>
           )}
 

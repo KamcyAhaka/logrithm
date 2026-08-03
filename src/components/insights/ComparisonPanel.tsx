@@ -74,9 +74,9 @@ export default function ComparisonPanel({
     }
   };
 
-  const { stats, label, name } = getStatsForTab();
+  const { stats, name } = getStatsForTab();
   const percentile = estimatePercentile(activityScore, stats);
-  const isTabLocked = (activeTab === 'language' || activeTab === 'country') && !isPro;
+  const isTabLocked = !isPro;
 
   return (
     <div className="border border-white/10 bg-white/5 p-6 backdrop-blur-md md:rounded-xl">
@@ -100,6 +100,7 @@ export default function ComparisonPanel({
           >
             <Globe className="h-3.5 w-3.5" />
             <span>Global</span>
+            {!isPro && <Lock className="h-3 w-3 text-white/40" />}
           </button>
 
           <button
@@ -130,19 +131,19 @@ export default function ComparisonPanel({
         </div>
       </div>
 
-      <div className="relative min-h-[160px]">
+      <div className="relative min-h-40">
         {isTabLocked ? (
-          /* Gated Tab Overlay */
+          /* Gated Panel Overlay */
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center rounded-lg border border-white/5 bg-[#0a0a0a]/80 p-6 text-center backdrop-blur-md">
             <Lock
               className={`mb-2 h-6 w-6 ${isProUpgradeDisabled() ? 'text-purple-400' : 'text-[#1D9E75]'}`}
             />
             <h4 className="font-mono text-sm font-semibold text-white">
-              {label} Comparisons are Pro Features
+              Peer Comparisons are Pro Features
             </h4>
             <p className="mt-1 max-w-sm text-xs text-white/40">
-              Filter comparisons by country and languages to see segment-specific leaderboards and
-              averages.
+              Unlock percentile rank, score distribution, and segment comparisons by country and
+              language.
             </p>
             {isProUpgradeDisabled() ? (
               <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-purple-500/20 bg-purple-500/5 px-3 py-1.5 font-mono text-[11px] font-semibold text-purple-400">
@@ -162,7 +163,7 @@ export default function ComparisonPanel({
 
         {/* Tab Content (always rendered, blurred if locked) */}
         <div
-          className={`transition-all duration-300 ${isTabLocked ? 'pointer-events-none blur-[4px] filter' : ''}`}
+          className={`transition-all duration-300 ${isTabLocked ? 'pointer-events-none blur-xs filter' : ''}`}
         >
           {!stats ? (
             <div className="flex h-32 flex-col items-center justify-center text-center">
@@ -170,7 +171,7 @@ export default function ComparisonPanel({
               <span className="text-[10px] text-white/20">Requires 10+ users to compile stats</span>
             </div>
           ) : (
-            <div className="flex flex-col gap-4">
+            <div className="flex gap-4">
               {/* Percentile Rank Card */}
               <div className="rounded-lg border border-white/5 bg-white/5 p-4">
                 <div className="flex items-center gap-2 text-xs text-white/40">
@@ -201,7 +202,7 @@ export default function ComparisonPanel({
               )}
 
               {/* Distribution visualizer */}
-              <div className="flex flex-col justify-center space-y-4 rounded-lg border border-white/5 bg-white/5 p-4">
+              <div className="flex w-full flex-col justify-center space-y-4 rounded-lg border border-white/5 bg-white/5 p-4">
                 <span className="text-xs font-medium text-white/60">
                   Score Distribution ({name})
                 </span>
