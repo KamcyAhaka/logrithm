@@ -21,7 +21,6 @@ function formatDate(dateStr: string): string {
 }
 
 export default function CommitChart({ contributionCalendar }: CommitChartProps) {
-  // Flatten all days and take the last 30
   const allDays = contributionCalendar.weeks
     .flatMap((w) => w.contributionDays)
     .slice(-30)
@@ -31,64 +30,53 @@ export default function CommitChart({ contributionCalendar }: CommitChartProps) 
     }));
 
   return (
-    <div className="glass-card" style={{ padding: '1.5rem', height: '100%', minHeight: '280px' }}>
-      <div style={{ marginBottom: '1rem' }}>
-        <h3
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.8rem',
-            color: 'var(--text-muted)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.1em',
-          }}
-        >
-          Commit Activity — Last 30 Days
-        </h3>
+    <div>
+      <div className="mb-4">
+        <div className="text-term-dim font-mono text-[11px] font-semibold tracking-wider uppercase">
+          {'// commit_activity.log · last 30 days'}
+        </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={200}>
+      <ResponsiveContainer width="100%" height={160}>
         <AreaChart data={allDays} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-          <defs>
-            <linearGradient id="commitGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#1D9E75" stopOpacity={0.35} />
-              <stop offset="95%" stopColor="#1D9E75" stopOpacity={0.02} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
           <XAxis
             dataKey="date"
-            tick={{ fontFamily: 'JetBrains Mono', fontSize: 10, fill: 'rgba(255,255,255,0.3)' }}
+            tick={{ fontFamily: 'var(--font-mono)', fontSize: 10, fill: 'var(--color-term-dim)' }}
             tickLine={false}
             axisLine={false}
             interval={6}
           />
           <YAxis
-            tick={{ fontFamily: 'JetBrains Mono', fontSize: 10, fill: 'rgba(255,255,255,0.3)' }}
+            tick={{ fontFamily: 'var(--font-mono)', fontSize: 10, fill: 'var(--color-term-dim)' }}
             tickLine={false}
             axisLine={false}
             allowDecimals={false}
           />
           <Tooltip
             contentStyle={{
-              background: '#1a1a1a',
-              border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '0.5rem',
-              fontFamily: 'JetBrains Mono',
+              background: 'var(--color-term-bg)',
+              border: '1px solid var(--color-term-border)',
+              borderRadius: '0px',
+              fontFamily: 'var(--font-mono)',
               fontSize: '0.75rem',
-              color: '#fff',
+              color: 'var(--color-term-light)',
             }}
-            labelStyle={{ color: 'rgba(255,255,255,0.5)', marginBottom: '4px' }}
-            itemStyle={{ color: '#1D9E75' }}
-            cursor={{ stroke: 'rgba(29,158,117,0.3)', strokeWidth: 1 }}
+            labelStyle={{ color: 'var(--color-term-dim)', marginBottom: '4px' }}
+            itemStyle={{ color: 'var(--color-term-accent)' }}
+            cursor={{ stroke: 'var(--color-term-accent)', strokeWidth: 1, strokeOpacity: 0.2 }}
           />
+          {/* Linear interpolation — sharp angular lines, no bezier smoothing.
+              Flat fill at low opacity — no gradient, matches terminal aesthetic. */}
           <Area
-            type="monotone"
+            type="linear"
             dataKey="commits"
-            stroke="#1D9E75"
-            strokeWidth={2}
-            fill="url(#commitGradient)"
+            stroke="var(--color-term-accent)"
+            strokeWidth={1.5}
+            fill="var(--color-term-accent)"
+            fillOpacity={0.08}
             dot={false}
-            activeDot={{ r: 4, fill: '#1D9E75', stroke: 'transparent' }}
+            activeDot={{ r: 3, fill: 'var(--color-term-accent)', stroke: 'transparent' }}
           />
         </AreaChart>
       </ResponsiveContainer>

@@ -332,6 +332,13 @@ button {
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  --color-term-accent: #4ade80;
+  --color-term-dim: #5a6a5a;
+  --color-term-border: #1e2a1e;
+  --color-term-bg: #0a0d0a;
+  --color-term-hover: #0f130f;
+  --color-term-block: #141a14;
+  --color-term-light: #c8d8c8;
 }
 
 @layer base {

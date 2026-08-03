@@ -18,11 +18,11 @@ function getIntensityLevel(count: number): number {
 }
 
 const LEVEL_COLORS = [
-  'rgba(255,255,255,0.05)', // 0 — empty
-  'rgba(29,158,117,0.25)', // 1 — light
-  'rgba(29,158,117,0.45)', // 2 — medium
-  'rgba(29,158,117,0.70)', // 3 — dark
-  'rgba(29,158,117,0.95)', // 4 — full
+  'var(--color-term-block)', // 0 — empty
+  'rgba(74, 222, 128, 0.15)', // 1 — light
+  'rgba(74, 222, 128, 0.4)', // 2 — medium
+  'rgba(74, 222, 128, 0.7)', // 3 — dark
+  'var(--color-term-accent)', // 4 — full
 ];
 
 const DAY_LABELS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
@@ -72,32 +72,12 @@ export default function ActivityHeatmap({ contributionCalendar }: ActivityHeatma
   };
 
   return (
-    <div className="glass-card" style={{ padding: '1.5rem' }}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '1rem',
-          flexWrap: 'wrap',
-          gap: '0.5rem',
-        }}
-      >
-        <h3
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.8rem',
-            color: 'var(--text-muted)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.1em',
-          }}
-        >
-          Activity Heatmap —{' '}
-          <span style={{ color: 'var(--green)' }}>
-            {contributionCalendar.totalContributions.toLocaleString()}
-          </span>{' '}
-          contributions
-        </h3>
+    <div>
+      <div className="mb-4">
+        <div className="text-term-dim text-[11px] font-semibold tracking-wider uppercase">
+          {'// activity_heatmap.log · '}
+          {contributionCalendar.totalContributions.toLocaleString()} contributions
+        </div>
       </div>
 
       {/* Scroll wrapper for small screens */}
@@ -177,7 +157,7 @@ export default function ActivityHeatmap({ contributionCalendar }: ActivityHeatma
                         style={{
                           width: '100%',
                           aspectRatio: '1 / 1',
-                          borderRadius: 2,
+                          borderRadius: 0,
                           background: LEVEL_COLORS[level],
                           cursor: 'default',
                         }}
@@ -209,7 +189,7 @@ export default function ActivityHeatmap({ contributionCalendar }: ActivityHeatma
               Less
             </span>
             {LEVEL_COLORS.map((color, i) => (
-              <div key={i} style={{ width: 10, height: 10, borderRadius: 2, background: color }} />
+              <div key={i} style={{ width: 10, height: 10, borderRadius: 0, background: color }} />
             ))}
             <span
               style={{
@@ -224,9 +204,7 @@ export default function ActivityHeatmap({ contributionCalendar }: ActivityHeatma
         </div>
       </div>
 
-      {/* Tooltip — portal-mounted directly on document.body, outside the layout tree.
-          A fixed element inside the component tree can still affect scrollbar calculations
-          in certain browser/OS configurations; a portal prevents this entirely. */}
+      {/* Tooltip — portal-mounted directly on document.body, outside the layout tree. */}
       {tooltip &&
         typeof document !== 'undefined' &&
         createPortal(
@@ -244,13 +222,13 @@ export default function ActivityHeatmap({ contributionCalendar }: ActivityHeatma
                   position: 'fixed',
                   left: safeLeft,
                   top: tooltip.y - 36,
-                  background: '#1a1a1a',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '0.375rem',
+                  background: 'var(--color-term-bg)',
+                  border: '1px solid var(--color-term-border)',
+                  borderRadius: '0px',
                   padding: '4px 10px',
                   fontFamily: 'var(--font-mono)',
                   fontSize: '0.7rem',
-                  color: '#fff',
+                  color: 'var(--color-term-light)',
                   pointerEvents: 'none',
                   zIndex: 2147483647,
                   whiteSpace: 'nowrap',

@@ -14,55 +14,50 @@ export default function StrengthsAndImprovementsCard({
   if (strengths.length === 0 && improvements.length === 0) return null;
 
   return (
-    <div
-      className="glass-card relative overflow-hidden p-5 transition-all duration-300"
-      style={{
-        borderRadius: '1.25rem',
-        background: 'rgba(10, 14, 12, 0.65)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-      }}
-    >
-      <div className="flex flex-col gap-5">
-        {/* Key Strengths (Top) */}
-        {strengths.length > 0 && (
-          <div className="space-y-2">
-            <p className="flex items-center gap-1.5 font-mono text-xs tracking-wider text-emerald-400 uppercase">
-              <TrendingUp size={13} className="text-[#4ade80]" />
-              Key Strengths
-            </p>
-            <ul className="flex flex-col gap-2">
-              {strengths.map((s, i) => (
-                <li
-                  key={i}
-                  className="rounded-lg border border-[#1D9E75]/25 bg-[#1D9E75]/10 p-3 font-sans text-xs leading-relaxed text-emerald-200/90"
-                >
-                  {s}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Areas to Explore (Bottom - Stacked Vertically) */}
-        {improvements.length > 0 && (
-          <div className="space-y-2 border-t border-white/5 pt-2">
-            <p className="flex items-center gap-1.5 font-mono text-xs tracking-wider text-amber-400 uppercase">
-              <AlertCircle size={13} className="text-amber-400" />
-              Areas to Explore
-            </p>
-            <ul className="flex flex-col gap-2">
-              {improvements.map((s, i) => (
-                <li
-                  key={i}
-                  className="rounded-lg border border-white/10 bg-white/5 p-3 font-sans text-xs leading-relaxed text-white/70"
-                >
-                  {s}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+    <div className="flex flex-col gap-5">
+      {/* Section header */}
+      <div className="text-term-dim font-mono text-[11px] font-semibold tracking-wider uppercase">
+        {'// strengths_and_improvements.log'}
       </div>
+      {/* Key Strengths (Top) */}
+      {strengths.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-term-accent flex items-center gap-1.5 font-mono text-xs tracking-wider uppercase">
+            <TrendingUp size={13} className="text-term-accent" />
+            Key Strengths
+          </p>
+          <ul className="flex flex-col gap-2">
+            {strengths.map((s, i) => (
+              <li
+                key={i}
+                className="border-term-border bg-term-block text-term-light rounded border p-3 font-mono text-xs leading-relaxed"
+              >
+                {s}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Areas to Explore (Bottom - Stacked Vertically) */}
+      {improvements.length > 0 && (
+        <div className="border-term-border space-y-2 border-t border-dashed pt-4">
+          <p className="text-term-dim flex items-center gap-1.5 font-mono text-xs tracking-wider uppercase">
+            <AlertCircle size={13} className="text-term-dim" />
+            Areas to Explore
+          </p>
+          <ul className="flex flex-col gap-2">
+            {improvements.map((s, i) => (
+              <li
+                key={i}
+                className="border-term-border bg-term-block text-term-dim rounded border p-3 font-mono text-xs leading-relaxed"
+              >
+                {s}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

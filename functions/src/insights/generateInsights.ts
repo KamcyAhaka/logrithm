@@ -441,7 +441,7 @@ export const generatePublicInsightsInternal = async (
     apiKey = await getSecret('GEMINI_API_KEY');
   }
 
-  const scoreBreakdown = calculateActivityScore(activity, true);
+  const scoreBreakdown = calculateActivityScore(activity);
   const deterministicScore = scoreBreakdown.total;
 
   if (!apiKey) {

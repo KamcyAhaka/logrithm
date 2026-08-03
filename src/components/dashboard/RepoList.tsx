@@ -3,7 +3,7 @@ import { Star, GitFork } from 'lucide-react';
 
 interface RepoListProps {
   repositories: Repository[];
-  maxHeight?: string;
+  maxHeight?: string; // kept for API compat but unused
   onReconnect?: () => void;
   reconnecting?: boolean;
   reconnectError?: string | null;
@@ -12,211 +12,107 @@ interface RepoListProps {
 
 export default function RepoList({
   repositories,
-  maxHeight = '550px',
   onReconnect,
   reconnecting,
   reconnectError,
   reconnectSuccess,
 }: RepoListProps) {
+  const COLS = 4; // desktop columns — matches StatsGrid (grid-cols-2 lg:grid-cols-4)
+  const total = repositories.length;
+
   return (
-    <div
-      className="glass-card"
-      style={{
-        padding: '1.5rem',
-        maxHeight,
-        minHeight: 0,
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      <a
-        href="/settings/repositories"
-        style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: '0.8rem',
-          color: 'var(--text-muted)',
-          textTransform: 'uppercase',
-          letterSpacing: '0.1em',
-          marginBottom: '1rem',
-        }}
-        className="underline-offset-3 transition hover:underline"
-      >
-        Repositories →
-      </a>
-
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.625rem',
-          flex: 1,
-          overflowY: 'auto',
-          minHeight: 0,
-        }}
-      >
-        {repositories.map((repo) => (
-          <a
-            key={repo.name}
-            href={repo.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '0.625rem 0.75rem',
-              background: 'rgba(255,255,255,0.03)',
-              borderRadius: '0.5rem',
-              border: '1px solid rgba(255,255,255,0.04)',
-              textDecoration: 'none',
-              transition: 'background 0.15s, border-color 0.15s',
-              gap: '0.5rem',
-            }}
-            className="hover:bg-white/5"
-          >
-            {/* Left: name + language */}
-            <div style={{ minWidth: 0 }}>
-              <p
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.8rem',
-                  color: 'var(--text-primary)',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {repo.name}
-              </p>
-              {repo.primaryLanguage && (
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.3rem',
-                    marginTop: '0.2rem',
-                  }}
-                >
-                  <div
-                    style={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: '50%',
-                      background: repo.primaryLanguage.color ?? '#888',
-                      flexShrink: 0,
-                    }}
-                  />
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: '0.68rem',
-                      color: 'var(--text-muted)',
-                    }}
-                  >
-                    {repo.primaryLanguage.name}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Right: stats */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                flexShrink: 0,
-              }}
-            >
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.7rem',
-                  color: 'var(--green)',
-                  minWidth: 40,
-                  textAlign: 'right',
-                }}
-              >
-                {repo.commitCount} commits
-              </span>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  color: 'var(--text-muted)',
-                }}
-              >
-                <Star size={11} />
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem' }}>
-                  {repo.stargazerCount}
-                </span>
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  color: 'var(--text-muted)',
-                }}
-              >
-                <GitFork size={11} />
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem' }}>
-                  {repo.forkCount}
-                </span>
-              </div>
-            </div>
-          </a>
-        ))}
+    <div className="flex flex-col">
+      {/* Section header */}
+      <div className="mb-4 flex items-center justify-between">
+        <div className="text-term-dim font-mono text-[11px] font-semibold tracking-wider uppercase">
+          {'// repositories.log'}
+        </div>
+        <a
+          href="/settings/repositories"
+          className="text-term-accent font-mono text-[11px] hover:underline"
+        >
+          settings →
+        </a>
       </div>
 
+      {/* Block grid — mirrors StatsGrid border convention exactly */}
+      <div className="border-term-border grid grid-cols-2 border border-dashed lg:grid-cols-4">
+        {repositories.map((repo, idx) => {
+          const col = idx % COLS;
+          const row = Math.floor(idx / COLS);
+          const totalRows = Math.ceil(total / COLS);
+          const isLastCol = col === COLS - 1;
+          const isLastRow = row === totalRows - 1;
+
+          // Inactive = nothing contributed to or starred
+          const isInactive =
+            repo.commitCount === 0 && repo.stargazerCount === 0 && repo.forkCount === 0;
+
+          const nameColor = repo.primaryLanguage?.color ?? 'var(--color-term-light)';
+
+          return (
+            <a
+              key={repo.name}
+              href={repo.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={[
+                'flex flex-col justify-between p-3 font-mono transition-colors duration-100',
+                !isLastCol ? 'border-term-border border-r border-dashed' : '',
+                !isLastRow ? 'border-term-border border-b border-dashed' : '',
+                isInactive ? 'opacity-80' : '',
+                'hover:bg-term-hover',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              style={{ textDecoration: 'none' }}
+            >
+              {/* Repo name — colored by primary language */}
+              <span
+                className="block truncate text-xs leading-tight font-semibold"
+                style={{ color: nameColor }}
+              >
+                {repo.name}
+              </span>
+
+              {/* Stats line */}
+              <span className="text-term-dim mt-1 flex flex-wrap items-center gap-x-2 text-[10px] leading-snug">
+                {repo.primaryLanguage && <span>{repo.primaryLanguage.name}</span>}
+                <span className="flex items-center gap-0.5">
+                  <Star size={9} className="shrink-0" />
+                  {repo.stargazerCount}
+                </span>
+                <span className="flex items-center gap-0.5">
+                  <GitFork size={9} className="shrink-0" />
+                  {repo.forkCount}
+                </span>
+                <span className="text-term-accent">{repo.commitCount}c</span>
+              </span>
+            </a>
+          );
+        })}
+      </div>
+
+      {/* Reconnect footer */}
       {onReconnect && (
-        <div
-          style={{
-            marginTop: '1rem',
-            paddingTop: '0.75rem',
-            borderTop: '1px solid rgba(255,255,255,0.05)',
-            fontSize: '0.7rem',
-            color: 'var(--text-muted)',
-            fontFamily: 'var(--font-mono)',
-            lineHeight: '1.4',
-          }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+        <div className="border-term-border text-term-dim mt-3.5 border-t border-dashed pt-3 font-mono text-[11px] leading-relaxed">
+          <div className="flex flex-col gap-1">
             <div>
               Missing repos from an organization?{' '}
               <button
                 onClick={onReconnect}
                 disabled={reconnecting}
-                style={{
-                  color: 'var(--green)',
-                  background: 'none',
-                  border: 'none',
-                  padding: 0,
-                  textDecoration: 'underline',
-                  cursor: 'pointer',
-                  fontFamily: 'inherit',
-                  fontSize: 'inherit',
-                }}
-                className="transition hover:text-[#1D9E75]/90 disabled:opacity-50"
+                className="text-term-accent hover:text-term-accent/90 cursor-pointer border-none bg-transparent p-0 font-mono text-[11px] transition hover:underline disabled:opacity-50"
               >
                 {reconnecting ? 'Connecting...' : 'Reconnect GitHub'}
               </button>{' '}
               to refresh access.
             </div>
             {reconnectError && (
-              <div
-                style={{
-                  color: 'rgba(255,100,100,0.85)',
-                  fontSize: '0.65rem',
-                  marginTop: '0.2rem',
-                }}
-              >
-                {reconnectError}
-              </div>
+              <div className="mt-1 text-[10px] text-red-400">{reconnectError}</div>
             )}
             {reconnectSuccess && (
-              <div style={{ color: 'var(--green)', fontSize: '0.65rem', marginTop: '0.2rem' }}>
+              <div className="text-term-accent mt-1 text-[10px]">
                 Connected successfully! Syncing repositories...
               </div>
             )}
