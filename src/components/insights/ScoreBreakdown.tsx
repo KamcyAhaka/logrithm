@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { usePlan } from '@/hooks/usePlan';
-import { HelpCircle, Lock } from 'lucide-react';
+import { HelpCircle } from 'lucide-react';
 import type { ComparisonStats } from '@/hooks/useComparisonStats';
 
 interface ScoreBreakdownProps {
@@ -81,23 +81,20 @@ export default function ScoreBreakdown({ scoreBreakdown, globalStats }: ScoreBre
   };
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-md">
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="border-term-border mt-5 border-t border-dashed pt-5 font-mono">
+      <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h3 className="font-sans text-lg font-semibold text-white">Score Breakdown</h3>
-          <p className="text-xs text-white/40">
+          <div className="text-term-dim font-mono text-[11px]">
+            <span className="mr-1.5 text-white/40">$</span>
+            <span>logrithm score --breakdown</span>
+          </div>
+          <p className="text-term-dim mt-0.5 text-[11px]">
             How your deterministic activity score is calculated
           </p>
         </div>
-        {!isPro && (
-          <div className="flex items-center gap-1.5 rounded-full bg-[#1D9E75]/15 px-2.5 py-1 text-xs font-medium text-[#1D9E75]">
-            <Lock className="h-3 w-3" />
-            <span>Pro unlocks peer averages</span>
-          </div>
-        )}
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-3">
         {SCORE_COMPONENTS.map((comp) => {
           const score = breakdown[comp.key];
           const peerVal = getPeerVal(comp.peerEst);
@@ -106,88 +103,78 @@ export default function ScoreBreakdown({ scoreBreakdown, globalStats }: ScoreBre
           const userPoints = Math.round((score * comp.weight) / 10) / 10;
           const peerPoints = Math.round((peerVal * comp.weight) / 10) / 10;
 
+          // Mapping keys to mockup labels
+          const keyLabels: Record<string, string> = {
+            volume: 'commit_volume',
+            consistency: 'consistency',
+            collaboration: 'collaboration',
+            diversity: 'diversity',
+            momentum: 'momentum',
+          };
+          const labelStr = (keyLabels[comp.key] || comp.key).padEnd(15);
+
+          // Render block fill bar
+          const totalBlocks = 24;
+          const filledBlocks = Math.round((score / 100) * totalBlocks);
+
           return (
-            <div key={comp.key} className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-medium text-white/80">{comp.label}</span>
-                  <span className="text-[10px] text-white/40">({comp.weight}% weight)</span>
+            <div
+              key={comp.key}
+              className="flex flex-col gap-2 font-mono text-xs sm:flex-row sm:items-center sm:gap-4"
+            >
+              {/* Bracketed Label */}
+              <div className="flex w-44 shrink-0 items-center gap-1.5">
+                <span className="text-term-dim font-mono">[{labelStr.trim()}]</span>
 
-                  {/* Tooltip trigger */}
-                  <div className="relative flex items-center">
-                    <button
-                      onMouseEnter={() => setActiveTooltip(comp.key)}
-                      onMouseLeave={() => setActiveTooltip(null)}
-                      onClick={() => setActiveTooltip(activeTooltip === comp.key ? null : comp.key)}
-                      className="text-white/40 hover:text-white/80 focus:outline-none"
-                    >
-                      <HelpCircle className="h-3.5 w-3.5" />
-                    </button>
-                    {activeTooltip === comp.key && (
-                      <div className="absolute bottom-6 left-1/2 z-50 w-64 -translate-x-1/2 rounded-lg border border-white/15 bg-[#0a0a0a] p-3 text-xs text-white shadow-xl backdrop-blur-md">
-                        {comp.description}
-                      </div>
-                    )}
-                  </div>
+                {/* Tooltip trigger */}
+                <div className="relative flex items-center">
+                  <button
+                    onMouseEnter={() => setActiveTooltip(comp.key)}
+                    onMouseLeave={() => setActiveTooltip(null)}
+                    onClick={() => setActiveTooltip(activeTooltip === comp.key ? null : comp.key)}
+                    className="text-term-dim hover:text-term-accent focus:outline-none"
+                  >
+                    <HelpCircle className="h-3.5 w-3.5" />
+                  </button>
+                  {activeTooltip === comp.key && (
+                    <div className="border-term-border bg-term-bg text-term-light absolute bottom-6 left-0 z-50 w-64 rounded border p-3 font-sans text-xs normal-case shadow-xl backdrop-blur-md">
+                      {comp.description}
+                    </div>
+                  )}
                 </div>
-                <span className="font-mono font-semibold text-[#1D9E75]">
-                  {userPoints}/{comp.weight}
-                </span>
               </div>
 
-              {/* Progress bar and peer marker */}
-              <div className="relative h-3 w-full overflow-hidden rounded-full bg-white/5">
-                {/* User score progress fill */}
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-[#1D9E75]/70 to-[#1D9E75] transition-all duration-500 ease-out"
-                  style={{ width: `${score}%` }}
-                />
-
-                {/* Peer average marker (Pro only) */}
-                {isPro ? (
-                  <div
-                    className="group absolute top-0 bottom-0 z-10 flex w-2 -translate-x-1/2 justify-center"
-                    style={{ left: `${peerVal}%` }}
-                    title={`Peer Average: ${peerPoints}`}
-                  >
-                    {/* The white dot marker */}
-                    <div className="absolute top-[-4px] h-2 w-2 rounded-full bg-white" />
-
-                    {/* The dashed line */}
-                    <div className="h-full border-l border-dashed border-white/90" />
-                  </div>
-                ) : (
-                  /* Blurred / locked peer average marker for Free tier */
-                  <div
-                    className="absolute top-0 bottom-0 z-10 w-1 -translate-x-1/2 bg-white/10 blur-[1px]"
-                    style={{ left: `${peerVal}%` }}
-                    title="Upgrade to Pro to see peer average"
-                  />
-                )}
+              {/* Block Segment Progress Bar */}
+              <div className="flex max-w-[200px] min-w-[150px] flex-1 items-center">
+                <div className="bg-term-block border-term-border flex w-full justify-between rounded-[2px] border p-[1.5px]">
+                  {Array.from({ length: totalBlocks }).map((_, i) => (
+                    <div
+                      key={i}
+                      className={`h-3 w-1 shrink-0 sm:w-1.5 ${
+                        i < filledBlocks ? 'bg-term-accent' : 'bg-transparent'
+                      }`}
+                      style={{ marginRight: i < totalBlocks - 1 ? '1px' : '0' }}
+                    />
+                  ))}
+                </div>
               </div>
 
-              {/* Labels under progress bar */}
-              <div className="relative mt-1 h-4 text-[10px] text-white/30">
-                <span className="absolute left-1">0</span>
+              {/* User Points */}
+              <span className="text-term-accent w-16 shrink-0 font-mono font-semibold sm:text-right">
+                {userPoints.toFixed(1)}/{comp.weight}
+              </span>
 
+              {/* Peer Average Inline (with blur if not pro) */}
+              <span className="text-term-dim w-24 shrink-0 font-mono">
                 {isPro ? (
-                  <span
-                    className="absolute -translate-x-1/2 font-medium whitespace-nowrap text-white/60 transition-all"
-                    style={{ left: `${peerVal}%` }}
-                  >
-                    Peer Avg ({peerPoints})
-                  </span>
+                  <>peer:{peerPoints.toFixed(1)}</>
                 ) : (
-                  <span
-                    className="absolute flex -translate-x-1/2 items-center gap-0.5 font-medium whitespace-nowrap text-white/50 blur-[0.5px] filter"
-                    style={{ left: `${peerVal}%` }}
-                  >
-                    <Lock className="h-2 w-2" /> Peer Avg
+                  <span className="inline-flex items-center">
+                    peer:
+                    <span className="ml-1 blur-[2.5px] select-none">{peerPoints.toFixed(1)}</span>
                   </span>
                 )}
-
-                <span className="absolute right-1">{comp.weight}</span>
-              </div>
+              </span>
             </div>
           );
         })}

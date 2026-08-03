@@ -1,19 +1,20 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { TrendingUp, AlertCircle, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
-import InsightSkeleton from './InsightSkeleton';
+import { useState, useEffect } from 'react';
+
 import type { InsightObject } from '@/types/github';
 import ScoreBreakdown from './ScoreBreakdown';
 import type { ComparisonStats } from '@/hooks/useComparisonStats';
 import LimitModal from './LimitModal';
-import { ErrorState, ReadyState } from './InsightPanelStates';
+import { ErrorState } from './InsightPanelStates';
 import TerminalAnalysisCard from '../dashboard/TerminalAnalysisCard';
+import type { GitHubActivity } from '@/types/github';
 
 interface InsightPanelProps {
   insights: InsightObject | null;
   loading: boolean;
+  activityLoading?: boolean;
+  activity?: GitHubActivity | null;
   error: string | null;
   onRun?: () => void;
   onClearError?: () => void;
@@ -26,22 +27,38 @@ interface InsightPanelProps {
   hideDetails?: boolean;
   totalCommits?: number;
   totalRepos?: number;
+  onComplete?: () => void;
 }
 
 export default function InsightPanel({
   insights,
   loading,
+  activityLoading,
+  activity,
   error,
   onRun,
   onClearError,
   login = 'developer',
   globalStats,
   isPublicView = false,
-  hideDetails = false,
   totalCommits = 0,
   totalRepos = 0,
+  onComplete,
 }: InsightPanelProps) {
   const [showFullReport, setShowFullReport] = useState(true);
+  const [isConsoleComplete, setIsConsoleComplete] = useState(false);
+
+  useEffect(() => {
+    if (!insights || loading) {
+      const t = setTimeout(() => setIsConsoleComplete(false), 0);
+      return () => clearTimeout(t);
+    }
+  }, [insights, loading]);
+
+  const handleConsoleComplete = () => {
+    setIsConsoleComplete(true);
+    onComplete?.();
+  };
 
   const isLimitError = error
     ? error.toLowerCase().includes('limit reached') || error.toLowerCase().includes('pro upgrades')
@@ -56,76 +73,82 @@ export default function InsightPanel({
         totalRepos={totalRepos}
         insights={insights}
         loading={loading}
+        activityLoading={activityLoading}
+        activity={activity}
         error={error}
         onRun={onRun}
         isPublicView={isPublicView}
+        onComplete={handleConsoleComplete}
       />
 
       {/* Deep-Dive Report & Insights Breakdown */}
-      {insights && !loading && !error && (
-        <div
-          className="glass-card relative overflow-hidden transition-all duration-300"
-          style={{
-            padding: '1.25rem 1.5rem',
-            borderRadius: '1.25rem',
-            background: 'rgba(10, 14, 12, 0.65)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-          }}
-        >
+      {insights && !loading && !error && isConsoleComplete && (
+        <div>
           {/* Header & Toggle */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between font-mono text-xs">
             <div className="flex items-center gap-2">
-              <h4 className="font-mono text-xs tracking-wider text-white/50 uppercase">
-                Full AI Analysis & Breakdown
-              </h4>
-              <span className="font-mono text-[10px] text-[#4ade80] opacity-80">
+              <div className="text-term-dim font-mono text-[11px]">
+                <span className="mr-1.5 text-white/40">$</span>
+                <span>logrithm report --summary</span>
+              </div>
+              <span className="text-term-accent text-[10px] font-bold opacity-80">
                 Gemini 2.5 Flash
               </span>
             </div>
 
             <button
               onClick={() => setShowFullReport((prev) => !prev)}
-              className="flex items-center gap-1 font-mono text-xs text-white/60 transition-colors hover:text-white"
+              className="text-term-dim hover:text-term-light flex items-center gap-1 text-[11px] transition-colors"
             >
-              <span>{showFullReport ? 'Collapse report' : 'Expand report'}</span>
-              {showFullReport ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              <span>{showFullReport ? 'collapse' : 'expand'}</span>
             </button>
           </div>
 
           {/* Expandable Report Content */}
-          {showFullReport && (
-            <div className="mt-4 flex flex-col gap-5 border-t border-white/5 pt-4">
-              {/* Summary Paragraph */}
-              <p className="font-sans text-sm leading-relaxed text-white/80">{insights.summary}</p>
+          <div
+            className={`grid transition-all duration-300 ease-in-out ${
+              showFullReport ? 'mt-4 grid-rows-[1fr] opacity-100' : 'mt-0 grid-rows-[0fr] opacity-0'
+            }`}
+          >
+            <div className="overflow-hidden">
+              <div className="border-term-border flex flex-col gap-5 border-t border-dashed pt-4 font-mono">
+                {/* Summary Paragraph */}
+                <p className="text-term-light font-mono text-xs leading-relaxed sm:text-sm">
+                  {insights.summary}
+                </p>
 
-              {/* Tags & Stacks */}
-              <div className="flex flex-wrap items-center gap-2">
-                {insights.tags.map((tag) => (
-                  <span key={tag} className="pill pill-white">
-                    {tag}
-                  </span>
-                ))}
-                {insights.topLanguages.map((lang) => (
-                  <span key={lang} className="pill pill-green">
-                    {lang}
-                  </span>
-                ))}
+                {/* Tags & Stacks */}
+                <div className="flex flex-wrap items-center gap-2">
+                  {insights.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="border-term-border bg-term-block text-term-dim rounded border px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                  {insights.topLanguages.map((lang) => (
+                    <span
+                      key={lang}
+                      className="border-term-border bg-term-accent/15 text-term-accent rounded border px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase"
+                    >
+                      {lang}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Score Breakdown */}
+                {insights.scoreBreakdown && (
+                  <ScoreBreakdown
+                    scoreBreakdown={insights.scoreBreakdown}
+                    globalStats={globalStats ?? null}
+                  />
+                )}
               </div>
-
-              {/* Score Breakdown */}
-              {insights.scoreBreakdown && (
-                <ScoreBreakdown
-                  scoreBreakdown={insights.scoreBreakdown}
-                  globalStats={globalStats ?? null}
-                />
-              )}
             </div>
-          )}
+          </div>
         </div>
       )}
-
-      {/* Loading Skeleton fallback if needed */}
-      {loading && !insights && <InsightSkeleton />}
 
       {/* Error state */}
       {!loading && error && !isLimitError && <ErrorState error={error} onRun={onRun} />}
