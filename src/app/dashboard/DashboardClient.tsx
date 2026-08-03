@@ -12,7 +12,7 @@ import { useComparisonStats } from '@/hooks/useComparisonStats';
 
 import Navbar from '@/components/layout/Navbar';
 import DemoBanner from '@/components/layout/DemoBanner';
-import StatsCard from '@/components/dashboard/StatsCard';
+import StatsGrid from '@/components/dashboard/StatsGrid';
 import CommitChart from '@/components/dashboard/CommitChart';
 import LanguageBreakdown from '@/components/dashboard/LanguageBreakdown';
 import ActivityHeatmap from '@/components/dashboard/ActivityHeatmap';
@@ -22,9 +22,15 @@ import ComparisonPanel from '@/components/insights/ComparisonPanel';
 import StrengthsAndImprovementsCard from '@/components/dashboard/StrengthsAndImprovementsCard';
 import OnboardingFlow from '@/components/dashboard/OnboardingFlow';
 import TermsModal from '@/components/dashboard/TermsModal';
+import TerminalCard from '@/components/dashboard/TerminalCard';
+import { ScanningBar } from '@/components/dashboard/Loaders';
 
-import { GitCommit, GitPullRequest, AlertCircle, FolderOpen } from 'lucide-react';
 import { useGitHubReconnect } from '@/hooks/useGitHubReconnect';
+
+// ── Reusable dashed section divider ─────────────────────────────────────────
+function SectionDivider() {
+  return <div className="border-term-border border-t border-dashed" />;
+}
 
 export default function DashboardClient() {
   const isDemoMode = useDemoMode();
@@ -34,6 +40,7 @@ export default function DashboardClient() {
   const [mustAcceptTerms, setMustAcceptTerms] = useState(false);
   const [excludedRepoIds, setExcludedRepoIds] = useState<Set<string>>(new Set());
   const [countryCode, setCountryCode] = useState<string | null>(null);
+  const [revealedSections, setRevealedSections] = useState(1);
 
   const {
     reconnect,
@@ -73,6 +80,17 @@ export default function DashboardClient() {
     insights?.topLanguages[0] ?? null
   );
 
+  // Sequentially reveal subsequent sections once Section 1 completes
+  useEffect(() => {
+    if (revealedSections < 2 || revealedSections >= 8) return;
+
+    const timer = setTimeout(() => {
+      setRevealedSections((prev) => prev + 1);
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [revealedSections]);
+
   // Auth guard — redirect to / if not authenticated in live mode
   useEffect(() => {
     if (!isDemoMode && !authLoading && !user) {
@@ -82,7 +100,7 @@ export default function DashboardClient() {
 
   // Fetch activity on mount (demo mode uses stub data immediately)
   useEffect(() => {
-    if (isDemoMode) return; // Demo data already loaded in hook
+    if (isDemoMode) return;
     if (!user?.uid) return;
 
     const loadRepos = async () => {
@@ -105,7 +123,6 @@ export default function DashboardClient() {
     const loadActivity = async () => {
       try {
         await fetchActivity(user.uid);
-        // Read plan from profile/data and sync to store
         try {
           const { getDoc, doc } = await import('firebase/firestore');
           const { db } = await import('@/lib/firebase');
@@ -129,7 +146,6 @@ export default function DashboardClient() {
           }
         } catch (err) {
           console.warn('[DashboardClient] Could not load plan:', err);
-          // Non-fatal — defaults to free
         }
         await loadRepos();
       } catch (err) {
@@ -150,12 +166,10 @@ export default function DashboardClient() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontFamily: 'var(--font-mono)',
-          fontSize: '0.8rem',
-          color: 'var(--text-muted)',
+          background: 'var(--bg-page)',
         }}
       >
-        Running the algorithm...
+        <ScanningBar text="authorizing connection..." />
       </div>
     );
   }
@@ -198,10 +212,7 @@ export default function DashboardClient() {
       ) : (
         <main
           style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '1.25rem',
-            maxWidth: '80rem',
+            maxWidth: '960px',
             margin: '0 auto',
             width: '100%',
             boxSizing: 'border-box',
@@ -212,6 +223,7 @@ export default function DashboardClient() {
           {activityError && (
             <div
               style={{
+                marginBottom: '1rem',
                 padding: '0.875rem 1.25rem',
                 background: 'rgba(255,100,100,0.06)',
                 border: '1px solid rgba(255,100,100,0.15)',
@@ -225,18 +237,19 @@ export default function DashboardClient() {
             </div>
           )}
 
-          {/* ─────────────────────────────────── */}
-          {/*  InsightPanel + Right Column Stack  */}
-          {/* ─────────────────────────────────── */}
-          {activity && (
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[3fr_2fr]">
+          {/* ── Single continuous terminal frame ─────────────────────────── */}
+          <TerminalCard title="dashboard.sh">
+            <div className="flex flex-col gap-6">
+              {/* §1 Live analysis / insights console */}
               <InsightPanel
                 insights={insights}
                 loading={insightsLoading}
+                activityLoading={activityLoading}
+                activity={activity}
                 error={insightsError}
                 onRun={() => {
                   const uid = isDemoMode ? 'demo' : (user?.uid ?? 'anon');
-                  runInsights(activity, uid);
+                  runInsights(activity!, uid);
                 }}
                 onClearError={clearInsightsError}
                 login={login}
@@ -244,105 +257,103 @@ export default function DashboardClient() {
                 globalStats={globalStats}
                 languageStats={languageStats}
                 countryStats={countryStats}
-                totalCommits={activity.totalCommitContributions}
-                totalRepos={activity.totalRepositoriesWithContributedCommits}
+                totalCommits={activity?.totalCommitContributions ?? 0}
+                totalRepos={activity?.totalRepositoriesWithContributedCommits ?? 0}
+                onComplete={() => setRevealedSections((prev) => Math.max(prev, 2))}
               />
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <RepoList
-                  repositories={activity.repositories.filter(
-                    (r) => !excludedRepoIds.has(String(r.repoId ?? r.name))
-                  )}
-                  onReconnect={!isDemoMode ? handleReconnect : undefined}
-                  reconnecting={reconnectLoading}
-                  reconnectError={reconnectError}
-                  reconnectSuccess={reconnectSuccess}
-                />
-                {insights && (
-                  <>
-                    <StrengthsAndImprovementsCard
-                      strengths={insights.strengths}
-                      improvements={insights.improvements}
+
+              {/* §2 Peer comparison */}
+              {insights && revealedSections >= 2 && (
+                <>
+                  <SectionDivider />
+                  <ComparisonPanel
+                    activityScore={insights.activityScore}
+                    primaryLanguage={insights.topLanguages[0] ?? null}
+                    countryCode={countryCode ?? null}
+                    globalStats={globalStats}
+                    languageStats={languageStats}
+                    countryStats={countryStats}
+                  />
+                </>
+              )}
+
+              {/* §3 Stats grid */}
+              {activity && revealedSections >= 3 && (
+                <>
+                  <SectionDivider />
+                  <div>
+                    <div className="text-term-dim mb-4 font-mono text-[11px] font-semibold tracking-wider uppercase">
+                      {'// activity_stats.log'}
+                    </div>
+                    <StatsGrid
+                      totalCommits={activity.totalCommitContributions}
+                      prsMerged={activity.totalPullRequestContributions}
+                      openIssues={activity.totalIssueContributions}
+                      activeRepos={activity.totalRepositoriesWithContributedCommits}
                     />
-                  </>
-                )}
-                <LanguageBreakdown repositories={activity.repositories} />
-              </div>
+                  </div>
+                </>
+              )}
+
+              {/* §4 Commit activity chart */}
+              {activity && revealedSections >= 4 && (
+                <>
+                  <SectionDivider />
+                  <CommitChart contributionCalendar={activity.contributionCalendar} />
+                </>
+              )}
+
+              {/* §5 Activity heatmap */}
+              {activity && revealedSections >= 5 && (
+                <>
+                  <SectionDivider />
+                  <ActivityHeatmap contributionCalendar={activity.contributionCalendar} />
+                </>
+              )}
+
+              {/* §6 Repositories */}
+              {activity && revealedSections >= 6 && (
+                <>
+                  <SectionDivider />
+                  <RepoList
+                    repositories={activity.repositories.filter(
+                      (r) => !excludedRepoIds.has(String(r.repoId ?? r.name))
+                    )}
+                    onReconnect={!isDemoMode ? handleReconnect : undefined}
+                    reconnecting={reconnectLoading}
+                    reconnectError={reconnectError}
+                    reconnectSuccess={reconnectSuccess}
+                  />
+                </>
+              )}
+
+              {/* §7 Language distribution */}
+              {activity && revealedSections >= 7 && (
+                <>
+                  <SectionDivider />
+                  <LanguageBreakdown repositories={activity.repositories} />
+                </>
+              )}
+
+              {/* §8 Strengths & improvements */}
+              {insights && revealedSections >= 8 && (
+                <>
+                  <SectionDivider />
+                  <StrengthsAndImprovementsCard
+                    strengths={insights.strengths}
+                    improvements={insights.improvements}
+                  />
+                </>
+              )}
+
+              {/* Activity loading skeleton */}
+              {activityLoading && !activity && (
+                <div className="flex items-center justify-center py-16">
+                  <ScanningBar text="fetching 12 months of activity..." />
+                </div>
+              )}
             </div>
-          )}
-
-          {insights && (
-            <>
-              <ComparisonPanel
-                activityScore={insights.activityScore}
-                primaryLanguage={insights.topLanguages[0] ?? null}
-                countryCode={countryCode ?? null}
-                globalStats={globalStats}
-                languageStats={languageStats}
-                countryStats={countryStats}
-              />
-            </>
-          )}
-
-          {/* ─────────────────────────────────── */}
-          {/* Stats cards                  */}
-          {/* ─────────────────────────────────── */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: '1rem',
-            }}
-          >
-            <StatsCard
-              label="Total Commits (12mo)"
-              value={activity?.totalCommitContributions ?? '—'}
-              icon={<GitCommit size={16} />}
-            />
-            <StatsCard
-              label="PRs Merged"
-              value={activity?.totalPullRequestContributions ?? '—'}
-              icon={<GitPullRequest size={16} />}
-            />
-            <StatsCard
-              label="Open Issues"
-              value={activity?.totalIssueContributions ?? '—'}
-              icon={<AlertCircle size={16} />}
-            />
-            <StatsCard
-              label="Active Repos"
-              value={activity?.totalRepositoriesWithContributedCommits ?? '—'}
-              icon={<FolderOpen size={16} />}
-            />
-          </div>
-
-          {/* ─────────────────────────────────── */}
-          {/* Commit chart                 */}
-          {/* ─────────────────────────────────── */}
-          {activity && (
-            <div className="w-full">
-              <CommitChart contributionCalendar={activity.contributionCalendar} />
-            </div>
-          )}
-
-          {/* ─────────────────────────────────── */}
-          {/*  Activity heatmap (full width) */}
-          {/* ─────────────────────────────────── */}
-          {activity && <ActivityHeatmap contributionCalendar={activity.contributionCalendar} />}
-
-          {/* Loading skeleton for activity */}
-          {activityLoading && (
-            <div style={{ textAlign: 'center', padding: '3rem' }}>
-              <p
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.8rem',
-                  color: 'var(--green)',
-                }}
-              >
-                Running the algorithm...
-              </p>
-            </div>
-          )}
+          </TerminalCard>
         </main>
       )}
     </div>
