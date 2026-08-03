@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { usePlan } from '@/hooks/usePlan';
 import { isProUpgradeDisabled } from '@/lib/planGating';
-import { Lock, Globe, Code, MapPin, TrendingUp } from 'lucide-react';
+import { Globe, Code, MapPin, TrendingUp } from 'lucide-react';
 import type { ComparisonStats } from '@/hooks/useComparisonStats';
 
 interface ComparisonPanelProps {
@@ -27,8 +27,9 @@ export default function ComparisonPanel({
 }: ComparisonPanelProps) {
   const { isPro } = usePlan();
   const [activeTab, setActiveTab] = useState<TabType>('global');
+  const [streamStep, setStreamStep] = useState(3);
+  const playedStatsRef = useRef<string | null>(null);
 
-  // Estimate percentile based on percentiles in stats doc
   const estimatePercentile = (score: number, stats: ComparisonStats | null): number => {
     if (!stats) return 50;
     if (score <= 1) return 1;
@@ -78,84 +79,110 @@ export default function ComparisonPanel({
   const percentile = estimatePercentile(activityScore, stats);
   const isTabLocked = !isPro;
 
+  // Stream reveal effect for unlocked tier
+  useEffect(() => {
+    if (isTabLocked || !stats) {
+      const t = setTimeout(() => setStreamStep(3), 0);
+      return () => clearTimeout(t);
+    }
+
+    const currentKey = `${activeTab}-${stats.totalUsers}-${activityScore}`;
+    if (playedStatsRef.current !== currentKey) {
+      playedStatsRef.current = currentKey;
+      const t = setTimeout(() => setStreamStep(1), 0);
+      return () => clearTimeout(t);
+    }
+  }, [isTabLocked, stats, activeTab, activityScore]);
+
+  useEffect(() => {
+    if (streamStep >= 3) return;
+
+    const timer = setTimeout(() => {
+      setStreamStep((prev) => prev + 1);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [streamStep]);
+
   return (
-    <div className="border border-white/10 bg-white/5 p-6 backdrop-blur-md md:rounded-xl">
-      <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+    <div className="font-mono">
+      {/* Section header + tab buttons */}
+      <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
         <div>
-          <h3 className="font-sans text-lg font-semibold text-white">Peer Comparison</h3>
-          <p className="text-xs text-white/40">
-            See how your activity score stacks up against other developers
-          </p>
+          <div className="text-term-dim font-mono text-[11px]">
+            <span className="mr-1.5 text-white/40">$</span>
+            <span>logrithm compare --peers --scope={activeTab}</span>
+          </div>
+          <div className="text-term-dim mt-1 font-mono text-[11px]">
+            {isTabLocked ? (
+              <span>&gt; pro required · percentile rank &amp; distribution locked</span>
+            ) : (
+              <span>
+                &gt; percentile compiled across {stats?.totalUsers ?? 0} {name} profiles
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Tab Buttons */}
-        <div className="flex self-start rounded-lg bg-black/30 p-1 sm:self-auto">
+        <div className="bg-term-hover border-term-border flex self-start rounded border p-0.5 sm:self-auto">
           <button
             onClick={() => setActiveTab('global')}
-            className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
+            className={`flex items-center gap-1.5 rounded px-2.5 py-1 text-[11px] font-medium transition-all ${
               activeTab === 'global'
-                ? 'bg-[#1D9E75] text-white'
-                : 'text-white/60 hover:text-white/95'
+                ? 'bg-term-accent/15 text-term-accent border-term-border border'
+                : 'text-term-dim hover:text-term-light border border-transparent'
             }`}
           >
-            <Globe className="h-3.5 w-3.5" />
+            <Globe className="h-3 w-3" />
             <span>Global</span>
-            {!isPro && <Lock className="h-3 w-3 text-white/40" />}
           </button>
 
           <button
             onClick={() => setActiveTab('language')}
-            className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
+            className={`flex items-center gap-1.5 rounded px-2.5 py-1 text-[11px] font-medium transition-all ${
               activeTab === 'language'
-                ? 'bg-[#1D9E75] text-white'
-                : 'text-white/60 hover:text-white/95'
+                ? 'bg-term-accent/15 text-term-accent border-term-border border'
+                : 'text-term-dim hover:text-term-light border border-transparent'
             }`}
           >
-            <Code className="h-3.5 w-3.5" />
+            <Code className="h-3 w-3" />
             <span>Language</span>
-            {!isPro && <Lock className="h-3 w-3 text-white/40" />}
           </button>
 
           <button
             onClick={() => setActiveTab('country')}
-            className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
+            className={`flex items-center gap-1.5 rounded px-2.5 py-1 text-[11px] font-medium transition-all ${
               activeTab === 'country'
-                ? 'bg-[#1D9E75] text-white'
-                : 'text-white/60 hover:text-white/95'
+                ? 'bg-term-accent/15 text-term-accent border-term-border border'
+                : 'text-term-dim hover:text-term-light border border-transparent'
             }`}
           >
-            <MapPin className="h-3.5 w-3.5" />
+            <MapPin className="h-3 w-3" />
             <span>Country</span>
-            {!isPro && <Lock className="h-3 w-3 text-white/40" />}
           </button>
         </div>
       </div>
 
+      {/* Content area */}
       <div className="relative min-h-40">
+        {/* Gated Panel Overlay */}
         {isTabLocked ? (
-          /* Gated Panel Overlay */
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center rounded-lg border border-white/5 bg-[#0a0a0a]/80 p-6 text-center backdrop-blur-md">
-            <Lock
-              className={`mb-2 h-6 w-6 ${isProUpgradeDisabled() ? 'text-purple-400' : 'text-[#1D9E75]'}`}
-            />
-            <h4 className="font-mono text-sm font-semibold text-white">
-              Peer Comparisons are Pro Features
-            </h4>
-            <p className="mt-1 max-w-sm text-xs text-white/40">
-              Unlock percentile rank, score distribution, and segment comparisons by country and
-              language.
-            </p>
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center rounded bg-black/55 p-6 text-center font-mono backdrop-blur-[4px]">
             {isProUpgradeDisabled() ? (
-              <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-purple-500/20 bg-purple-500/5 px-3 py-1.5 font-mono text-[11px] font-semibold text-purple-400">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-purple-400" />
-                Pro Coming Soon
+              <div className="border-term-border bg-term-bg/90 text-term-dim flex items-center gap-2 rounded border border-dashed px-4 py-2 text-xs shadow-xl">
+                <span>$ unlock --plan=pro</span>
+                <span className="text-amber-500/80">→ pro coming soon</span>
               </div>
             ) : (
               <a
                 href="/settings/account"
-                className="mt-4 rounded-md bg-[#1D9E75] px-4 py-2 font-mono text-xs font-bold text-white transition-colors hover:bg-[#1D9E75]/95"
+                className="border-term-accent/40 bg-term-bg/90 text-term-accent hover:border-term-accent hover:bg-term-block flex items-center gap-2 rounded border border-dashed px-4 py-2 text-xs shadow-xl transition-all"
               >
-                Upgrade to Pro
+                <span>$ unlock --plan=pro</span>
+                <span className="text-term-dim hover:text-term-accent">
+                  → reveal peer_comparison.log
+                </span>
               </a>
             )}
           </div>
@@ -163,92 +190,100 @@ export default function ComparisonPanel({
 
         {/* Tab Content (always rendered, blurred if locked) */}
         <div
-          className={`transition-all duration-300 ${isTabLocked ? 'pointer-events-none blur-xs filter' : ''}`}
+          className={`transition-all duration-300 ${
+            isTabLocked ? 'pointer-events-none blur-[4px] filter select-none' : ''
+          }`}
         >
           {!stats ? (
-            <div className="flex h-32 flex-col items-center justify-center text-center">
-              <span className="text-sm text-white/40">Not enough segment data yet</span>
-              <span className="text-[10px] text-white/20">Requires 10+ users to compile stats</span>
+            <div className="flex h-32 flex-col items-center justify-center text-center font-mono">
+              <span className="text-term-dim text-xs">&gt; not enough segment data yet</span>
+              <span className="text-term-dim/50 mt-1 text-[10px]">
+                requires 10+ users to compile stats
+              </span>
             </div>
           ) : (
-            <div className="flex gap-4">
-              {/* Percentile Rank Card */}
-              <div className="rounded-lg border border-white/5 bg-white/5 p-4">
-                <div className="flex items-center gap-2 text-xs text-white/40">
-                  <TrendingUp className="h-4 w-4 text-[#1D9E75]" />
-                  <span>Percentile Rank</span>
+            <div className="flex flex-col gap-6 pt-2 lg:flex-row lg:gap-8">
+              {/* Percentile Rank Block (Unboxed) */}
+              <div className="flex-1 space-y-2">
+                <div className="text-term-dim flex items-center gap-2 font-mono text-xs">
+                  <TrendingUp className="text-term-accent h-3.5 w-3.5" />
+                  <span>PERCENTILE_RANK</span>
                 </div>
-                <div className="mt-1.5 flex items-baseline gap-1">
-                  <span className="text-3xl font-extrabold text-white">{percentile}th</span>
-                  <span className="text-xs text-white/60">percentile</span>
+                <div className="flex items-baseline gap-1.5 pt-1">
+                  <span className="text-term-accent font-mono text-3xl font-extrabold">
+                    {percentile}th
+                  </span>
+                  <span className="text-term-dim font-mono text-xs">percentile</span>
                 </div>
-                <p className="mt-1 text-xs text-white/40">
+                <p className="text-term-light font-mono text-xs leading-relaxed">
                   You score higher than {percentile}% of developers in this group ({name}).
                 </p>
+
+                {/* Stats sub-row */}
+                {stats.totalUsers >= 10 && streamStep >= 2 && (
+                  <div className="text-term-dim border-term-border/40 flex items-center gap-4 border-t border-dashed pt-2 font-mono text-xs">
+                    <div>
+                      <span className="text-white/40">profiles: </span>
+                      <span className="text-term-light font-semibold">{stats.totalUsers}</span>
+                    </div>
+                    <div>
+                      <span className="text-white/40">avg score: </span>
+                      <span className="text-term-light font-semibold">{stats.mean}</span>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Stats Grid */}
-              {stats.totalUsers >= 10 && (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-lg border border-white/5 bg-white/5 p-3">
-                    <span className="text-[10px] text-white/40 uppercase">Compared Profiles</span>
-                    <div className="text-xl font-bold text-white/80">{stats.totalUsers}</div>
+              {/* Score Distribution Visualizer (Unboxed) */}
+              {streamStep >= 3 && (
+                <div className="border-term-border/40 flex flex-[1.5] flex-col justify-center space-y-3 border-t border-dashed pt-4 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-8">
+                  <div className="text-term-light font-mono text-xs font-semibold">
+                    Score Distribution ({name})
                   </div>
-                  <div className="rounded-lg border border-white/5 bg-white/5 p-3">
-                    <span className="text-[10px] text-white/40 uppercase">Average Score</span>
-                    <div className="text-xl font-bold text-white/80">{stats.mean}</div>
+                  <div className="relative py-4">
+                    {/* Bar track */}
+                    <div className="bg-term-bg border-term-border h-2 w-full rounded-[1px] border" />
+
+                    {/* Percentile points */}
+                    <div
+                      className="bg-term-dim absolute top-1/2 left-[25%] h-2.5 w-2.5 -translate-y-1/2 rounded"
+                      title={`25th Percentile: ${stats.p25}`}
+                    />
+                    <div
+                      className="bg-term-dim absolute top-1/2 left-[50%] h-2.5 w-2.5 -translate-y-1/2 rounded"
+                      title={`Median (50th): ${stats.p50}`}
+                    />
+                    <div
+                      className="bg-term-dim absolute top-1/2 left-[75%] h-2.5 w-2.5 -translate-y-1/2 rounded"
+                      title={`75th Percentile: ${stats.p75}`}
+                    />
+                    <div
+                      className="bg-term-dim absolute top-1/2 left-[90%] h-2.5 w-2.5 -translate-y-1/2 rounded"
+                      title={`90th Percentile: ${stats.p90}`}
+                    />
+
+                    {/* User marker */}
+                    <div
+                      className="absolute top-1/2 z-10 flex -translate-y-1/2 flex-col items-center"
+                      style={{
+                        left: `${Math.min(96, Math.max(4, percentile))}%`,
+                        transform: 'translate(-50%, -50%)',
+                      }}
+                    >
+                      <div className="border-term-border bg-term-accent text-term-bg shadow-term-accent/20 flex h-5 w-5 items-center justify-center rounded border text-[9px] font-bold shadow-lg">
+                        {activityScore}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-term-dim flex justify-between px-1 font-mono text-[9px]">
+                    <span>P25 ({stats.p25})</span>
+                    <span>Median ({stats.p50})</span>
+                    <span>P75 ({stats.p75})</span>
+                    <span>P90 ({stats.p90})</span>
                   </div>
                 </div>
               )}
-
-              {/* Distribution visualizer */}
-              <div className="flex w-full flex-col justify-center space-y-4 rounded-lg border border-white/5 bg-white/5 p-4">
-                <span className="text-xs font-medium text-white/60">
-                  Score Distribution ({name})
-                </span>
-                <div className="relative py-4">
-                  {/* The bar track */}
-                  <div className="h-2 w-full rounded-full bg-white/5" />
-
-                  {/* Percentile points */}
-                  <div
-                    className="absolute top-1/2 left-[25%] h-3 w-3 -translate-y-1/2 rounded-full border border-white/20 bg-white/10"
-                    title={`25th Percentile: ${stats.p25}`}
-                  />
-                  <div
-                    className="absolute top-1/2 left-[50%] h-3 w-3 -translate-y-1/2 rounded-full border border-white/20 bg-white/10"
-                    title={`Median (50th): ${stats.p50}`}
-                  />
-                  <div
-                    className="absolute top-1/2 left-[75%] h-3 w-3 -translate-y-1/2 rounded-full border border-white/20 bg-white/10"
-                    title={`75th Percentile: ${stats.p75}`}
-                  />
-                  <div
-                    className="absolute top-1/2 left-[90%] h-3 w-3 -translate-y-1/2 rounded-full border border-white/20 bg-white/10"
-                    title={`90th Percentile: ${stats.p90}`}
-                  />
-
-                  {/* User marker position indicator */}
-                  <div
-                    className="absolute top-1/2 z-10 flex -translate-y-1/2 flex-col items-center"
-                    style={{
-                      left: `${Math.min(96, Math.max(4, percentile))}%`,
-                      transform: 'translate(-50%, -50%)',
-                    }}
-                  >
-                    <div className="flex h-5 w-5 animate-bounce items-center justify-center rounded-full border-2 border-white bg-[#1D9E75] shadow-lg shadow-[#1D9E75]/50">
-                      <span className="text-[8px] font-bold text-white">{activityScore}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex justify-between px-1 text-[10px] text-white/30">
-                  <span>P25 ({stats.p25})</span>
-                  <span>Median ({stats.p50})</span>
-                  <span>P75 ({stats.p75})</span>
-                  <span>P90 ({stats.p90})</span>
-                </div>
-              </div>
             </div>
           )}
         </div>
