@@ -5,6 +5,7 @@ import { usePlan } from '@/hooks/usePlan';
 import { isProUpgradeDisabled } from '@/lib/planGating';
 import { Globe, Code, MapPin, TrendingUp } from 'lucide-react';
 import type { ComparisonStats } from '@/hooks/useComparisonStats';
+import { useSequenceStep } from '../dashboard/SequenceContext';
 
 interface ComparisonPanelProps {
   activityScore: number;
@@ -26,8 +27,9 @@ export default function ComparisonPanel({
   countryStats,
 }: ComparisonPanelProps) {
   const { isPro } = usePlan();
+  const { isCompleted, completeStep: completeStep4 } = useSequenceStep(4);
   const [activeTab, setActiveTab] = useState<TabType>('global');
-  const [streamStep, setStreamStep] = useState(3);
+  const [streamStep, setStreamStep] = useState(() => (isCompleted ? 3 : 1));
   const playedStatsRef = useRef<string | null>(null);
 
   const estimatePercentile = (score: number, stats: ComparisonStats | null): number => {
@@ -56,22 +58,15 @@ export default function ComparisonPanel({
     return Math.min(99, Math.round(90 + ((score - p90) / denom) * 9));
   };
 
-  const getStatsForTab = (): { stats: ComparisonStats | null; label: string; name: string } => {
+  const getStatsForTab = () => {
     switch (activeTab) {
       case 'language':
-        return {
-          stats: languageStats,
-          label: 'Language',
-          name: primaryLanguage || 'Primary Language',
-        };
+        return { stats: languageStats, name: primaryLanguage ?? 'Language' };
       case 'country':
-        return {
-          stats: countryStats,
-          label: 'Country',
-          name: countryCode ? countryCode.toUpperCase() : 'Country',
-        };
+        return { stats: countryStats, name: countryCode ?? 'Country' };
+      case 'global':
       default:
-        return { stats: globalStats, label: 'Global', name: 'Worldwide' };
+        return { stats: globalStats, name: 'Global' };
     }
   };
 
@@ -81,7 +76,7 @@ export default function ComparisonPanel({
 
   // Stream reveal effect for unlocked tier
   useEffect(() => {
-    if (isTabLocked || !stats) {
+    if (isTabLocked || !stats || isCompleted) {
       const t = setTimeout(() => setStreamStep(3), 0);
       return () => clearTimeout(t);
     }
@@ -92,17 +87,20 @@ export default function ComparisonPanel({
       const t = setTimeout(() => setStreamStep(1), 0);
       return () => clearTimeout(t);
     }
-  }, [isTabLocked, stats, activeTab, activityScore]);
+  }, [isTabLocked, stats, activeTab, activityScore, isCompleted]);
 
   useEffect(() => {
-    if (streamStep >= 3) return;
+    if (streamStep >= 3 || isTabLocked || isCompleted) {
+      completeStep4();
+      return;
+    }
 
     const timer = setTimeout(() => {
       setStreamStep((prev) => prev + 1);
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [streamStep]);
+  }, [streamStep, isTabLocked, isCompleted, completeStep4]);
 
   return (
     <div className="font-mono">
@@ -168,7 +166,7 @@ export default function ComparisonPanel({
       <div className="relative min-h-40">
         {/* Gated Panel Overlay */}
         {isTabLocked ? (
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center rounded bg-black/55 p-6 text-center font-mono backdrop-blur-[4px]">
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center rounded bg-black/55 p-6 text-center font-mono backdrop-blur-xs">
             {isProUpgradeDisabled() ? (
               <div className="border-term-border bg-term-bg/90 text-term-dim flex items-center gap-2 rounded border border-dashed px-4 py-2 text-xs shadow-xl">
                 <span>$ unlock --plan=pro</span>
@@ -191,7 +189,7 @@ export default function ComparisonPanel({
         {/* Tab Content (always rendered, blurred if locked) */}
         <div
           className={`transition-all duration-300 ${
-            isTabLocked ? 'pointer-events-none blur-[4px] filter select-none' : ''
+            isTabLocked ? 'pointer-events-none blur-xs filter select-none' : ''
           }`}
         >
           {!stats ? (

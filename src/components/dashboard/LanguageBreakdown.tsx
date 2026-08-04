@@ -1,6 +1,8 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import type { Repository } from '@/types/github';
+import { useSequenceStep } from './SequenceContext';
 
 interface LanguageBreakdownProps {
   repositories: Repository[];
@@ -18,6 +20,8 @@ const FALLBACK_COLORS = [
 ];
 
 export default function LanguageBreakdown({ repositories }: LanguageBreakdownProps) {
+  const { isCompleted, completeStep: completeStep9 } = useSequenceStep(9);
+
   // Aggregate commit counts by language
   const langMap = repositories
     .filter((r) => r.primaryLanguage)
@@ -40,14 +44,46 @@ export default function LanguageBreakdown({ repositories }: LanguageBreakdownPro
 
   const total = data.reduce((s, d) => s + d.value, 0);
 
+  const [isBarExpanded, setIsBarExpanded] = useState(isCompleted);
+  const [legendIndex, setLegendIndex] = useState(() => (isCompleted ? data.length : 0));
+
+  useEffect(() => {
+    if (isCompleted) {
+      const t = setTimeout(() => {
+        setIsBarExpanded(true);
+        setLegendIndex(data.length);
+      }, 0);
+      return () => clearTimeout(t);
+    }
+  }, [isCompleted, data.length]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setIsBarExpanded(true), 50);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    if (legendIndex >= data.length) {
+      completeStep9();
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setLegendIndex((prev) => prev + 1);
+    }, 120);
+
+    return () => clearTimeout(timer);
+  }, [legendIndex, data.length, completeStep9]);
+
   if (data.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 font-mono">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="text-term-dim text-[11px] font-semibold tracking-wider uppercase">
-          {'// language_distribution.log'}
+        <div className="text-term-dim font-mono text-[11px]">
+          <span className="mr-1.5 text-white/40">$</span>
+          <span>logrithm languages --breakdown</span>
         </div>
         <span className="text-term-dim font-mono text-xs">
           {total.toLocaleString()} commits total
@@ -55,16 +91,16 @@ export default function LanguageBreakdown({ repositories }: LanguageBreakdownPro
       </div>
 
       {/* Multi-segment Horizontal Progress Bar */}
-      <div className="border-term-border bg-term-block flex h-3.5 w-full overflow-hidden rounded-[2px] border p-0.5">
+      <div className="border-term-border bg-term-block flex h-3.5 w-full overflow-hidden rounded-xs border p-0.5">
         {data.map((lang) => {
           const pct = Math.max(2, Math.round((lang.value / total) * 100));
           return (
             <div
               key={lang.name}
               style={{
-                width: `${pct}%`,
+                width: isBarExpanded ? `${pct}%` : '0%',
                 backgroundColor: lang.color,
-                transition: 'width 0.5s ease-in-out',
+                transition: 'width 0.6s ease-out',
               }}
               className="h-full first:rounded-l-[1px] last:rounded-r-[1px] hover:brightness-125"
               title={`${lang.name}: ${lang.value} commits (${pct}%)`}
@@ -75,10 +111,16 @@ export default function LanguageBreakdown({ repositories }: LanguageBreakdownPro
 
       {/* Horizontal Language Legend */}
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-1">
-        {data.map((lang) => {
+        {data.map((lang, idx) => {
           const pct = Math.round((lang.value / total) * 100);
+          const isItemVisible = idx < legendIndex;
           return (
-            <div key={lang.name} className="flex items-center gap-2 font-mono text-xs">
+            <div
+              key={lang.name}
+              className={`flex items-center gap-2 font-mono text-xs transition-all duration-300 ease-out ${
+                isItemVisible ? 'translate-y-0 opacity-100' : 'translate-y-1 opacity-0'
+              }`}
+            >
               <span
                 className="h-2.5 w-2.5 shrink-0 rounded-full"
                 style={{ backgroundColor: lang.color }}

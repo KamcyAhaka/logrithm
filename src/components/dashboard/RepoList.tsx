@@ -1,5 +1,9 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import type { Repository } from '@/types/github';
 import { Star, GitFork } from 'lucide-react';
+import { useSequenceStep } from './SequenceContext';
 
 interface RepoListProps {
   repositories: Repository[];
@@ -17,15 +21,40 @@ export default function RepoList({
   reconnectError,
   reconnectSuccess,
 }: RepoListProps) {
-  const COLS = 4; // desktop columns — matches StatsGrid (grid-cols-2 lg:grid-cols-4)
+  const { isCompleted, completeStep: completeStep8 } = useSequenceStep(8);
+  const [activeRepoIndex, setActiveRepoIndex] = useState(() =>
+    isCompleted ? repositories.length : 0
+  );
+  const COLS = 4;
   const total = repositories.length;
+
+  useEffect(() => {
+    if (isCompleted) {
+      const t = setTimeout(() => setActiveRepoIndex(repositories.length), 0);
+      return () => clearTimeout(t);
+    }
+  }, [isCompleted, repositories.length]);
+
+  useEffect(() => {
+    if (activeRepoIndex >= repositories.length) {
+      completeStep8();
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setActiveRepoIndex((prev) => prev + 1);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [activeRepoIndex, repositories.length, completeStep8]);
 
   return (
     <div className="flex flex-col">
       {/* Section header */}
       <div className="mb-4 flex items-center justify-between">
-        <div className="text-term-dim font-mono text-[11px] font-semibold tracking-wider uppercase">
-          {'// repositories.log'}
+        <div className="text-term-dim font-mono text-[11px]">
+          <span className="mr-1.5 text-white/40">$</span>
+          <span>logrithm repos --list</span>
         </div>
         <a
           href="/settings/repositories"
@@ -48,6 +77,7 @@ export default function RepoList({
           const isInactive =
             repo.commitCount === 0 && repo.stargazerCount === 0 && repo.forkCount === 0;
 
+          const isItemVisible = idx < activeRepoIndex;
           const nameColor = repo.primaryLanguage?.color ?? 'var(--color-term-light)';
 
           return (
@@ -57,7 +87,8 @@ export default function RepoList({
               target="_blank"
               rel="noopener noreferrer"
               className={[
-                'flex flex-col justify-between p-3 font-mono transition-colors duration-100',
+                'flex flex-col justify-between p-3 font-mono transition-all duration-300 ease-out',
+                isItemVisible ? 'translate-y-0 opacity-100' : 'translate-y-1 opacity-0',
                 !isLastCol ? 'border-term-border border-r border-dashed' : '',
                 !isLastRow ? 'border-term-border border-b border-dashed' : '',
                 isInactive ? 'opacity-80' : '',
