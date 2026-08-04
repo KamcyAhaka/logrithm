@@ -73,10 +73,14 @@ export default function ActivityHeatmap({ contributionCalendar }: ActivityHeatma
 
   return (
     <div>
-      <div className="mb-4">
-        <div className="text-term-dim text-[11px] font-semibold tracking-wider uppercase">
-          {'// activity_heatmap.log · '}
-          {contributionCalendar.totalContributions.toLocaleString()} contributions
+      <div className="text-term-dim mb-4 font-mono text-[11px]">
+        <div className="flex items-center gap-1.5">
+          <span className="text-white/40">$</span>
+          <span>logrithm heatmap --contributions</span>
+        </div>
+        <div className="text-term-dim mt-1">
+          &gt; {contributionCalendar.totalContributions.toLocaleString()} total contributions
+          indexed
         </div>
       </div>
 

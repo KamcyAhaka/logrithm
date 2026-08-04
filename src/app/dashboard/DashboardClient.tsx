@@ -23,6 +23,8 @@ import StrengthsAndImprovementsCard from '@/components/dashboard/StrengthsAndImp
 import OnboardingFlow from '@/components/dashboard/OnboardingFlow';
 import TermsModal from '@/components/dashboard/TermsModal';
 import TerminalCard from '@/components/dashboard/TerminalCard';
+import RevealSection from '@/components/dashboard/RevealSection';
+import { SequenceProvider } from '@/components/dashboard/SequenceContext';
 import { ScanningBar } from '@/components/dashboard/Loaders';
 
 import { useGitHubReconnect } from '@/hooks/useGitHubReconnect';
@@ -40,7 +42,6 @@ export default function DashboardClient() {
   const [mustAcceptTerms, setMustAcceptTerms] = useState(false);
   const [excludedRepoIds, setExcludedRepoIds] = useState<Set<string>>(new Set());
   const [countryCode, setCountryCode] = useState<string | null>(null);
-  const [revealedSections, setRevealedSections] = useState(1);
 
   const {
     reconnect,
@@ -79,17 +80,6 @@ export default function DashboardClient() {
     countryCode,
     insights?.topLanguages[0] ?? null
   );
-
-  // Sequentially reveal subsequent sections once Section 1 completes
-  useEffect(() => {
-    if (revealedSections < 2 || revealedSections >= 8) return;
-
-    const timer = setTimeout(() => {
-      setRevealedSections((prev) => prev + 1);
-    }, 200);
-
-    return () => clearTimeout(timer);
-  }, [revealedSections]);
 
   // Auth guard — redirect to / if not authenticated in live mode
   useEffect(() => {
@@ -179,15 +169,8 @@ export default function DashboardClient() {
     : (activity?.login ?? user?.displayName ?? user?.email ?? 'developer');
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-page)' }}>
-      <Navbar />
-
-      {isDemoMode && <DemoBanner />}
-
-      {!isDemoMode && mustAcceptTerms && user && (
-        <TermsModal uid={user.uid} onAccept={() => setMustAcceptTerms(false)} />
-      )}
-
+    <div className="bg-term-bg text-term-light flex min-h-screen flex-col font-mono selection:bg-white/20 selection:text-white">
+      {/* Onboarding overlay for first-time signups */}
       {isOnboarding && activity ? (
         <OnboardingFlow
           activity={activity}
@@ -210,151 +193,148 @@ export default function DashboardClient() {
           }}
         />
       ) : (
-        <main
-          style={{
-            maxWidth: '960px',
-            margin: '0 auto',
-            width: '100%',
-            boxSizing: 'border-box',
-          }}
-          className="px-0 sm:px-6 sm:py-8"
-        >
-          {/* Activity fetch error */}
-          {activityError && (
-            <div
-              style={{
-                marginBottom: '1rem',
-                padding: '0.875rem 1.25rem',
-                background: 'rgba(255,100,100,0.06)',
-                border: '1px solid rgba(255,100,100,0.15)',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '0.8rem',
-                color: 'rgba(255,100,100,0.85)',
-              }}
-              className="rounded-none sm:rounded-xl"
-            >
-              {activityError}
-            </div>
+        <>
+          {/* Demo Mode Banner */}
+          {isDemoMode && <DemoBanner />}
+
+          {/* Terms Modal */}
+          {!isDemoMode && mustAcceptTerms && user && (
+            <TermsModal uid={user.uid} onAccept={() => setMustAcceptTerms(false)} />
           )}
 
-          {/* ── Single continuous terminal frame ─────────────────────────── */}
-          <TerminalCard title="dashboard.sh">
-            <div className="flex flex-col gap-6">
-              {/* §1 Live analysis / insights console */}
-              <InsightPanel
-                insights={insights}
-                loading={insightsLoading}
-                activityLoading={activityLoading}
-                activity={activity}
-                error={insightsError}
-                onRun={() => {
-                  const uid = isDemoMode ? 'demo' : (user?.uid ?? 'anon');
-                  runInsights(activity!, uid);
-                }}
-                onClearError={clearInsightsError}
-                login={login}
-                countryCode={countryCode}
-                globalStats={globalStats}
-                languageStats={languageStats}
-                countryStats={countryStats}
-                totalCommits={activity?.totalCommitContributions ?? 0}
-                totalRepos={activity?.totalRepositoriesWithContributedCommits ?? 0}
-                onComplete={() => setRevealedSections((prev) => Math.max(prev, 2))}
-              />
+          {/* Primary Navigation Bar */}
+          <Navbar />
 
-              {/* §2 Peer comparison */}
-              {insights && revealedSections >= 2 && (
-                <>
-                  <SectionDivider />
-                  <ComparisonPanel
-                    activityScore={insights.activityScore}
-                    primaryLanguage={insights.topLanguages[0] ?? null}
-                    countryCode={countryCode ?? null}
+          {/* Main Container */}
+          <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 sm:px-6">
+            {/* Activity fetch error */}
+            {activityError && (
+              <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 p-3.5 font-mono text-xs text-red-400">
+                {activityError}
+              </div>
+            )}
+
+            <SequenceProvider>
+              {/* ── Single continuous terminal frame ─────────────────────────── */}
+              <TerminalCard title="dashboard.sh">
+                <div className="flex flex-col gap-6 font-mono">
+                  {/* §1 Live analysis / insights console */}
+                  <InsightPanel
+                    insights={insights}
+                    loading={insightsLoading}
+                    activityLoading={activityLoading}
+                    activity={activity}
+                    error={insightsError}
+                    onRun={() => {
+                      const uid = isDemoMode ? 'demo' : (user?.uid ?? 'anon');
+                      runInsights(activity!, uid);
+                    }}
+                    onClearError={clearInsightsError}
+                    login={login}
+                    countryCode={countryCode}
                     globalStats={globalStats}
                     languageStats={languageStats}
                     countryStats={countryStats}
+                    totalCommits={activity?.totalCommitContributions ?? 0}
+                    totalRepos={activity?.totalRepositoriesWithContributedCommits ?? 0}
                   />
-                </>
-              )}
 
-              {/* §3 Stats grid */}
-              {activity && revealedSections >= 3 && (
-                <>
-                  <SectionDivider />
-                  <div>
-                    <div className="text-term-dim mb-4 font-mono text-[11px] font-semibold tracking-wider uppercase">
-                      {'// activity_stats.log'}
+                  {/* §4 Peer comparison */}
+                  {insights && (
+                    <RevealSection stepIndex={4}>
+                      <SectionDivider />
+                      <ComparisonPanel
+                        activityScore={insights.activityScore}
+                        primaryLanguage={insights.topLanguages[0] ?? null}
+                        countryCode={countryCode ?? null}
+                        globalStats={globalStats}
+                        languageStats={languageStats}
+                        countryStats={countryStats}
+                      />
+                    </RevealSection>
+                  )}
+
+                  {/* §5 Stats grid */}
+                  {activity && (
+                    <RevealSection stepIndex={5}>
+                      <SectionDivider />
+                      <div>
+                        <div className="text-term-dim mb-4 font-mono text-[11px]">
+                          <span className="mr-1.5 text-white/40">$</span>
+                          <span>logrithm stats --summary</span>
+                        </div>
+                        <StatsGrid
+                          totalCommits={activity.totalCommitContributions}
+                          prsMerged={activity.totalPullRequestContributions}
+                          openIssues={activity.totalIssueContributions}
+                          activeRepos={activity.totalRepositoriesWithContributedCommits}
+                        />
+                      </div>
+                    </RevealSection>
+                  )}
+
+                  {/* §6 Commit activity chart */}
+                  {activity && (
+                    <RevealSection stepIndex={6}>
+                      <SectionDivider />
+                      <CommitChart contributionCalendar={activity.contributionCalendar} />
+                    </RevealSection>
+                  )}
+
+                  {/* §7 Activity heatmap */}
+                  {activity && (
+                    <RevealSection stepIndex={7}>
+                      <SectionDivider />
+                      <ActivityHeatmap contributionCalendar={activity.contributionCalendar} />
+                    </RevealSection>
+                  )}
+
+                  {/* §8 Repositories */}
+                  {activity && (
+                    <RevealSection stepIndex={8}>
+                      <SectionDivider />
+                      <RepoList
+                        repositories={activity.repositories.filter(
+                          (r) => !excludedRepoIds.has(String(r.repoId ?? r.name))
+                        )}
+                        onReconnect={!isDemoMode ? handleReconnect : undefined}
+                        reconnecting={reconnectLoading}
+                        reconnectError={reconnectError}
+                        reconnectSuccess={reconnectSuccess}
+                      />
+                    </RevealSection>
+                  )}
+
+                  {/* §9 Language distribution */}
+                  {activity && (
+                    <RevealSection stepIndex={9}>
+                      <SectionDivider />
+                      <LanguageBreakdown repositories={activity.repositories} />
+                    </RevealSection>
+                  )}
+
+                  {/* §10 Strengths & improvements */}
+                  {insights && (
+                    <RevealSection stepIndex={10}>
+                      <SectionDivider />
+                      <StrengthsAndImprovementsCard
+                        strengths={insights.strengths}
+                        improvements={insights.improvements}
+                      />
+                    </RevealSection>
+                  )}
+
+                  {/* Activity loading skeleton */}
+                  {activityLoading && !activity && (
+                    <div className="flex items-center justify-center py-16">
+                      <ScanningBar text="fetching 12 months of activity..." />
                     </div>
-                    <StatsGrid
-                      totalCommits={activity.totalCommitContributions}
-                      prsMerged={activity.totalPullRequestContributions}
-                      openIssues={activity.totalIssueContributions}
-                      activeRepos={activity.totalRepositoriesWithContributedCommits}
-                    />
-                  </div>
-                </>
-              )}
-
-              {/* §4 Commit activity chart */}
-              {activity && revealedSections >= 4 && (
-                <>
-                  <SectionDivider />
-                  <CommitChart contributionCalendar={activity.contributionCalendar} />
-                </>
-              )}
-
-              {/* §5 Activity heatmap */}
-              {activity && revealedSections >= 5 && (
-                <>
-                  <SectionDivider />
-                  <ActivityHeatmap contributionCalendar={activity.contributionCalendar} />
-                </>
-              )}
-
-              {/* §6 Repositories */}
-              {activity && revealedSections >= 6 && (
-                <>
-                  <SectionDivider />
-                  <RepoList
-                    repositories={activity.repositories.filter(
-                      (r) => !excludedRepoIds.has(String(r.repoId ?? r.name))
-                    )}
-                    onReconnect={!isDemoMode ? handleReconnect : undefined}
-                    reconnecting={reconnectLoading}
-                    reconnectError={reconnectError}
-                    reconnectSuccess={reconnectSuccess}
-                  />
-                </>
-              )}
-
-              {/* §7 Language distribution */}
-              {activity && revealedSections >= 7 && (
-                <>
-                  <SectionDivider />
-                  <LanguageBreakdown repositories={activity.repositories} />
-                </>
-              )}
-
-              {/* §8 Strengths & improvements */}
-              {insights && revealedSections >= 8 && (
-                <>
-                  <SectionDivider />
-                  <StrengthsAndImprovementsCard
-                    strengths={insights.strengths}
-                    improvements={insights.improvements}
-                  />
-                </>
-              )}
-
-              {/* Activity loading skeleton */}
-              {activityLoading && !activity && (
-                <div className="flex items-center justify-center py-16">
-                  <ScanningBar text="fetching 12 months of activity..." />
+                  )}
                 </div>
-              )}
-            </div>
-          </TerminalCard>
-        </main>
+              </TerminalCard>
+            </SequenceProvider>
+          </main>
+        </>
       )}
     </div>
   );

@@ -32,8 +32,9 @@ export default function CommitChart({ contributionCalendar }: CommitChartProps) 
   return (
     <div>
       <div className="mb-4">
-        <div className="text-term-dim font-mono text-[11px] font-semibold tracking-wider uppercase">
-          {'// commit_activity.log · last 30 days'}
+        <div className="text-term-dim font-mono text-[11px]">
+          <span className="mr-1.5 text-white/40">$</span>
+          <span>logrithm commits --history --period=30d</span>
         </div>
       </div>
 
