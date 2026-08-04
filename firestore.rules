@@ -10,8 +10,11 @@ service cloud.firestore {
     // Insight history — readable if profile is public
     match /users/{uid}/insights/{insightId} {
       allow write: if request.auth != null && request.auth.uid == uid;
-      allow read: if request.auth != null && request.auth.uid == uid
-        || get(/databases/$(database)/documents/users/$(uid)/profile/data).data.isPublic == true;
+      allow read: if request.auth != null && (
+        request.auth.uid == uid ||
+        (exists(/databases/$(database)/documents/users/$(uid)/profile/data) &&
+         get(/databases/$(database)/documents/users/$(uid)/profile/data).data.isPublic == true)
+      );
     }
 
     // Goals — read if owner or invited partner, write if owner
@@ -19,7 +22,9 @@ service cloud.firestore {
       allow write: if request.auth != null && request.auth.uid == uid;
       allow read: if request.auth != null && (
         request.auth.uid == uid ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)/profile/data).data.githubLogin in resource.data.invitedUsers
+        (resource != null && 'invitedUsers' in resource.data &&
+         exists(/databases/$(database)/documents/users/$(request.auth.uid)/profile/data) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)/profile/data).data.githubLogin in resource.data.invitedUsers)
       );
     }
 
@@ -31,8 +36,10 @@ service cloud.firestore {
     // User Profile data — publicly readable if profile is public
     match /users/{uid}/profile/data {
       allow write: if request.auth != null && request.auth.uid == uid;
-      allow read: if request.auth != null && request.auth.uid == uid
-        || resource.data.isPublic == true;
+      allow read: if request.auth != null && (
+        request.auth.uid == uid ||
+        (resource != null && 'isPublic' in resource.data && resource.data.isPublic == true)
+      );
     }
 
     // Repository list — private to owner
