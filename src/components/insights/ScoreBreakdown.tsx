@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePlan } from '@/hooks/usePlan';
 import { HelpCircle } from 'lucide-react';
 import type { ComparisonStats } from '@/hooks/useComparisonStats';
+import { useSequenceStep } from '../dashboard/SequenceContext';
 
 interface ScoreBreakdownProps {
   scoreBreakdown?: {
@@ -61,7 +62,29 @@ const SCORE_COMPONENTS = [
 
 export default function ScoreBreakdown({ scoreBreakdown, globalStats }: ScoreBreakdownProps) {
   const { isPro } = usePlan();
+  const { isCompleted, completeStep: completeStep3 } = useSequenceStep(3);
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
+  const [activeBarIndex, setActiveBarIndex] = useState(() => (isCompleted ? 5 : 0));
+
+  useEffect(() => {
+    if (isCompleted) {
+      const t = setTimeout(() => setActiveBarIndex(5), 0);
+      return () => clearTimeout(t);
+    }
+  }, [isCompleted]);
+
+  useEffect(() => {
+    if (activeBarIndex >= 5) {
+      completeStep3();
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setActiveBarIndex((prev) => prev + 1);
+    }, 280);
+
+    return () => clearTimeout(timer);
+  }, [activeBarIndex, completeStep3]);
 
   // Fallback defaults if not computed yet
   const breakdown = scoreBreakdown || {
@@ -75,7 +98,6 @@ export default function ScoreBreakdown({ scoreBreakdown, globalStats }: ScoreBre
   // Scale the component peer average based on globalStats mean if available
   const getPeerVal = (peerEst: number) => {
     if (!globalStats) return peerEst;
-    // Scale estimated average dynamically based on actual global database mean (default benchmark base is 41)
     const factor = globalStats.mean / 41;
     return Math.min(Math.max(Math.round(peerEst * factor), 10), 90);
   };
@@ -95,15 +117,15 @@ export default function ScoreBreakdown({ scoreBreakdown, globalStats }: ScoreBre
       </div>
 
       <div className="space-y-3">
-        {SCORE_COMPONENTS.map((comp) => {
-          const score = breakdown[comp.key];
+        {SCORE_COMPONENTS.map((comp, compIdx) => {
+          const isRowActive = compIdx <= activeBarIndex;
+          const score = isRowActive ? breakdown[comp.key] : 0;
           const peerVal = getPeerVal(comp.peerEst);
 
-          // Calculate weighted points (e.g., 54% of 30 = 16.2)
+          // Calculate weighted points
           const userPoints = Math.round((score * comp.weight) / 10) / 10;
           const peerPoints = Math.round((peerVal * comp.weight) / 10) / 10;
 
-          // Mapping keys to mockup labels
           const keyLabels: Record<string, string> = {
             volume: 'commit_volume',
             consistency: 'consistency',
@@ -113,14 +135,15 @@ export default function ScoreBreakdown({ scoreBreakdown, globalStats }: ScoreBre
           };
           const labelStr = (keyLabels[comp.key] || comp.key).padEnd(15);
 
-          // Render block fill bar
           const totalBlocks = 24;
           const filledBlocks = Math.round((score / 100) * totalBlocks);
 
           return (
             <div
               key={comp.key}
-              className="flex flex-col gap-2 font-mono text-xs sm:flex-row sm:items-center sm:gap-4"
+              className={`flex flex-col gap-2 font-mono text-xs transition-all duration-300 ease-out sm:flex-row sm:items-center sm:gap-4 ${
+                isRowActive ? 'translate-y-0 opacity-100' : 'translate-y-1 opacity-0'
+              }`}
             >
               {/* Bracketed Label */}
               <div className="flex w-44 shrink-0 items-center gap-1.5">
@@ -145,12 +168,12 @@ export default function ScoreBreakdown({ scoreBreakdown, globalStats }: ScoreBre
               </div>
 
               {/* Block Segment Progress Bar */}
-              <div className="flex max-w-[200px] min-w-[150px] flex-1 items-center">
-                <div className="bg-term-block border-term-border flex w-full justify-between rounded-[2px] border p-[1.5px]">
+              <div className="flex max-w-50 min-w-37.5 flex-1 items-center">
+                <div className="bg-term-block border-term-border flex w-full justify-between rounded-xs border p-[1.5px]">
                   {Array.from({ length: totalBlocks }).map((_, i) => (
                     <div
                       key={i}
-                      className={`h-3 w-1 shrink-0 sm:w-1.5 ${
+                      className={`h-3 w-1 shrink-0 transition-colors duration-200 sm:w-1.5 ${
                         i < filledBlocks ? 'bg-term-accent' : 'bg-transparent'
                       }`}
                       style={{ marginRight: i < totalBlocks - 1 ? '1px' : '0' }}

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Copy, Share2, Zap, Check, RefreshCw } from 'lucide-react';
 import type { GitHubActivity, InsightObject } from '@/types/github';
 import { BootSequence, CursorPrompt } from './Loaders';
+import { useSequenceStep } from './SequenceContext';
 
 interface TerminalAnalysisCardProps {
   login: string;
@@ -34,8 +35,9 @@ export default function TerminalAnalysisCard({
   onComplete,
 }: TerminalAnalysisCardProps) {
   const [showToast, setShowToast] = useState(false);
+  const { isCompleted, completeStep: completeStep1 } = useSequenceStep(1);
   const playedInsightsRef = useRef<InsightObject | null>(null);
-  const [streamStep, setStreamStep] = useState(1);
+  const [streamStep, setStreamStep] = useState(() => (isCompleted ? 4 : 1));
 
   const handleCopyProfileLink = async () => {
     if (!login) return;
@@ -62,33 +64,36 @@ export default function TerminalAnalysisCard({
   useEffect(() => {
     if (!insights) {
       playedInsightsRef.current = null;
-      const t = setTimeout(() => setStreamStep(1), 0);
+      const t = setTimeout(() => setStreamStep(0), 0);
       return () => clearTimeout(t);
     }
 
     if (insights !== playedInsightsRef.current) {
       playedInsightsRef.current = insights;
-      const t = setTimeout(() => setStreamStep(1), 0);
+      const t = setTimeout(() => setStreamStep(0), 0);
       return () => clearTimeout(t);
     }
   }, [insights]);
 
   // Handle the sequential reveal steps
   useEffect(() => {
+    if (!insights) return;
+
     if (streamStep >= 4) {
-      if (insights && playedInsightsRef.current === insights) {
+      if (playedInsightsRef.current === insights) {
         onComplete?.();
+        completeStep1();
       }
       return;
     }
 
-    const delay = 350; // 350ms per reveal step
+    const delay = 400; // 400ms per reveal step
     const timer = setTimeout(() => {
       setStreamStep((prev) => prev + 1);
     }, delay);
 
     return () => clearTimeout(timer);
-  }, [streamStep, insights, onComplete]);
+  }, [streamStep, insights, onComplete, completeStep1]);
 
   const displayedInsights = finalBullets.slice(0, Math.min(streamStep, finalBullets.length));
   const isTyping = streamStep < 4;
