@@ -19,7 +19,11 @@ const firebaseConfig = {
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
 const auth = getAuth(app);
-const db = getFirestore(app, process.env.NODE_ENV === 'development' ? 'dev-db' : '(default)');
+const db = getFirestore(
+  app,
+  process.env.NEXT_PUBLIC_FIREBASE_DB_ID ||
+    (process.env.NODE_ENV === 'development' ? 'dev-db' : '(default)')
+);
 const functions = getFunctions(app, 'us-central1');
 
 // Connect to local emulator only in emulator dev mode

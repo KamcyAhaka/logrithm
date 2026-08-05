@@ -69,12 +69,15 @@ jobs:
           if [ "$ENV_TARGET" = "alpha" ]; then
             echo "SERVICE=logrithm-alpha" >> $GITHUB_ENV
             echo "SITE=logrithm-ai-alpha" >> $GITHUB_ENV
+            echo "DB_ID=dev-db" >> $GITHUB_ENV
           elif [ "$ENV_TARGET" = "beta" ]; then
             echo "SERVICE=logrithm-beta" >> $GITHUB_ENV
             echo "SITE=logrithm-ai-beta" >> $GITHUB_ENV
+            echo "DB_ID=(default)" >> $GITHUB_ENV
           elif [ "$ENV_TARGET" = "production" ]; then
             echo "SERVICE=logrithm" >> $GITHUB_ENV
             echo "SITE=logrithm-ai" >> $GITHUB_ENV
+            echo "DB_ID=(default)" >> $GITHUB_ENV
           else
             echo "Error: Unknown target environment: $ENV_TARGET"
             exit 1
@@ -105,6 +108,7 @@ jobs:
           NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
           NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
           NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
+          NEXT_PUBLIC_FIREBASE_DB_ID: ${{ env.DB_ID }}
 
       # 6. Authenticate with GCP
       - name: Authenticate GCP
@@ -143,7 +147,8 @@ jobs:
             --allow-unauthenticated \
             --memory 512Mi \
             --min-instances 0 \
-            --max-instances 5
+            --max-instances 5 \
+            --set-env-vars NEXT_PUBLIC_FIREBASE_DB_ID=${{ env.DB_ID }}
 
       # 12. Install Firebase CLI
       - name: Install Firebase CLI

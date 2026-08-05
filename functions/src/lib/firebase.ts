@@ -21,8 +21,12 @@ export const db = new Proxy(defaultDb, {
   get(target, prop, receiver) {
     const store = storage.getStore();
     const origin = store?.origin || '';
-    const isLocal = origin.includes('localhost') || origin.includes('127.0.0.1');
-    const activeDb = isLocal ? getFirestore(admin.app(), 'dev-db') : defaultDb;
+    const isDevDb =
+      origin.includes('localhost') ||
+      origin.includes('127.0.0.1') ||
+      origin.includes('logrithm-ai-alpha.web.app') ||
+      origin.includes('logrithm-alpha');
+    const activeDb = isDevDb ? getFirestore(admin.app(), 'dev-db') : defaultDb;
 
     const value = Reflect.get(activeDb, prop, receiver);
     if (typeof value === 'function') {

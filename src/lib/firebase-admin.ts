@@ -77,7 +77,8 @@ export async function getAdminDb(): Promise<Firestore | null> {
         const app = getApp();
         adminDb = getFirestore(
           app,
-          process.env.NODE_ENV === 'development' ? 'dev-db' : '(default)'
+          process.env.NEXT_PUBLIC_FIREBASE_DB_ID ||
+            (process.env.NODE_ENV === 'development' ? 'dev-db' : '(default)')
         );
         return adminDb;
       } catch (err) {
