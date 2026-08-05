@@ -16,6 +16,20 @@ import { calculateActivityScore } from '../lib/scoreCalculator';
 import { upsertLeaderboardEntry } from '../lib/leaderboardService';
 import { parseCountryCode } from '../lib/locationParser';
 
+function isRetryable(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return (
+    msg.includes('503') ||
+    msg.includes('Service Unavailable') ||
+    msg.includes('429') ||
+    msg.includes('Too Many Requests') ||
+    msg.includes('ECONNRESET') ||
+    msg.includes('ETIMEDOUT')
+  );
+}
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 // ---------------------------------------------------------------------------
 // Demo fallback — returned when key is missing or demo mode is active
 // ---------------------------------------------------------------------------
@@ -326,7 +340,33 @@ export const generateInsightsInternal = async (
       },
     });
     const prompt = buildPrompt(activity, filteredRepos, deterministicScore, privacySettings);
-    const result = await model.generateContent(prompt);
+
+    let result;
+    let lastErr: unknown;
+    const maxAttempts = 3;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        result = await model.generateContent(prompt);
+        break;
+      } catch (err) {
+        lastErr = err;
+        if (isRetryable(err) && attempt < maxAttempts) {
+          const backoffMs = Math.pow(2, attempt) * 1000;
+          console.warn(
+            `[generateInsights] Transient error on attempt ${attempt}, retrying in ${backoffMs}ms:`,
+            err
+          );
+          await sleep(backoffMs);
+        } else {
+          break;
+        }
+      }
+    }
+
+    if (!result) {
+      throw lastErr;
+    }
+
     const text = result.response.text();
     insights = parseInsights(text);
     // Override LLM score with deterministic calculation
@@ -465,7 +505,33 @@ export const generatePublicInsightsInternal = async (
       },
     });
     const prompt = buildPrompt(activity, undefined, deterministicScore, undefined);
-    const result = await model.generateContent(prompt);
+
+    let result;
+    let lastErr: unknown;
+    const maxAttempts = 3;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        result = await model.generateContent(prompt);
+        break;
+      } catch (err) {
+        lastErr = err;
+        if (isRetryable(err) && attempt < maxAttempts) {
+          const backoffMs = Math.pow(2, attempt) * 1000;
+          console.warn(
+            `[generatePublicInsightsInternal] Transient error on attempt ${attempt}, retrying in ${backoffMs}ms:`,
+            err
+          );
+          await sleep(backoffMs);
+        } else {
+          break;
+        }
+      }
+    }
+
+    if (!result) {
+      throw lastErr;
+    }
+
     const text = result.response.text();
     insights = parseInsights(text);
     insights.activityScore = deterministicScore;
