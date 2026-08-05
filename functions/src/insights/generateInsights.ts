@@ -292,8 +292,7 @@ export const generateInsightsInternal = async (
   }
 
   if (!apiKey) {
-    console.warn('[generateInsights] GEMINI_API_KEY not found — returning DUMMY_INSIGHTS');
-    return DUMMY_INSIGHTS;
+    throw new HttpsError('failed-precondition', 'Gemini API key is not configured.');
   }
 
   // Step 3b: Fetch privacy-filtered repos from Firestore
@@ -378,7 +377,10 @@ export const generateInsightsInternal = async (
     } catch {
       // Non-fatal
     }
-    return DUMMY_INSIGHTS;
+    throw new HttpsError(
+      'unavailable',
+      `Gemini is temporarily unavailable. Please try again. (${err instanceof Error ? err.message : String(err)})`
+    );
   }
 
   // Step 5: Persist insights via firestoreService
@@ -485,14 +487,7 @@ export const generatePublicInsightsInternal = async (
   const deterministicScore = scoreBreakdown.total;
 
   if (!apiKey) {
-    console.warn(
-      '[generatePublicInsightsInternal] GEMINI_API_KEY not found — returning DUMMY_INSIGHTS'
-    );
-    return {
-      ...DUMMY_INSIGHTS,
-      activityScore: deterministicScore,
-      scoreBreakdown: scoreBreakdown.components,
-    };
+    throw new Error('Gemini API key is not configured.');
   }
 
   let insights: InsightObject;
@@ -537,11 +532,7 @@ export const generatePublicInsightsInternal = async (
     insights.activityScore = deterministicScore;
   } catch (err) {
     console.error('[generatePublicInsightsInternal] Gemini call failed:', err);
-    return {
-      ...DUMMY_INSIGHTS,
-      activityScore: deterministicScore,
-      scoreBreakdown: scoreBreakdown.components,
-    };
+    throw err;
   }
 
   return {
