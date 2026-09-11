@@ -16,7 +16,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
   const pathname = usePathname();
 
   return (
-    <div className="flex min-h-screen flex-col overflow-x-hidden bg-[#0a0a0a] font-sans text-white/70">
+    <div className="flex min-h-screen flex-col overflow-x-hidden bg-[var(--bg-page)] font-sans text-[var(--text-secondary)]">
       <Navbar />
 
       <div className="mx-auto mt-4 flex w-full max-w-5xl flex-1 flex-col gap-8 p-4 md:mt-8 md:flex-row md:p-8">
@@ -24,14 +24,14 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
           <div className="sticky top-24">
             <Link
               href="/dashboard"
-              className="mb-6 flex items-center gap-2 px-3 font-mono text-xs text-white/40 transition-colors hover:text-[#1D9E75] md:mb-8"
+              className="mb-6 flex items-center gap-2 px-3 font-mono text-xs text-[var(--text-muted)] transition-colors hover:text-[#1D9E75] md:mb-8"
             >
               ← return to dashboard
             </Link>
-            <h2 className="mb-4 hidden px-3 font-mono text-xs font-medium tracking-widest text-white/40 uppercase md:block">
+            <h2 className="mb-4 hidden px-3 font-mono text-xs font-medium tracking-widest text-[var(--text-muted)] uppercase md:block">
               Settings
             </h2>
-            <nav className="scrollbar-hide mb-6 flex space-x-2 overflow-x-auto border-b border-white/10 pb-4 md:mb-0 md:flex-col md:space-y-1 md:space-x-0 md:border-b-0 md:pb-0">
+            <nav className="scrollbar-hide mb-6 flex space-x-2 overflow-x-auto border-b border-[var(--border-std)] pb-4 md:mb-0 md:flex-col md:space-y-1 md:space-x-0 md:border-b-0 md:pb-0">
               {navigation.map((item) => {
                 const isActive = pathname === item.href;
                 return (
@@ -40,13 +40,13 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
                     href={item.href}
                     className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-sm whitespace-nowrap transition-colors md:rounded-none md:border-l-2 ${
                       isActive
-                        ? 'border-[#1D9E75] bg-white/5 text-[#1D9E75] md:bg-transparent'
-                        : 'border-transparent text-white/40 hover:bg-white/5 hover:text-white/70 md:hover:bg-transparent'
+                        ? 'border-[#1D9E75] bg-[#1D9E75]/10 text-[#1D9E75] md:bg-transparent'
+                        : 'border-transparent text-[var(--text-muted)] hover:bg-[var(--border-subtle)] hover:text-[var(--text-primary)] md:hover:bg-transparent'
                     }`}
                   >
                     <item.icon
                       size={16}
-                      className={isActive ? 'text-[#1D9E75]' : 'text-white/40'}
+                      className={isActive ? 'text-[#1D9E75]' : 'text-[var(--text-muted)]'}
                     />
                     {item.name}
                   </Link>

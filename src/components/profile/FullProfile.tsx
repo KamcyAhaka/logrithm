@@ -50,14 +50,14 @@ export function FullProfile({
   const COLORS = ['#1D9E75', '#2E8B57', '#3CB371', '#20B2AA', '#48D1CC'];
 
   return (
-    <div className="flex min-h-screen bg-[#0a0a0a] font-sans text-white/80 selection:bg-[#1D9E75]/30">
+    <div className="flex min-h-screen bg-[var(--bg-page)] font-sans text-[var(--text-secondary)] selection:bg-[#1D9E75]/30">
       <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-8 p-4 md:flex-row md:p-8 lg:p-12">
         {/* Sidebar */}
         <aside className="shrink-0 md:w-72">
-          <div className="sticky top-12 space-y-8 rounded-2xl border border-white/5 bg-[#0f0f0f] p-6 shadow-2xl">
+          <div className="sticky top-12 space-y-8 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-6 shadow-2xl">
             <Link
               href="/dashboard"
-              className="block font-mono text-xs text-white/40 transition-colors hover:text-[#1D9E75]"
+              className="block font-mono text-xs text-[var(--text-muted)] transition-colors hover:text-[#1D9E75]"
             >
               ← return to dashboard
             </Link>
@@ -151,11 +151,13 @@ export function FullProfile({
         {/* Main content */}
         <main className="flex-1 space-y-8">
           {/* Summary */}
-          <section className="rounded-2xl border border-white/5 bg-[#0f0f0f] p-8">
+          <section className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-8">
             <h2 className="mb-4 font-mono text-sm tracking-widest text-[#1D9E75] uppercase">
               AI Analysis
             </h2>
-            <p className="text-[15px] leading-relaxed text-white/80">{insights.summary}</p>
+            <p className="text-[15px] leading-relaxed text-[var(--text-secondary)]">
+              {insights.summary}
+            </p>
           </section>
 
           {/* Strengths & Explore */}
@@ -189,19 +191,19 @@ export function FullProfile({
           </div>
 
           {/* Patterns */}
-          <section className="rounded-2xl border border-white/5 bg-[#0f0f0f] p-8">
-            <h3 className="mb-4 font-mono text-xs tracking-widest text-white/40 uppercase">
+          <section className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-8">
+            <h3 className="mb-4 font-mono text-xs tracking-widest text-[var(--text-muted)] uppercase">
               Identified Patterns
             </h3>
-            <blockquote className="border-l-2 border-[#1D9E75]/30 pl-4 text-white/60 italic">
+            <blockquote className="border-l-2 border-[#1D9E75]/30 pl-4 text-[var(--text-secondary)] italic">
               &quot;{insights.patterns}&quot;
             </blockquote>
           </section>
 
           {/* Activity Chart */}
           {snapshot?.dailyCommits && snapshot.dailyCommits.length > 0 && (
-            <section className="rounded-2xl border border-white/5 bg-[#0f0f0f] p-8">
-              <h3 className="mb-6 font-mono text-xs tracking-widest text-white/40 uppercase">
+            <section className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-8">
+              <h3 className="mb-6 font-mono text-xs tracking-widest text-[var(--text-muted)] uppercase">
                 30-Day Activity
               </h3>
               <div className="h-64 w-full">
@@ -248,15 +250,15 @@ export function FullProfile({
 
           {/* Heatmap Custom implementation */}
           {snapshot?.contributionHeatmap && snapshot.contributionHeatmap.length > 0 && (
-            <section className="rounded-2xl border border-white/5 bg-[#0f0f0f] p-8">
-              <h3 className="mb-6 font-mono text-xs tracking-widest text-white/40 uppercase">
+            <section className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-8">
+              <h3 className="mb-6 font-mono text-xs tracking-widest text-[var(--text-muted)] uppercase">
                 Contribution Heatmap
               </h3>
               <div className="grid grid-flow-col grid-rows-7 gap-[2px] overflow-x-auto pb-2">
                 {snapshot.contributionHeatmap.map((day, i) => {
                   const bgClass =
                     day.level === 0
-                      ? 'bg-white/5'
+                      ? 'bg-[var(--border-subtle)]'
                       : day.level === 1
                         ? 'bg-[#1D9E75]/30'
                         : day.level === 2
@@ -279,8 +281,8 @@ export function FullProfile({
 
           {/* Repositories */}
           {privacySettings.profile.showRepoList && repos && repos.length > 0 && (
-            <section className="rounded-2xl border border-white/5 bg-[#0f0f0f] p-8">
-              <h3 className="mb-6 font-mono text-xs tracking-widest text-white/40 uppercase">
+            <section className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-8">
+              <h3 className="mb-6 font-mono text-xs tracking-widest text-[var(--text-muted)] uppercase">
                 Active Repositories
               </h3>
               <div className="grid gap-4 sm:grid-cols-2">

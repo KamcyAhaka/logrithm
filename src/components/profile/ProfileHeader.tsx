@@ -17,12 +17,14 @@ export function ProfileHeader({ login, avatarUrl, displayName }: ProfileHeaderPr
         height={64}
         className="mb-4 rounded-full border-2 border-[#1D9E75]/40"
       />
-      <h1 className="mb-1 text-2xl font-semibold text-white">{displayName || `@${login}`}</h1>
-      <p className="mb-3 font-mono text-sm text-white/40">@{login}</p>
+      <h1 className="mb-1 text-2xl font-semibold text-[var(--text-primary)]">
+        {displayName || `@${login}`}
+      </h1>
+      <p className="mb-3 font-mono text-sm text-[var(--text-muted)]">@{login}</p>
 
       <div className="flex items-center gap-2">
         <div className="h-2 w-2 rounded-full bg-[#1D9E75]" />
-        <p className="font-mono text-xs text-white/40">
+        <p className="font-mono text-xs text-[var(--text-muted)]">
           Analysed by{' '}
           <Link href="/" className="text-[#1D9E75] hover:underline">
             logrithm
