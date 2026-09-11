@@ -172,41 +172,19 @@ export default function ShareCard({
       }}
     >
       {/* ── Selection Pills ── */}
-      <div
-        style={{
-          display: 'flex',
-          gap: '0.5rem',
-          background: 'rgba(255,255,255,0.03)',
-          border: '1px solid rgba(255,255,255,0.06)',
-          borderRadius: '9999px',
-          padding: '0.25rem',
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-          width: '100%',
-          boxSizing: 'border-box',
-        }}
-      >
+      <div className="border-term-border bg-term-hover/30 box-sizing-border flex w-full flex-wrap justify-center gap-2 rounded-full border p-1">
         {menuItems.map((item) => {
           const isActive = activeVariant === item.id;
           return (
             <button
               key={item.id}
               onClick={() => setActiveVariant(item.id)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '0.72rem',
-                fontWeight: 500,
-                color: isActive ? '#fff' : 'rgba(255, 255, 255, 0.4)',
-                background: isActive ? '#1D9E75' : 'transparent',
-                border: 'none',
-                borderRadius: '9999px',
-                padding: '0.35rem 0.75rem',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-              }}
+              className={[
+                'flex cursor-pointer items-center gap-1.5 rounded-full border px-3.5 py-1.5 font-mono text-[11px] font-medium transition-all',
+                isActive
+                  ? 'bg-term-accent text-term-bg border-term-accent'
+                  : 'text-term-dim hover:text-term-light border-transparent bg-transparent',
+              ].join(' ')}
             >
               {item.icon}
               {item.label}
@@ -229,16 +207,70 @@ export default function ShareCard({
         <div
           ref={cardRef}
           style={{
-            background: '#0a0a0a',
-            border: '1px solid rgba(255,255,255,0.08)',
+            background: '#0a0d0a',
+            border: '1px solid #1e2a1e',
             padding: '2rem',
             width: CARD_WIDTH,
             minWidth: CARD_WIDTH,
-            fontFamily: "'Inter', sans-serif",
+            fontFamily: 'var(--font-mono), monospace',
             overflow: 'hidden',
             boxSizing: 'border-box',
           }}
         >
+          {/* Terminal Title Bar inside capture area */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              borderBottom: '1px solid #1e2a1e',
+              padding: '0.75rem 1rem',
+              background: '#0f130f',
+              margin: '-2rem -2rem 1.5rem -2rem',
+              userSelect: 'none',
+            }}
+          >
+            <div style={{ display: 'flex', gap: '0.35rem' }}>
+              <div
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  background: '#FF5F57',
+                  opacity: 0.6,
+                }}
+              />
+              <div
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  background: '#FEBC2E',
+                  opacity: 0.6,
+                }}
+              />
+              <div
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  background: '#28C840',
+                  opacity: 0.6,
+                }}
+              />
+            </div>
+            <span
+              style={{
+                fontSize: '10px',
+                color: '#5a6a5a',
+                fontFamily: 'var(--font-mono), monospace',
+                marginLeft: '0.5rem',
+              }}
+            >
+              logrithm — share/{login}/{activeVariant}.sh
+            </span>
+          </div>
+
           {/* Header */}
           <div
             style={{
@@ -255,13 +287,13 @@ export default function ShareCard({
                 alt={`@${login}`}
                 width={44}
                 height={44}
-                style={{ borderRadius: '50%', border: '2px solid rgba(29,158,117,0.4)' }}
+                style={{ borderRadius: '4px', border: '1px solid #1e2a1e' }}
                 crossOrigin="anonymous"
               />
               <div>
                 <p
                   style={{
-                    fontFamily: "'JetBrains Mono', monospace",
+                    fontFamily: 'var(--font-mono), monospace',
                     fontSize: '1rem',
                     fontWeight: 600,
                     color: '#fff',
@@ -272,9 +304,9 @@ export default function ShareCard({
                 </p>
                 <p
                   style={{
-                    fontFamily: "'JetBrains Mono', monospace",
+                    fontFamily: 'var(--font-mono), monospace',
                     fontSize: '0.72rem',
-                    color: 'rgba(255,255,255,0.4)',
+                    color: '#5a6a5a',
                     margin: 0,
                   }}
                 >
@@ -284,18 +316,13 @@ export default function ShareCard({
             </div>
             <span
               style={{
-                fontFamily: "'JetBrains Mono', monospace",
+                fontFamily: 'var(--font-mono), monospace',
                 fontSize: '0.75rem',
                 fontWeight: 600,
-                color: '#1D9E75',
-                background: 'rgba(29,158,117,0.12)',
-                border: '1px solid rgba(29,158,117,0.25)',
-                borderRadius: 9999,
-                display: 'inline-block',
-                padding: '0.25rem 0.75rem',
+                color: '#4ade80',
               }}
             >
-              score: {insights.activityScore}
+              [INDEX: {insights.activityScore}]
             </span>
           </div>
 
@@ -308,16 +335,16 @@ export default function ShareCard({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              borderTop: '1px solid rgba(255,255,255,0.06)',
+              borderTop: '1px dashed #1e2a1e',
               paddingTop: '1rem',
               marginTop: 'auto',
             }}
           >
             <span
               style={{
-                fontFamily: "'JetBrains Mono', monospace",
+                fontFamily: 'var(--font-mono), monospace',
                 fontSize: '0.72rem',
-                color: '#1D9E75',
+                color: '#4ade80',
                 fontWeight: 500,
               }}
             >
@@ -325,9 +352,9 @@ export default function ShareCard({
             </span>
             <span
               style={{
-                fontFamily: "'JetBrains Mono', monospace",
+                fontFamily: 'var(--font-mono), monospace',
                 fontSize: '0.68rem',
-                color: 'rgba(255,255,255,0.3)',
+                color: '#5a6a5a',
               }}
             >
               {generationMonth}

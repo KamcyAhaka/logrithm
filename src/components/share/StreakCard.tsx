@@ -45,110 +45,87 @@ export default function StreakCard({
   const longestStreakDateRange = formatDateRange(longestStreakStart, longestStreakEnd);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', margin: '1.5rem 0' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
       <div
-        style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '1rem' }}
+        style={{
+          color: '#5a6a5a',
+          fontFamily: 'var(--font-mono), monospace',
+          fontSize: '11px',
+          marginBottom: '0.5rem',
+        }}
       >
-        <div
-          style={{
-            background: 'rgba(255,255,255,0.02)',
-            border: '1px solid rgba(255,255,255,0.05)',
-            borderRadius: '0.75rem',
-            padding: '1.25rem',
-            textAlign: 'center',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-          }}
-        >
-          <Flame size={20} color="#1D9E75" style={{ margin: '0 auto 0.5rem' }} />
-          <p
-            style={{
-              margin: 0,
-              fontSize: '0.7rem',
-              color: 'rgba(255,255,255,0.4)',
-              fontFamily: "'JetBrains Mono', monospace",
-            }}
-          >
-            CURRENT STREAK
-          </p>
-          <h3
-            style={{
-              margin: '0.25rem 0 0',
-              fontSize: currentStreak > 0 ? '2rem' : '1.25rem',
-              color: currentStreak > 0 ? '#fff' : 'rgba(255,255,255,0.25)',
-              fontFamily: "'JetBrains Mono', monospace",
-              fontWeight: 700,
-            }}
-          >
+        $ logrithm streak --history
+      </div>
+
+      <div className="border-term-border grid grid-cols-2 border border-dashed font-mono">
+        {/* Current Streak */}
+        <div className="border-term-border flex flex-col justify-center border-r border-dashed p-4">
+          <div className="text-term-dim flex items-center gap-1 text-[10px]">
+            <Flame size={12} className="text-term-accent" />
+            <span>current_streak</span>
+          </div>
+          <div className="text-term-accent mt-1.5 text-xl font-bold">
             {currentStreak > 0 ? (
-              <>
-                {currentStreak}{' '}
-                <span style={{ fontSize: '0.8rem', fontWeight: 400, color: '#1D9E75' }}>
-                  day {currentStreak >= 2 ? 's' : ''}
+              <span>
+                {currentStreak}
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 400,
+                    marginLeft: '2px',
+                    color: '#5a6a5a',
+                  }}
+                >
+                  d
                 </span>
-              </>
+              </span>
             ) : (
               '—'
             )}
-          </h3>
+          </div>
         </div>
-        <div
-          style={{
-            background: 'rgba(255,255,255,0.02)',
-            border: '1px solid rgba(255,255,255,0.05)',
-            borderRadius: '0.75rem',
-            padding: '1.25rem',
-            textAlign: 'center',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-          }}
-        >
-          <Award size={20} color="#1D9E75" style={{ margin: '0 auto 0.5rem' }} />
-          <p
-            style={{
-              margin: 0,
-              fontSize: '0.7rem',
-              color: 'rgba(255,255,255,0.4)',
-              fontFamily: "'JetBrains Mono', monospace",
-            }}
-          >
-            LONGEST STREAK
-          </p>
-          <h3
-            style={{
-              margin: '0.25rem 0 0',
-              fontSize: '2rem',
-              color: '#fff',
-              fontFamily: "'JetBrains Mono', monospace",
-              fontWeight: 700,
-            }}
-          >
-            {longestStreak}{' '}
-            <span style={{ fontSize: '0.8rem', fontWeight: 400, color: '#1D9E75' }}>days</span>
-          </h3>
+
+        {/* Longest Streak */}
+        <div className="flex flex-col justify-center p-4">
+          <div className="text-term-dim flex items-center gap-1 text-[10px]">
+            <Award size={12} className="text-term-accent" />
+            <span>longest_streak</span>
+          </div>
+          <div className="text-term-accent mt-1.5 text-xl font-bold">
+            {longestStreak > 0 ? (
+              <span>
+                {longestStreak}
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 400,
+                    marginLeft: '2px',
+                    color: '#5a6a5a',
+                  }}
+                >
+                  d
+                </span>
+              </span>
+            ) : (
+              '—'
+            )}
+          </div>
           {longestStreakDateRange && longestStreak > 0 && (
-            <p
-              style={{
-                margin: '0.25rem 0 0 0',
-                fontSize: '0.65rem',
-                color: 'rgba(255,255,255,0.4)',
-                fontFamily: "'JetBrains Mono', monospace",
-              }}
-            >
-              ({longestStreakDateRange})
-            </p>
+            <div className="text-term-dim mt-0.5 text-[9px] font-normal">
+              {longestStreakDateRange}
+            </div>
           )}
         </div>
       </div>
+
       <p
         style={{
-          fontFamily: "'Inter', sans-serif",
+          fontFamily: 'var(--font-mono), monospace',
           fontSize: '0.8rem',
-          color: 'rgba(255,255,255,0.6)',
+          color: '#c8d8c8',
           textAlign: 'center',
           lineHeight: 1.5,
+          marginTop: '0.5rem',
         }}
       >
         {patterns || 'Consistency is the engine of high performance.'}

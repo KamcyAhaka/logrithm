@@ -7,11 +7,21 @@ interface AboutCardProps {
 export default function AboutCard({ insights }: AboutCardProps) {
   return (
     <>
+      <div
+        style={{
+          color: '#5a6a5a',
+          fontFamily: 'var(--font-mono), monospace',
+          fontSize: '11px',
+          marginBottom: '0.75rem',
+        }}
+      >
+        $ logrithm about --user
+      </div>
       <p
         style={{
-          fontFamily: "'Inter', sans-serif",
+          fontFamily: 'var(--font-mono), monospace',
           fontSize: '0.875rem',
-          color: 'rgba(255,255,255,0.75)',
+          color: '#c8d8c8',
           lineHeight: 1.65,
           margin: '1.25rem 0',
         }}
@@ -33,14 +43,14 @@ export default function AboutCard({ insights }: AboutCardProps) {
               key={tag}
               style={{
                 display: 'inline-block',
-                fontFamily: "'JetBrains Mono', monospace",
+                fontFamily: 'var(--font-mono), monospace',
                 fontSize: '0.65rem',
                 fontWeight: 500,
                 letterSpacing: '0.08em',
-                color: 'rgba(255,255,255,0.5)',
-                background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 9999,
+                color: '#5a6a5a',
+                background: '#141a14',
+                border: '1px solid #1e2a1e',
+                borderRadius: '2px',
                 padding: '0.25rem 0.6rem',
               }}
             >
@@ -57,14 +67,14 @@ export default function AboutCard({ insights }: AboutCardProps) {
               key={lang}
               style={{
                 display: 'inline-block',
-                fontFamily: "'JetBrains Mono', monospace",
+                fontFamily: 'var(--font-mono), monospace',
                 fontSize: '0.65rem',
                 fontWeight: 500,
                 letterSpacing: '0.08em',
-                color: '#1D9E75',
-                background: 'rgba(29,158,117,0.12)',
-                border: '1px solid rgba(29,158,117,0.25)',
-                borderRadius: 9999,
+                color: '#4ade80',
+                background: 'rgba(74, 222, 128, 0.12)',
+                border: '1px solid rgba(74, 222, 128, 0.25)',
+                borderRadius: '2px',
                 padding: '0.25rem 0.6rem',
               }}
             >

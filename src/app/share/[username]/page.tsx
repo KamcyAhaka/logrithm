@@ -140,14 +140,14 @@ export default async function SharePage({ params }: SharePageProps) {
       >
         <Link
           href="/dashboard"
-          className="font-mono text-xs text-white/40 transition-colors hover:text-[#1D9E75]"
+          className="hover:text-term-accent font-mono text-xs text-white/40 transition-colors"
           style={{ textDecoration: 'none' }}
         >
           ← return to dashboard
         </Link>
         <Link
           href="/faq"
-          className="rounded-full border border-[#1D9E75]/20 bg-[#1D9E75]/5 px-2.5 py-1 font-mono text-xs text-[#1D9E75] transition-colors hover:text-[#1D9E75]/80"
+          className="border-term-accent/20 bg-term-accent/5 text-term-accent hover:text-term-accent/80 rounded-full border px-2.5 py-1 font-mono text-xs transition-colors"
           style={{ textDecoration: 'none' }}
         >
           how is this score calculated? (FAQ)
@@ -266,10 +266,7 @@ function NoPublicInsights({
           }}
         >
           If this is your profile, you can make it public in your{' '}
-          <Link
-            href="/settings/privacy#profile-visibility"
-            style={{ color: 'var(--green)', textDecoration: 'underline' }}
-          >
+          <Link href="/settings/privacy#profile-visibility" className="text-term-accent underline">
             privacy settings
           </Link>
           .

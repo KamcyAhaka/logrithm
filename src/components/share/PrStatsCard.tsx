@@ -10,92 +10,64 @@ export default function PrStatsCard({ totalPRs, totalIssues }: PrStatsCardProps)
   const issuePercentage =
     totalCollaborations > 0 ? Math.round((totalIssues / totalCollaborations) * 100) : 0;
 
+  const totalBlocks = 24;
+  const prBlocks = Math.round((prPercentage / 100) * totalBlocks);
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', margin: '1.5rem 0' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-        <div
-          style={{
-            background: 'rgba(255,255,255,0.02)',
-            border: '1px solid rgba(255,255,255,0.05)',
-            borderRadius: '0.75rem',
-            padding: '1.25rem',
-            textAlign: 'center',
-          }}
-        >
-          <span
-            style={{
-              fontSize: '0.7rem',
-              color: 'rgba(255,255,255,0.4)',
-              fontFamily: "'JetBrains Mono', monospace",
-            }}
-          >
-            PRS MERGED
-          </span>
-          <h3
-            style={{
-              margin: '0.25rem 0 0',
-              fontSize: '2.25rem',
-              color: '#fff',
-              fontFamily: "'JetBrains Mono', monospace",
-              fontWeight: 700,
-            }}
-          >
-            {totalPRs}
-          </h3>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
+      <div
+        style={{
+          color: '#5a6a5a',
+          fontFamily: 'var(--font-mono), monospace',
+          fontSize: '11px',
+          marginBottom: '0.5rem',
+        }}
+      >
+        $ logrithm stats --collaboration
+      </div>
+
+      <div className="border-term-border grid grid-cols-2 border border-dashed font-mono">
+        {/* PRs Merged */}
+        <div className="border-term-border flex flex-col justify-center border-r border-dashed p-4">
+          <div className="text-term-dim text-[10px]">prs_merged</div>
+          <div className="text-term-accent mt-1 text-xl font-bold">{totalPRs}</div>
         </div>
-        <div
-          style={{
-            background: 'rgba(255,255,255,0.02)',
-            border: '1px solid rgba(255,255,255,0.05)',
-            borderRadius: '0.75rem',
-            padding: '1.25rem',
-            textAlign: 'center',
-          }}
-        >
-          <span
-            style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace' }}
-          >
-            ISSUES OPENED
-          </span>
-          <h3
-            style={{
-              margin: '0.25rem 0 0',
-              fontSize: '2.25rem',
-              color: '#fff',
-              fontFamily: "'JetBrains Mono', monospace",
-              fontWeight: 700,
-            }}
-          >
-            {totalIssues}
-          </h3>
+
+        {/* Issues Opened */}
+        <div className="flex flex-col justify-center p-4">
+          <div className="text-term-dim text-[10px]">issues_opened</div>
+          <div className="text-term-accent mt-1 text-xl font-bold">{totalIssues}</div>
         </div>
       </div>
 
       {totalCollaborations > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+        <div
+          style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}
+        >
           <div
             style={{
               display: 'flex',
               justifyContent: 'space-between',
               fontSize: '0.7rem',
-              color: 'rgba(255,255,255,0.4)',
-              fontFamily: "'JetBrains Mono', monospace",
+              color: '#5a6a5a',
+              fontFamily: 'var(--font-mono), monospace',
             }}
           >
             <span>PRs ({prPercentage}%)</span>
             <span>Issues ({issuePercentage}%)</span>
           </div>
-          <div
-            style={{
-              display: 'flex',
-              height: 6,
-              width: '100%',
-              borderRadius: 99,
-              overflow: 'hidden',
-            }}
-          >
-            <div style={{ width: `${prPercentage}%`, background: '#1D9E75' }} />
-            <div style={{ width: `${issuePercentage}%`, background: 'rgba(255,255,255,0.15)' }} />
+
+          <div className="bg-term-block border-term-border flex w-full justify-between rounded-[2px] border p-[1.5px] font-mono">
+            {Array.from({ length: totalBlocks }).map((_, i) => {
+              const isPR = i < prBlocks;
+              return (
+                <div
+                  key={i}
+                  className={`h-3 w-1 shrink-0 sm:w-1.5 ${isPR ? 'bg-term-accent' : 'bg-term-dim'}`}
+                  style={{ marginRight: i < totalBlocks - 1 ? '1px' : '0' }}
+                />
+              );
+            })}
           </div>
         </div>
       )}
