@@ -29,6 +29,7 @@ export const metadata: Metadata = {
 
 import Footer from '@/components/layout/Footer';
 import ScrollToTop from '@/components/layout/ScrollToTop';
+import { ThemeProvider } from '@/components/theme/ThemeProvider';
 
 export default function RootLayout({
   children,
@@ -36,9 +37,31 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn('dark font-sans', inter.variable, jetbrainsMonoHeading.variable)}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={cn('font-sans', inter.variable, jetbrainsMonoHeading.variable)}
+    >
       <head>
         <meta name="apple-mobile-web-app-title" content="Logrithm" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var stored = localStorage.getItem('logrithm-theme');
+                var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                var isDark = stored === 'dark' || (stored !== 'light' && prefersDark);
+                if (isDark) {
+                  document.documentElement.classList.add('dark');
+                  document.documentElement.style.colorScheme = 'dark';
+                } else {
+                  document.documentElement.classList.remove('dark');
+                  document.documentElement.style.colorScheme = 'light';
+                }
+              } catch (e) {}
+            `,
+          }}
+        />
       </head>
       <body
         style={{
@@ -48,9 +71,11 @@ export default function RootLayout({
           flexDirection: 'column',
         }}
       >
-        <ScrollToTop />
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>{children}</div>
-        <Footer />
+        <ThemeProvider>
+          <ScrollToTop />
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>{children}</div>
+          <Footer />
+        </ThemeProvider>
       </body>
     </html>
   );
