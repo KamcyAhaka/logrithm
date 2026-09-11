@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { GitBranch } from 'lucide-react';
 import NavbarAuth from './NavbarAuth';
 import BetaBadge from './BetaBadge';
+import ThemeToggle from './ThemeToggle';
 
 // Wordmark: "log" normal · "r" green · "ithm" normal — consistent with login page
 export default function Navbar() {
@@ -10,7 +11,7 @@ export default function Navbar() {
     <nav
       style={{
         borderBottom: '1px solid var(--border-subtle)',
-        background: 'rgba(10,10,10,0.9)',
+        background: 'color-mix(in srgb, var(--bg-card) 85%, transparent)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
         position: 'sticky',
@@ -19,7 +20,7 @@ export default function Navbar() {
         maxWidth: '100%',
         overflowX: 'hidden',
       }}
-      className="mx-auto flex w-full items-center justify-center"
+      className="mx-auto flex w-full items-center justify-center transition-colors duration-200"
     >
       <div
         style={{
@@ -42,20 +43,26 @@ export default function Navbar() {
               alignItems: 'center',
               textDecoration: 'none',
             }}
+            className="select-none"
           >
-            <Image
-              src="/logrithm-logo-white.png"
-              alt="logrithm logo"
-              width={110}
-              height={30}
-              style={{ objectFit: 'contain' }}
-              priority
-            />
+            <div className="hidden dark:block">
+              <Image
+                src="/logrithm-logo-white.png"
+                alt="logrithm logo"
+                width={110}
+                height={30}
+                style={{ objectFit: 'contain' }}
+                priority
+              />
+            </div>
+            <div className="block font-mono text-xl font-medium tracking-tight text-[var(--text-primary)] dark:hidden">
+              log<span className="font-semibold text-[#1D9E75]">r</span>ithm
+            </div>
           </Link>
           <BetaBadge />
         </div>
 
-        {/* Nav links + auth */}
+        {/* Nav links + theme toggle + auth */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
           <a
             href="https://github.com/KamcyAhaka/logrithm"
@@ -71,11 +78,14 @@ export default function Navbar() {
               gap: '0.375rem',
               transition: 'color 0.15s',
             }}
-            className="hover:text-white"
+            className="hover:text-[var(--text-primary)]"
           >
             <GitBranch size={13} />
             github
           </a>
+
+          {/* Theme Toggle */}
+          <ThemeToggle />
 
           {/* Client component handles auth state */}
           <NavbarAuth />
