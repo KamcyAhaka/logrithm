@@ -5,10 +5,11 @@ export default function Footer() {
     <footer
       style={{
         borderTop: '1px solid var(--border-subtle)',
-        background: 'rgba(10, 10, 10, 0.9)',
+        background: 'color-mix(in srgb, var(--bg-card) 85%, transparent)',
         padding: '1.5rem 2rem',
         marginTop: 'auto',
       }}
+      className="transition-colors duration-200"
     >
       <div
         style={{
@@ -32,21 +33,21 @@ export default function Footer() {
         >
           <Link
             href="/terms"
-            className="text-white/40 transition-colors hover:text-[#1D9E75]"
+            className="text-[var(--text-secondary)] transition-colors hover:text-[#1D9E75]"
             style={{ textDecoration: 'none' }}
           >
             terms
           </Link>
           <Link
             href="/privacy"
-            className="text-white/40 transition-colors hover:text-[#1D9E75]"
+            className="text-[var(--text-secondary)] transition-colors hover:text-[#1D9E75]"
             style={{ textDecoration: 'none' }}
           >
             privacy
           </Link>
           <Link
             href="/refund"
-            className="text-white/40 transition-colors hover:text-[#1D9E75]"
+            className="text-[var(--text-secondary)] transition-colors hover:text-[#1D9E75]"
             style={{ textDecoration: 'none' }}
           >
             refunds

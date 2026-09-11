@@ -33,7 +33,7 @@ export default function HeroSection({
         textAlign: 'center',
         overflow: 'hidden',
         background:
-          'radial-gradient(circle at center, transparent 35%, #0a0a0a 100%), radial-gradient(rgba(29, 158, 117, 0.07) 1.5px, transparent 1.5px)',
+          'radial-gradient(circle at center, transparent 35%, var(--bg-page) 100%), radial-gradient(rgba(29, 158, 117, 0.07) 1.5px, transparent 1.5px)',
         backgroundSize: '100% 100%, 28px 28px',
       }}
     >
